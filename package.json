@@ -1,0 +1,37 @@
+{
+  "name": "flinkord-cli",
+  "version": "1.0.0",
+  "description": "CLI tool for easy order generation and management",
+  "main": "dist/index.js",
+  "bin": {
+    "flinkord": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "npx tsc",
+    "test": "npm run test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/goflink/flinkord-cli.git"
+  },
+  "keywords": [
+    "order",
+    "consumer"
+  ],
+  "author": "@annakhvorostianova",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/goflink/flinkord-cli/issues"
+  },
+  "homepage": "https://github.com/goflink/flinkord-cli#readme",
+  "dependencies": {
+    "chalk": "^5.2.0",
+    "commander": "^10.0.0",
+    "conf": "^11.0.1",
+    "figlet": "^1.5.2",
+    "typescript": "^5.0.2"
+  },
+  "devDependencies": {
+    "@types/node": "^18.15.11"
+  }
+}
