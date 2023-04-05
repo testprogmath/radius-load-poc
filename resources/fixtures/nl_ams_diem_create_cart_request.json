@@ -1,0 +1,30 @@
+{
+  "lines": [
+    {
+      "variant_id": "13134734",
+      "product_sku": "13134734",
+      "quantity": 2
+    },
+    {
+      "variant_id": "13134773",
+      "product_sku": "13134773",
+      "quantity": 3
+    }
+  ],
+  "email": "flinkordautotest@goflink.com",
+  "shipping_address": {
+    "first_name": "Anissa",
+    "last_name": "Little",
+    "street_address_1": "Schoolstraat 26",
+    "city": "Diemen",
+    "postal_code": "1111 BR",
+    "country": "NL",
+    "phone": "+31202547999"
+  },
+  "delivery_coordinates": {
+    "latitude": 52.3403454,
+    "longitude": 4.9588151
+  },
+  "notes": "This is just a test",
+  "delivery_eta": "8"
+}

@@ -1,0 +1,30 @@
+{
+  "lines": [
+    {
+      "variant_id": "11016745",
+      "product_sku": "11016745",
+      "quantity": 2
+    },
+    {
+      "variant_id": "11016931",
+      "product_sku": "11016931",
+      "quantity": 3
+    }
+  ],
+  "email": "flinkordautotest@goflink.com",
+  "shipping_address": {
+    "first_name": "Kristopher",
+    "last_name": "Stokes",
+    "street_address_1": "Winterhuder Weg 116",
+    "city": "Hamburg",
+    "postal_code": "10119",
+    "country": "DE",
+    "phone": "+31202547999"
+  },
+  "delivery_coordinates": {
+    "latitude": 53.588104,
+    "longitude": 9.999352
+  },
+  "notes": "This is just a test",
+  "delivery_eta": "8"
+}

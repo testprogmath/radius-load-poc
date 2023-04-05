@@ -1,0 +1,22 @@
+{
+  "amount": {
+    "currency": "EUR",
+    "value": 1000
+  },
+  "additionalData": {
+    "allow3DS2": true
+  },
+  "paymentMethod": {
+    "type": "scheme",
+    "encryptedCardNumber": "test_5555555555554444",
+    "encryptedExpiryMonth": "test_03",
+    "encryptedExpiryYear": "test_2030",
+    "encryptedSecurityCode": "test_737"
+  },
+  "channel": "Web",
+  "browserInfo": {
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1",
+    "acceptHeader": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8"
+  },
+  "returnUrl": "https://webhook.site/"
+}
