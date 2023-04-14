@@ -15,10 +15,10 @@
   "shipping_address": {
     "first_name": "Anissa",
     "last_name": "Little",
-    "street_address_1": "Schoolstraat 26",
-    "city": "Diemen",
-    "postal_code": "1111 BR",
-    "country": "NL",
+    "street_address_1": "",
+    "city": "",
+    "postal_code": "",
+    "country": "",
     "phone": "+31202547999"
   },
   "delivery_coordinates": {

@@ -636,7 +636,7 @@ export class HttpClient<SecurityDataType = unknown> {
  *
  * the purpose of the cart service is to offer an API to create, modify, and pay for carts.
  */
-export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
+export class CartApi<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
     v1 = {
         /**
          * @description Creates a cart

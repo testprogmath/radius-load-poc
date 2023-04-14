@@ -8,6 +8,7 @@
   },
   "scripts": {
     "build": "npx tsc",
+    "postbuild": "npm link",
     "test": "npm run test"
   },
   "repository": {
@@ -25,6 +26,8 @@
   },
   "homepage": "https://github.com/goflink/flinkord-cli#readme",
   "dependencies": {
+    "@flink/catalog": "^1.44.0",
+    "@flink/hub-manager": "^1.45.0",
     "axios": "^1.3.4",
     "chalk": "^5.2.0",
     "commander": "^10.0.0",
@@ -32,14 +35,16 @@
     "config": "^3.3.9",
     "dotenv": "^16.0.3",
     "figlet": "^1.5.2",
-    "typescript": "^5.0.2"
+    "fix-esm": "^1.0.1",
+    "node-fetch": "^2.6.9",
+    "ora": "5.4.1",
+    "typescript": "^5.0.3"
   },
   "devDependencies": {
     "@types/config": "^3.3.0",
     "@types/lodash": "^4.14.192",
     "@types/luxon": "^3.2.2",
     "@types/node": "^18.15.11",
-    "node-fetch": "^3.3.1",
     "swagger-typescript-api": "^12.0.4"
   }
 }

@@ -1,3 +1,4 @@
 {
-  "consumerApiUrl": "https://consumer-api.staging.goflink.com"
+  "consumerApiUrl": "https://consumer-api.staging.goflink.com",
+  "hubManagerApiUrl": "https://api.staging.goflink.com/hub/hub-manager"
 }

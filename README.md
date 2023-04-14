@@ -87,7 +87,9 @@ To get a local copy up and running follow these simple example steps.
 
 ### Prerequisites
 
-This is an example of how to list things you need to use the software and how to install them.
+This CLI uses internal flink packages, such as `@flink/catalog` and `@flink/hub-manager`. To install them, you might
+need to set it up. Please
+see [internal documentation](https://goflink.atlassian.net/wiki/spaces/PLATFORM/pages/343343497/Configuring+yarn+npm+registry+to+download+and+publish+packages#Yarn-1-%26-NPM-Usage%3A).
 
 * npm
   ```sh
@@ -96,20 +98,19 @@ This is an example of how to list things you need to use the software and how to
 
 ### Installation
 
-1. Get a free API Key at [https://example.com](https://example.com)
-2. Clone the repo
+1. Clone the repo
    ```sh
    git clone https://github.com/goflink/flinkord-cli.git
    ```
-3. Install NPM packages
+2. Install NPM packages
    ```sh
    npm install
    ```
-4. Build the project
+3. Build the project
    ```sh
    npm run build
    ```
-5. Run the help command to check if everything works:
+4. Run the help command to check if everything works:
    ```sh
    flinkord -h
    ```
@@ -136,6 +137,12 @@ Options:
 
 ```
 
+You might need to make `dist/index.js` executable for the first time. If you see the error, please run
+
+```shell
+sudo chmod +x dist/index.js
+```
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <!-- USAGE EXAMPLES -->
@@ -143,6 +150,21 @@ Options:
 ## Usage
 
 Usage: flinkord [options]
+
+To create the order in the chosen hub, please use -h (--hub option):
+
+```shell
+flinkord create -h fr_par_lepe
+```
+
+Default value is `nl_ams_diem`:
+
+```typescript
+//index.ts
+
+createOrder
+    .option("-h, --hub <hub_slug>", "the hub for the order", 'nl_ams_diem')
+```
 
 _For more examples, please refer to
 the [Documentation](https://docs.google.com/document/d/1aGe_5EBZ-VZ-27SChg9Ouc9E6NQlTNZf5FiS7AhimXQ/edit#)_
@@ -156,7 +178,7 @@ the [Documentation](https://docs.google.com/document/d/1aGe_5EBZ-VZ-27SChg9Ouc9E
 ## Roadmap
 
 - [ ] "Create" command with default values
-    - [ ] Implement -h (--hub) option
+    - [x] Implement -h (--hub) option ([HO-1044](https://goflink.atlassian.net/browse/HO-1044))
     - [ ] Implement -m (--email) option
 - [ ] Support custom config file
 - [ ] "Cancel" command by order_name
