@@ -3,9 +3,11 @@ import {ProductsService} from "@flink/catalog";
 import {LegacyHubDetailsService} from "@flink/hub-manager";
 import {spinnerError, stopSpinner} from "./spinner";
 import {printErrorAndStopSpinner} from "./utils";
+import chalk from "chalk";
+import {Colors} from "./shared/enums";
 
 const cartToken = require('../resources/fixtures/cart_checkout_token.json');
-
+const emojic = require("emojic");
 
 export async function createCart(customerDomainApi: CartApi<any>, cartRequest: any) {
     let response;
@@ -13,7 +15,7 @@ export async function createCart(customerDomainApi: CartApi<any>, cartRequest: a
         response = await customerDomainApi.v3.createCartV3(cartRequest);
         if (response.status === 200) {
             let cartId = response.data.id as string;
-            console.log(`The cart is created with the id ${cartId}`);
+            console.log(`${emojic.shoppingCart} The cart is created with the id ${chalk.hex(Colors.THULIAN_PINK)(cartId)}`);
         }
         console.log();
     } catch
@@ -27,7 +29,7 @@ export async function addShippingMethod(customerDomainApi: CartApi<any>, cartId:
     try {
         const response = await customerDomainApi.v2.setShippingMethodV2(cartId, {clickAndCollect: clickAndCollect});
         if (response.status === 200) {
-            console.log(`The shipping method is assigned, clickAndCollect is ${clickAndCollect}`);
+            console.log(`${emojic.rocket} The shipping method is assigned, clickAndCollect is ${chalk.hex(Colors.MEXICAN_PINK)(clickAndCollect)}`);
         }
         console.log();
     } catch
@@ -41,7 +43,7 @@ export async function getCart(customerDomainApi: CartApi<any>, cartId: string) {
     try {
         response = await customerDomainApi.v3.getCartV3(cartId);
         if (response.status === 200) {
-            console.log(`The cart is created with the id ${cartId}`);
+            console.log(`The cart is created with the id ${chalk.hex(Colors.MEXICAN_PINK)(cartId)}`);
         }
         console.log();
     } catch
@@ -61,7 +63,7 @@ export async function checkoutCart(customerDomainApi: CartApi<any>, cartId: stri
             }
         );
         if (response.status === 200) {
-            console.log(`The order is created!`);
+            console.log(`${emojic.confettiBall} The order is created!`);
             await checkIfOrderIsCreated(customerDomainApi, cartId);
         }
         return response.data;
@@ -89,11 +91,12 @@ async function checkIfOrderIsCreated(customerDomainApi: CartApi<any>, cartId: st
             spinnerError("Your request failed. Please find the stacktrace above");
             stopSpinner();
         }
-        console.log(`The order number is ${order?.number} and the order id is ${order?.id}`);
+        console.log(`${emojic.memo} The order number is ${chalk.hex(Colors.LAVENDER_PINK).bold(order?.number)} and the order id is ${chalk.hex(Colors.THULIAN_PINK).bold(order?.id)}`);
     } else console.log("Something went wrong. Please check the logs and try later.")
 }
 
 export async function addProductLines(emptyCartRequest: any, hubSlug: string, locale: string, numberOfProducts: number) {
+    console.log(`${emojic.grapes} Setting products available in the hub...\n`);
     try {
         const products = await ProductsService.getProductsv2Alpha1({locale: locale, hub: hubSlug});
 
@@ -135,5 +138,11 @@ export async function setDeliveryAddress(emptyCartRequest: any, hubSlug: string)
         printErrorAndStopSpinner(e);
     }
 
+    return emptyCartRequest;
+}
+
+export function setEmail(emptyCartRequest: any, email: string) {
+    console.log(`${emojic.outboxTray} Setting the email to receive notifications about your order...\n`);
+    emptyCartRequest.email = email;
     return emptyCartRequest;
 }

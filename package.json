@@ -7,7 +7,7 @@
     "flinkord": "./dist/index.js"
   },
   "scripts": {
-    "build": "npx tsc",
+    "build": "npx tsc && chmod +x ./dist/index.js",
     "postbuild": "npm link",
     "test": "npm run test"
   },
@@ -29,13 +29,16 @@
     "@flink/catalog": "^1.44.0",
     "@flink/hub-manager": "^1.45.0",
     "axios": "^1.3.4",
-    "chalk": "^5.2.0",
+    "chalk": "^4.1.2",
     "commander": "^10.0.0",
     "conf": "^11.0.1",
     "config": "^3.3.9",
     "dotenv": "^16.0.3",
+    "emojic": "^1.1.17",
     "figlet": "^1.5.2",
     "fix-esm": "^1.0.1",
+    "gradient-string": "^2.0.2",
+    "inquirer": "^8.2.5",
     "node-fetch": "^2.6.9",
     "ora": "5.4.1",
     "typescript": "^5.0.3"

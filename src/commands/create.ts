@@ -1,8 +1,22 @@
 import {CartApi} from "../api/cart-api";
-import {addProductLines, addShippingMethod, checkoutCart, createCart, getCart, setDeliveryAddress} from "../cart";
+import {
+    addProductLines,
+    addShippingMethod,
+    checkoutCart,
+    createCart,
+    getCart,
+    setDeliveryAddress,
+    setEmail
+} from "../cart";
 import {spinnerSuccess, updateSpinnerText} from "../spinner";
 import {OpenAPI as ProductsServiceConfig} from "@flink/catalog";
 import {OpenAPI as HubManagerConfig} from "@flink/hub-manager";
+import {Colors} from "../shared/enums";
+
+const chalk = require("chalk");
+const emojic = require("emojic");
+
+const inquirer = require("inquirer");
 
 const config = require('config');
 const emptyCartRequest = require('../../resources/fixtures/new_create_cart_request.json');
@@ -19,8 +33,14 @@ ProductsServiceConfig.BASE = consumerApiUrl;
 
 let cartId: string;
 let totalPrice: number;
-export default async function create(locale: string, hubSlug: string) {
-    updateSpinnerText("Processing... \n");
+export default async function create(locale: string, hubSlug: string, email: string) {
+    if (!hubSlug) {
+        const response = await inquirer.prompt([
+            {type: 'input', name: 'hub', message: "Enter the desired hub", default: "fr_par_lepe"}
+        ]);
+        hubSlug = response.hub;
+    }
+
     const cartApi = await new CartApi({
         baseURL: consumerApiUrl,
         headers: {
@@ -30,10 +50,13 @@ export default async function create(locale: string, hubSlug: string) {
         },
     });
 
+    updateSpinnerText(chalk.hex(Colors.MEXICAN_PINK_DARK)("Processing... \n"));
+
+    setEmail(emptyCartRequest, email);
     await setDeliveryAddress(emptyCartRequest, hubSlug)
     let cartRequest = await addProductLines(emptyCartRequest, hubSlug, locale, DEFAULT_NUMBER_OF_PRODUCTS);
 
-    console.log("The cart content is:");
+    console.log(`${emojic.shoppingCart} The cart content is:`);
     console.log(cartRequest)
 
     // @ts-ignore
@@ -44,5 +67,3 @@ export default async function create(locale: string, hubSlug: string) {
     spinnerSuccess();
     await checkoutCart(cartApi, cartId, totalPrice);
 }
-
-

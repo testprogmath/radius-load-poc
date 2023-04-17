@@ -137,12 +137,6 @@ Options:
 
 ```
 
-You might need to make `dist/index.js` executable for the first time. If you see the error, please run
-
-```shell
-sudo chmod +x dist/index.js
-```
-
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <!-- USAGE EXAMPLES -->
@@ -157,20 +151,30 @@ To create the order in the chosen hub, please use -h (--hub option):
 flinkord create -h fr_par_lepe
 ```
 
-Default value is `nl_ams_diem`:
+If you run command without specifying the hub, you'll need to provide the hub in the interactive mode or choose the default one:
 
-```typescript
-//index.ts
+![flinkord-hub-not-defined.png](resources%2Fflinkord-hub-not-defined.png)
 
-createOrder
-    .option("-h, --hub <hub_slug>", "the hub for the order", 'nl_ams_diem')
+To receive notifications to your email, please use -m (--email option):
+
+```shell
+flinkord create -h fr_par_lepe -m myemail@goflink.com
 ```
 
-_For more examples, please refer to
-the [Documentation](https://docs.google.com/document/d/1aGe_5EBZ-VZ-27SChg9Ouc9E6NQlTNZf5FiS7AhimXQ/edit#)_
+Don't hesitate to use help command to discover all possible options:
+
+```shell
+flinkord help create
+```
+or
+
+```shell
+flinkord create --help
+```
+
+_For more examples, please refer to the [Documentation](https://docs.google.com/document/d/1aGe_5EBZ-VZ-27SChg9Ouc9E6NQlTNZf5FiS7AhimXQ/edit#)_
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 
 
 <!-- ROADMAP -->
@@ -179,7 +183,8 @@ the [Documentation](https://docs.google.com/document/d/1aGe_5EBZ-VZ-27SChg9Ouc9E
 
 - [ ] "Create" command with default values
     - [x] Implement -h (--hub) option ([HO-1044](https://goflink.atlassian.net/browse/HO-1044))
-    - [ ] Implement -m (--email) option
+    - [x] Implement -m (--email) option  ([HO-1070](https://goflink.atlassian.net/browse/HO-1070))
+- [ ] Deploy artifact to GCP Artifact Registry
 - [ ] Support custom config file
 - [ ] "Cancel" command by order_name
     - [ ] Support order_id in "cancel" command

@@ -1,0 +1,7 @@
+export enum Colors {
+    MEXICAN_PINK = "E31D78",
+    WHITE = "FEFEFE",
+    LAVENDER_PINK = "EBAED0",
+    THULIAN_PINK = "DC7BAC",
+    MEXICAN_PINK_DARK = "E61977"
+}
