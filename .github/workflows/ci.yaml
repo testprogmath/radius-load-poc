@@ -62,7 +62,7 @@ jobs:
           PACKAGE_VERSION: ${{ env.PACKAGE_VERSION }}
         run: |
           if [[ "$GITHUB_REF" == "refs/heads/main" ]]; then
-            echo "PRE_RELEASE_TAG=stable" >> $GITHUB_ENV
+            echo "PRE_RELEASE_TAG=" >> $GITHUB_ENV
           else
             echo "PRE_RELEASE_TAG=pre-release" >> $GITHUB_ENV
           fi
@@ -82,4 +82,9 @@ jobs:
 
       - name: Publish module
         working-directory: '.'
-        run: npm publish --tag flink-${{ env.PRE_RELEASE_TAG }} --no-git-checks
+        run: |
+          if [[ "$GITHUB_REF" == "refs/heads/main" ]]; then
+          npm publish --tag stable --no-git-checks
+          else
+            npm publish --tag flink-${{ env.PRE_RELEASE_TAG }} --no-git-checks
+          fi
