@@ -69,7 +69,11 @@ jobs:
 
       - name: Push new version
         run: |
+          if [[ "$GITHUB_REF" == "refs/heads/main" ]]; then
+          npm version ${{ steps.tag_version.outputs.new_version }}
+          else
           npm version ${{ steps.tag_version.outputs.new_version }} --preid=${{ env.PRE_RELEASE_TAG }}
+          fi
           git push
 
       - name: Create a GitHub release
@@ -83,8 +87,4 @@ jobs:
       - name: Publish module
         working-directory: '.'
         run: |
-          if [[ "$GITHUB_REF" == "refs/heads/main" ]]; then
-          npm publish --tag stable --no-git-checks
-          else
-            npm publish --tag flink-${{ env.PRE_RELEASE_TAG }} --no-git-checks
-          fi
+          npm publish --no-git-checks
