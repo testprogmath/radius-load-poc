@@ -82,4 +82,4 @@ jobs:
 
       - name: Publish module
         working-directory: '.'
-        run: npm publish --tag ${{ env.PRE_RELEASE_TAG }} --no-git-checks
+        run: npm publish --tag flink-${{ env.PRE_RELEASE_TAG }} --no-git-checks
