@@ -2,9 +2,12 @@
 
 import {Command} from "commander";
 import create from "./commands/create";
+import path from "path";
 
 const figlet = require("figlet");
 const gradient = require('gradient-string');
+
+const pkg = require(path.join(__dirname, '..','package.json'));
 
 console.log(gradient.rainbow(figlet.textSync("Flinkord")));
 
@@ -23,7 +26,7 @@ createOrder
 
 
 program
-    .version("1.0.0")
+    .version(pkg.version)
     .description("A CLI tool for order management")
     .showSuggestionAfterError(true)
     .option("create <arguments>", "Create an order with parameters or with default values")
@@ -33,7 +36,6 @@ program
 
 
 program.parse(process.argv);
-const options = program.opts();
 
 
 

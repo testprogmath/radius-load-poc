@@ -12,28 +12,33 @@ import {spinnerSuccess, updateSpinnerText} from "../spinner";
 import {OpenAPI as ProductsServiceConfig} from "@flink/catalog";
 import {OpenAPI as HubManagerConfig} from "@flink/hub-manager";
 import {Colors} from "../shared/enums";
+import {getConfigPath} from "../utils";
 
 const chalk = require("chalk");
 const emojic = require("emojic");
 
 const inquirer = require("inquirer");
 
-const config = require('config');
+
+
+const config = getConfigPath();
+
 const emptyCartRequest = require('../../resources/fixtures/new_create_cart_request.json');
 
 // a variable for the future option of adding a different number of products
 const DEFAULT_NUMBER_OF_PRODUCTS = 2;
 
-const consumerApiUrl = config.get("consumerApiUrl") as string;
-const hubManagerApiUrl = config.get("hubManagerApiUrl") as string;
 
-
-HubManagerConfig.BASE = hubManagerApiUrl;
-ProductsServiceConfig.BASE = consumerApiUrl;
 
 let cartId: string;
 let totalPrice: number;
 export default async function create(locale: string, hubSlug: string, email: string) {
+    const consumerApiUrl = config.get("consumerApiUrl") as string;
+    const hubManagerApiUrl = config.get("hubManagerApiUrl") as string;
+
+
+    HubManagerConfig.BASE = hubManagerApiUrl;
+    ProductsServiceConfig.BASE = consumerApiUrl;
     if (!hubSlug) {
         const response = await inquirer.prompt([
             {type: 'input', name: 'hub', message: "Enter the desired hub", default: "fr_par_lepe"}

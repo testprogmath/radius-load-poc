@@ -89,28 +89,52 @@ To get a local copy up and running follow these simple example steps.
 
 This CLI uses internal flink packages, such as `@flink/catalog` and `@flink/hub-manager`. To install them, you might
 need to set it up. Please
-see [internal documentation](https://goflink.atlassian.net/wiki/spaces/PLATFORM/pages/343343497/Configuring+yarn+npm+registry+to+download+and+publish+packages#Yarn-1-%26-NPM-Usage%3A).
+see [internal documentation](https://goflink.atlassian.net/wiki/spaces/PLATFORM/pages/343343497/Configuring+yarn+npm+registry+to+download+and+publish+packages#Yarn-1-%26-NPM-Usage%3A)
+or follow the steps below:
 
-* npm
-  ```sh
-  npm install npm@latest -g
-  ```
+1. Install npm 18:
+   ```shell
+   npm install npm@18 -g
+   ```
+2. Use the npx command to refresh the access token by first installing
+    ```shell
+    npx google-artifactregistry-auth
+    ```
+3. Log in on gcloud by running:
+   ```shell
+   gcloud auth login --project flink-core-shared
+   ```
+4. Check the file .npmrc in your home directory. If there's no one, create it with the following content:
+    ```
+   @flink:registry=https://europe-west3-npm.pkg.dev/flink-core-shared/npm-registry/
+    //europe-west3-npm.pkg.dev/flink-core-shared/npm-registry/:always-auth=true
+   ```
+5. Then run from your home directory:
+   ```shell
+   npx google-artifactregistry-auth --repo-config=.npmrc --credential-config=.npmrc 
+   ```
+
+You should see the output:
+
+```
+Retrieving application default credentials...
+Retrieving credentials from gcloud...
+Success!
+```
+
+Using this command will produce a token using the information in your `.npmrc` file, and store the token in the `.npmrc`
+file located in your user folder.
+
+This method ensures that the authToken is not stored in the `.npmrc` file of your project, which helps prevent it from
+being accidentally committed.
 
 ### Installation
 
-1. Clone the repo
+1. Install the flinkord-cli:
    ```sh
-   git clone https://github.com/goflink/flinkord-cli.git
+   npm install @flink/flinkord-cli --global
    ```
-2. Install NPM packages
-   ```sh
-   npm install
-   ```
-3. Build the project
-   ```sh
-   npm run build
-   ```
-4. Run the help command to check if everything works:
+2. Run the help command to check if everything works:
    ```sh
    flinkord -h
    ```
@@ -151,7 +175,8 @@ To create the order in the chosen hub, please use -h (--hub option):
 flinkord create -h fr_par_lepe
 ```
 
-If you run command without specifying the hub, you'll need to provide the hub in the interactive mode or choose the default one:
+If you run command without specifying the hub, you'll need to provide the hub in the interactive mode or choose the
+default one:
 
 ![flinkord-hub-not-defined.png](resources%2Fflinkord-hub-not-defined.png)
 
@@ -166,13 +191,15 @@ Don't hesitate to use help command to discover all possible options:
 ```shell
 flinkord help create
 ```
+
 or
 
 ```shell
 flinkord create --help
 ```
 
-_For more examples, please refer to the [Documentation](https://docs.google.com/document/d/1aGe_5EBZ-VZ-27SChg9Ouc9E6NQlTNZf5FiS7AhimXQ/edit#)_
+_For more examples, please refer to
+the [Documentation](https://docs.google.com/document/d/1aGe_5EBZ-VZ-27SChg9Ouc9E6NQlTNZf5FiS7AhimXQ/edit#)_
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
