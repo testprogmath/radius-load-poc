@@ -1,10 +1,10 @@
 import {CartApi} from "./api/cart-api";
-import {ProductsService} from "@flink/catalog";
 import {LegacyHubDetailsService} from "@flink/hub-manager";
 import {spinnerError, stopSpinner} from "./spinner";
 import {printErrorAndStopSpinner} from "./utils";
 import chalk from "chalk";
 import {Colors} from "./shared/enums";
+import {getProducts} from "./api/catalog-api";
 
 const cartToken = require('../resources/fixtures/cart_checkout_token.json');
 const emojic = require("emojic");
@@ -98,8 +98,7 @@ async function checkIfOrderIsCreated(customerDomainApi: CartApi<any>, cartId: st
 export async function addProductLines(emptyCartRequest: any, hubSlug: string, locale: string, numberOfProducts: number) {
     console.log(`${emojic.grapes} Setting products available in the hub...\n`);
     try {
-        const products = await ProductsService.getProductsv2Alpha1({locale: locale, hub: hubSlug});
-
+        const products = await getProducts(locale, hubSlug);
 
         if (numberOfProducts > 0) {
             for (let i = 0; i < numberOfProducts; i++) {

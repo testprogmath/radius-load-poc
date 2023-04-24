@@ -1,6 +1,6 @@
 {
   "name": "@flink/flinkord-cli",
-  "version": "1.0.31",
+  "version": "1.0.32-fix-catalog-endpoint.1",
   "description": "CLI tool for easy order generation and management",
   "main": "dist/index.js",
   "bin": {
@@ -32,7 +32,6 @@
   },
   "homepage": "https://github.com/goflink/flinkord-cli#readme",
   "dependencies": {
-    "@flink/catalog": "^1.44.0",
     "@flink/hub-manager": "^1.45.0",
     "axios": "^1.3.4",
     "chalk": "^4.1.2",

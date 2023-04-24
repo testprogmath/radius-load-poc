@@ -9,7 +9,6 @@ import {
     setEmail
 } from "../cart";
 import {spinnerSuccess, updateSpinnerText} from "../spinner";
-import {OpenAPI as ProductsServiceConfig} from "@flink/catalog";
 import {OpenAPI as HubManagerConfig} from "@flink/hub-manager";
 import {Colors} from "../shared/enums";
 import {getConfigPath} from "../utils";
@@ -38,7 +37,6 @@ export default async function create(locale: string, hubSlug: string, email: str
 
 
     HubManagerConfig.BASE = hubManagerApiUrl;
-    ProductsServiceConfig.BASE = consumerApiUrl;
     if (!hubSlug) {
         const response = await inquirer.prompt([
             {type: 'input', name: 'hub', message: "Enter the desired hub", default: "fr_par_lepe"}

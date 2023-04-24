@@ -21,7 +21,7 @@ createOrder
     .option("-m, --email <email>", "the email to receive notifications about the order", "flinkordautotest@goflink.com")
     .action((commandAndOptions) => {
         console.log(commandAndOptions);
-        create('en-nl', commandAndOptions.hub, commandAndOptions.email).catch(e => console.log(e));
+        create('en-fr', commandAndOptions.hub, commandAndOptions.email).catch(e => console.log(e));
     });
 
 
