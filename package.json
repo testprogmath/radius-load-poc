@@ -2,9 +2,9 @@
   "name": "@flink/flinkord-cli",
   "version": "1.0.36",
   "description": "CLI tool for easy order generation and management",
-  "main": "dist/index.js",
+  "main": "dist/src/index.js",
   "bin": {
-    "flinkord": "./dist/index.js"
+    "flinkord": "./dist/src/index.js"
   },
   "files": [
     "config",
@@ -12,9 +12,10 @@
     "resources"
   ],
   "scripts": {
-    "build": "npx tsc && chmod +x ./dist/index.js",
+    "build": "npx tsc && chmod +x ./dist/src/index.js",
+    "lint": "npx eslint",
     "postbuild": "npm link",
-    "test": "npm run test",
+    "test": "jest dist/tests",
     "preinstall": "npx google-artifactregistry-auth"
   },
   "repository": {
@@ -32,11 +33,17 @@
   },
   "homepage": "https://github.com/goflink/flinkord-cli#readme",
   "dependencies": {
+    "@commercetools/platform-sdk": "^4.7.0",
+    "@commercetools/sdk-client-v2": "^2.1.5",
+    "@commercetools/sdk-middleware-auth": "^7.0.1",
+    "@commercetools/sdk-middleware-http": "^7.0.2",
+    "@flink/catalog": "^1.44.0",
     "@flink/hub-manager": "^1.45.0",
     "axios": "^1.3.4",
     "chalk": "^4.1.2",
     "commander": "^10.0.0",
     "config": "^3.3.9",
+    "dotenv": "^16.0.3",
     "emojic": "^1.1.17",
     "figlet": "^1.5.2",
     "find-up": "^3.0.0",
@@ -48,9 +55,16 @@
     "typescript": "^5.0.3"
   },
   "devDependencies": {
+    "@jest/globals": "^29.5.0",
     "@types/config": "^3.3.0",
+    "@types/jest": "^29.5.0",
+    "@types/lodash": "^4.14.192",
+    "@types/luxon": "^3.2.2",
     "@types/node": "^18.15.11",
-    "node-fetch": "^3.3.1",
-    "swagger-typescript-api": "^12.0.4"
+    "@typescript-eslint/eslint-plugin": "^5.59.0",
+    "eslint": "^8.38.0",
+    "jest": "^29.5.0",
+    "swagger-typescript-api": "^12.0.4",
+    "ts-node": "^10.9.1"
   }
 }

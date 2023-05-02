@@ -19,14 +19,17 @@ const emojic = require("emojic");
 const inquirer = require("inquirer");
 
 
-
 const config = getConfigPath();
 
-const emptyCartRequest = require('../../resources/fixtures/new_create_cart_request.json');
+const path = require('path');
+const rootDir = process.cwd();
+
+const emptyCartRequest = require(path.join(rootDir, 'resources/fixtures/new_create_cart_request.json'));
 
 // a variable for the future option of adding a different number of products
 const DEFAULT_NUMBER_OF_PRODUCTS = 2;
 
+const hubSlugRegex = /\b[a-z]{2}_[a-z]+_[a-z]+\b/;
 
 
 let cartId: string;
@@ -43,7 +46,9 @@ export default async function create(locale: string, hubSlug: string, email: str
         ]);
         hubSlug = response.hub;
     }
-
+    if (!hubSlugRegex.test(hubSlug)) {
+        return "This hub does not exist!";
+    }
     const cartApi = await new CartApi({
         baseURL: consumerApiUrl,
         headers: {
@@ -52,6 +57,7 @@ export default async function create(locale: string, hubSlug: string, email: str
             'Content-Type': 'application/json'
         },
     });
+
 
     updateSpinnerText(chalk.hex(Colors.MEXICAN_PINK_DARK)("Processing... \n"));
 

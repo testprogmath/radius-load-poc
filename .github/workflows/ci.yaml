@@ -38,46 +38,48 @@ jobs:
       # get a new auth token and set it to a temp npm configuration
       - name: Get auth for artifact registry
         run: npx google-artifactregistry-auth
-
+      - name: 'Create env file'
+        run: |
+          echo "${{ secrets.CT_ENV_FILE }}" > .env
       - name: Install dependencies
         run: |
           npx google-artifactregistry-auth
           npm ci --cache .npm
 
-      - run: npm run build --if-present
+      - name: Run lint
+        run: npm run lint
+
+      - name: Build application
+        run: npm run build --if-present
+
+      - name: Run tests
+        run: npm run test
+
+      - name: Remove env file
+        run: rm -f .env
 
       - name: Set git user
+        if: github.ref == 'refs/heads/main'
         run: |
           git config --global user.email "flinkord-cli-helper@goflink.com"
           git config --global user.name "flinkord-cli-helper"
 
       - name: Bump version and push tag
+        if: github.ref == 'refs/heads/main'
         id: tag_version
         uses: mathieudutour/github-tag-action@v6.1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Set pre-release tag
-        env:
-          PACKAGE_VERSION: ${{ env.PACKAGE_VERSION }}
-        run: |
-          if [[ "$GITHUB_REF" == "refs/heads/main" ]]; then
-            echo "PRE_RELEASE_TAG=" >> $GITHUB_ENV
-          else
-            echo "PRE_RELEASE_TAG=pre-release" >> $GITHUB_ENV
-          fi
-
       - name: Push new version
+        if: github.ref == 'refs/heads/main'
         run: |
-          if [[ "$GITHUB_REF" == "refs/heads/main" ]]; then
           npm version ${{ steps.tag_version.outputs.new_version }}
-          else
-          npm version ${{ steps.tag_version.outputs.new_version }} --preid=${{ env.PRE_RELEASE_TAG }}
-          fi
           git push
 
       - name: Create a GitHub release
         uses: ncipollo/release-action@v1
+        if: github.ref == 'refs/heads/main'
         with:
           tag: ${{ steps.tag_version.outputs.new_tag }}
           name: Release ${{ steps.tag_version.outputs.new_tag }}
@@ -85,6 +87,7 @@ jobs:
           prerelease: true
 
       - name: Publish module
+        if: github.ref == 'refs/heads/main'
         working-directory: '.'
         run: |
           npm publish --no-git-checks

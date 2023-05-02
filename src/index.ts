@@ -7,7 +7,9 @@ import path from "path";
 const figlet = require("figlet");
 const gradient = require('gradient-string');
 
-const pkg = require(path.join(__dirname, '..','package.json'));
+const rootDir = process.cwd();
+
+const pkg = require(path.join(rootDir, 'package.json'));
 
 console.log(gradient.rainbow(figlet.textSync("Flinkord")));
 

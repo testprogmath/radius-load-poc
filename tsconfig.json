@@ -1,6 +1,10 @@
 {
   "compilerOptions": {
-    "rootDir": "src",
+    "skipLibCheck": true,
+    "rootDirs": [
+      "src",
+      "tests"
+    ],
     "outDir": "dist",
     "strict": true,
     "target": "es6",
@@ -9,5 +13,9 @@
     "esModuleInterop": true,
     "moduleResolution": "node",
     "allowJs": true
-  }
+  },
+  "include": [
+    "src/**/*.ts",
+    "tests/**/*.ts"
+  ]
 }

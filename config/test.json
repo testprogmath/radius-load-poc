@@ -1,0 +1,10 @@
+{
+  "consumerApiUrl": "https://consumer-api.staging.goflink.com",
+  "hubManagerApiUrl": "https://api.staging.goflink.com/hub/hub-manager",
+  "hubApiUrl": "https://hub-api.staging.goflink.com",
+  "CTAuthUrl": "https://auth.europe-west1.gcp.commercetools.com",
+  "CTApiUrl": "https://api.europe-west1.gcp.commercetools.com",
+  "hubForTests": "fr_par_lepe",
+  "testEmail": "test@goflink.com",
+  "hubApiKey": "a07e2812-4789-4916-8cf5-6577f7408174"
+}

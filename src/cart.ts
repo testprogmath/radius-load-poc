@@ -6,15 +6,19 @@ import chalk from "chalk";
 import {Colors} from "./shared/enums";
 import {getProducts} from "./api/catalog-api";
 
-const cartToken = require('../resources/fixtures/cart_checkout_token.json');
-const emojic = require("emojic");
+const path = require('path');
+const rootDir = process.cwd();
 
+const cartToken = require(path.join(rootDir, 'resources/fixtures/cart_checkout_token.json'));
+
+
+const emojic = require("emojic");
 export async function createCart(customerDomainApi: CartApi<any>, cartRequest: any) {
     let response;
     try {
         response = await customerDomainApi.v3.createCartV3(cartRequest);
         if (response.status === 200) {
-            let cartId = response.data.id as string;
+            const cartId = response.data.id as string;
             console.log(`${emojic.shoppingCart} The cart is created with the id ${chalk.hex(Colors.THULIAN_PINK)(cartId)}`);
         }
         console.log();
@@ -25,7 +29,7 @@ export async function createCart(customerDomainApi: CartApi<any>, cartRequest: a
     return response?.data;
 }
 
-export async function addShippingMethod(customerDomainApi: CartApi<any>, cartId: string, clickAndCollect: boolean = false) {
+export async function addShippingMethod(customerDomainApi: CartApi<any>, cartId: string, clickAndCollect = false) {
     try {
         const response = await customerDomainApi.v2.setShippingMethodV2(cartId, {clickAndCollect: clickAndCollect});
         if (response.status === 200) {
@@ -55,7 +59,7 @@ export async function getCart(customerDomainApi: CartApi<any>, cartId: string) {
 
 export async function checkoutCart(customerDomainApi: CartApi<any>, cartId: string, totalPrice: number) {
     cartToken.amount.value = totalPrice;
-
+    let orderInfo;
     try {
         const response = await customerDomainApi.v3.checkoutV3(cartId, {
                 "amount": totalPrice,
@@ -64,9 +68,12 @@ export async function checkoutCart(customerDomainApi: CartApi<any>, cartId: stri
         );
         if (response.status === 200) {
             console.log(`${emojic.confettiBall} The order is created!`);
-            await checkIfOrderIsCreated(customerDomainApi, cartId);
+            orderInfo = await checkIfOrderIsCreated(customerDomainApi, cartId);
         }
-        return response.data;
+        else {
+            console.log("The order was not created.")
+        }
+        return orderInfo;
     } catch
         (e) {
         printErrorAndStopSpinner(e);
@@ -75,9 +82,10 @@ export async function checkoutCart(customerDomainApi: CartApi<any>, cartId: stri
 
 
 async function checkIfOrderIsCreated(customerDomainApi: CartApi<any>, cartId: string) {
-    const MAX_RETRIES = 3;
+    const MAX_RETRIES = 10;
     let retry = 0;
     let getCartResponse = await customerDomainApi.v3.getCartV3(cartId);
+    let order;
     if (getCartResponse.status === 200) {
         // it takes 1-2 seconds sometimes to assign the order id to the cart
         while (retry < MAX_RETRIES) {
@@ -85,21 +93,22 @@ async function checkIfOrderIsCreated(customerDomainApi: CartApi<any>, cartId: st
             if (getCartResponse.data.order) break;
             retry++;
         }
-        const order = getCartResponse.data.order;
+        order = getCartResponse.data.order;
         if (!order) {
             console.log("The cart is not assigned to the order. Please try later");
             spinnerError("Your request failed. Please find the stacktrace above");
             stopSpinner();
+            return;
         }
         console.log(`${emojic.memo} The order number is ${chalk.hex(Colors.LAVENDER_PINK).bold(order?.number)} and the order id is ${chalk.hex(Colors.THULIAN_PINK).bold(order?.id)}`);
-    } else console.log("Something went wrong. Please check the logs and try later.")
+    } else console.log("Something went wrong. Please check the logs and try later.");
+    return order;
 }
 
 export async function addProductLines(emptyCartRequest: any, hubSlug: string, locale: string, numberOfProducts: number) {
     console.log(`${emojic.grapes} Setting products available in the hub...\n`);
     try {
         const products = await getProducts(locale, hubSlug);
-
         if (numberOfProducts > 0) {
             for (let i = 0; i < numberOfProducts; i++) {
                 emptyCartRequest.lines[i].variant_id = products[i].sku;
