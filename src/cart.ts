@@ -6,13 +6,32 @@ import chalk from "chalk";
 import {Colors} from "./shared/enums";
 import {getProducts} from "./api/catalog-api";
 
-const path = require('path');
-const rootDir = process.cwd();
-
-const cartToken = require(path.join(rootDir, 'resources/fixtures/cart_checkout_token.json'));
+const cartToken = {
+    "amount": {
+        "currency": "EUR",
+        "value": 1000
+    },
+    "additionalData": {
+        "allow3DS2": true
+    },
+    "paymentMethod": {
+        "type": "scheme",
+        "encryptedCardNumber": "test_5555555555554444",
+        "encryptedExpiryMonth": "test_03",
+        "encryptedExpiryYear": "test_2030",
+        "encryptedSecurityCode": "test_737"
+    },
+    "channel": "Web",
+    "browserInfo": {
+        "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1",
+        "acceptHeader": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8"
+    },
+    "returnUrl": "https://webhook.site/"
+}
 
 
 const emojic = require("emojic");
+
 export async function createCart(customerDomainApi: CartApi<any>, cartRequest: any) {
     let response;
     try {
@@ -69,8 +88,7 @@ export async function checkoutCart(customerDomainApi: CartApi<any>, cartId: stri
         if (response.status === 200) {
             console.log(`${emojic.confettiBall} The order is created!`);
             orderInfo = await checkIfOrderIsCreated(customerDomainApi, cartId);
-        }
-        else {
+        } else {
             console.log("The order was not created.")
         }
         return orderInfo;
