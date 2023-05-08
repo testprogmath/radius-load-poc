@@ -20,11 +20,36 @@ const inquirer = require("inquirer");
 
 
 const config = getConfigPath();
-
-const path = require('path');
-const rootDir = process.cwd();
-
-const emptyCartRequest = require(path.join(rootDir, 'resources/fixtures/new_create_cart_request.json'));
+const emptyCartRequest = {
+    "lines": [
+        {
+            "variant_id": "13134734",
+            "product_sku": "13134734",
+            "quantity": 2
+        },
+        {
+            "variant_id": "13134773",
+            "product_sku": "13134773",
+            "quantity": 3
+        }
+    ],
+    "email": "flinkordautotest@goflink.com",
+    "shipping_address": {
+        "first_name": "Anissa",
+        "last_name": "Little",
+        "street_address_1": "",
+        "city": "",
+        "postal_code": "",
+        "country": "",
+        "phone": "+31202547999"
+    },
+    "delivery_coordinates": {
+        "latitude": 52.3403454,
+        "longitude": 4.9588151
+    },
+    "notes": "This is just a test",
+    "delivery_eta": "8"
+}
 
 const hubSlugRegex = /\b[a-z]{2}_[a-z]+_[a-z1-9]+\b/;
 
