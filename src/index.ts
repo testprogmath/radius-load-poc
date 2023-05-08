@@ -4,6 +4,7 @@ import {Command} from "commander";
 import create from "./commands/create";
 import path from "path";
 import free from "./commands/free";
+import {setupEnv} from "./commands/setup";
 
 const figlet = require("figlet");
 const gradient = require('gradient-string');
@@ -20,6 +21,7 @@ const program = new Command();
 export const createOrder = new Command("create");
 export const freeHub = new Command("free");
 
+export const setup = new Command("setup");
 createOrder
     .option("-h, --hub <hub_slug>", "the hub for the order")
     .option("-m, --email <email>", "the email to receive notifications about the order", "flinkordautotest@goflink.com")
@@ -35,6 +37,11 @@ freeHub
         free(commandAndOptions.hub).catch(e => console.log(e));
     });
 
+setup
+    .action(() => {
+        setupEnv().catch(e => console.log(e));
+    });
+
 program
     .description("A CLI tool for order management")
     .showSuggestionAfterError(true)
@@ -42,6 +49,8 @@ program
     .addCommand(createOrder)
     .option("free <arguments>", "Cancel all orders in the hub to deal with 'Something went wrong: hub is closed right now' error")
     .addCommand(freeHub)
+    .option("setup", "This command creates .env file with given or default CommerceTools credentials")
+    .addCommand(setup)
     .option("cancel <value>", "Cancel by order name")
     .option("defaults", "list defaults")
     .version(pkg.version);

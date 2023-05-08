@@ -4,10 +4,10 @@ import {createClient} from "@commercetools/sdk-client-v2";
 import {createAuthMiddlewareForClientCredentialsFlow} from "@commercetools/sdk-middleware-auth";
 // @ts-ignore
 import {createHttpMiddleware} from "@commercetools/sdk-middleware-http";
-
-const fetch = require('node-fetch');
 import dotenv from "dotenv";
 import {getConfigPath} from "../utils";
+
+const fetch = require('node-fetch');
 
 dotenv.config();
 const config = getConfigPath();

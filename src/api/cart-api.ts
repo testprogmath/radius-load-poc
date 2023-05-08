@@ -554,43 +554,6 @@ export class HttpClient<SecurityDataType = unknown> {
         this.securityData = data;
     };
 
-    protected mergeRequestParams(params1: AxiosRequestConfig, params2?: AxiosRequestConfig): AxiosRequestConfig {
-        const method = params1.method || (params2 && params2.method);
-
-        return {
-            ...this.instance.defaults,
-            ...params1,
-            ...(params2 || {}),
-            headers: {
-                ...((method && this.instance.defaults.headers[method.toLowerCase() as keyof HeadersDefaults]) || {}),
-                ...(params1.headers || {}),
-                ...((params2 && params2.headers) || {}),
-            },
-        };
-    }
-
-    protected stringifyFormItem(formItem: unknown) {
-        if (typeof formItem === "object" && formItem !== null) {
-            return JSON.stringify(formItem);
-        } else {
-            return `${formItem}`;
-        }
-    }
-
-    protected createFormData(input: Record<string, unknown>): FormData {
-        return Object.keys(input || {}).reduce((formData, key) => {
-            const property = input[key];
-            const propertyContent: any[] = property instanceof Array ? property : [property];
-
-            for (const formItem of propertyContent) {
-                const isFileType = formItem instanceof Blob || formItem instanceof File;
-                formData.append(key, isFileType ? formItem : this.stringifyFormItem(formItem));
-            }
-
-            return formData;
-        }, new FormData());
-    }
-
     public request = async <T = any, _E = any>({
                                                    secure,
                                                    path,
@@ -628,6 +591,43 @@ export class HttpClient<SecurityDataType = unknown> {
             url: path,
         });
     };
+
+    protected mergeRequestParams(params1: AxiosRequestConfig, params2?: AxiosRequestConfig): AxiosRequestConfig {
+        const method = params1.method || (params2 && params2.method);
+
+        return {
+            ...this.instance.defaults,
+            ...params1,
+            ...(params2 || {}),
+            headers: {
+                ...((method && this.instance.defaults.headers[method.toLowerCase() as keyof HeadersDefaults]) || {}),
+                ...(params1.headers || {}),
+                ...((params2 && params2.headers) || {}),
+            },
+        };
+    }
+
+    protected stringifyFormItem(formItem: unknown) {
+        if (typeof formItem === "object" && formItem !== null) {
+            return JSON.stringify(formItem);
+        } else {
+            return `${formItem}`;
+        }
+    }
+
+    protected createFormData(input: Record<string, unknown>): FormData {
+        return Object.keys(input || {}).reduce((formData, key) => {
+            const property = input[key];
+            const propertyContent: any[] = property instanceof Array ? property : [property];
+
+            for (const formItem of propertyContent) {
+                const isFileType = formItem instanceof Blob || formItem instanceof File;
+                formData.append(key, isFileType ? formItem : this.stringifyFormItem(formItem));
+            }
+
+            return formData;
+        }, new FormData());
+    }
 }
 
 /**

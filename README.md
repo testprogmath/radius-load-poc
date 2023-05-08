@@ -134,6 +134,7 @@ being accidentally committed.
    ```sh
    npm install @flink/flinkord-cli --global
    ```
+
 2. Run the help command to check if everything works:
    ```sh
    flinkord -h
@@ -204,12 +205,23 @@ flinkord create --help
 ```
 
 ### Deal with _Something went wrong: hub is closed right now_ error
+
 This error often appears when there are too many orders in the hub queue. To free the hub queue, use this command:
 
 ```shell
 flinkord free -h fr_par_lepe
 ```
 
+For the first time, you need to enter your CommerceTools client creds. You can also use default ones. Run 
+```shell
+flinkord setup
+```
+
+```shell
+Enter CT_CLIENT_ID (default: wxgadKVe9YfVkHWUDhgpIIJ6): 
+Enter CT_CLIENT_SECRET (to use the default value, press enter):
+.env file successfully created 
+```
 _For more examples, please refer to
 the [Documentation](https://docs.google.com/document/d/1aGe_5EBZ-VZ-27SChg9Ouc9E6NQlTNZf5FiS7AhimXQ/edit#)_
 

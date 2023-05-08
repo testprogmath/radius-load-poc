@@ -20,7 +20,7 @@ export function getConfigPath() {
         return require('config');
     }
     const flinkordCliPath = path.dirname(require.resolve('@flink/flinkord-cli'));
-    const resolvedConfigPath = findUp.sync('config', { cwd: flinkordCliPath });
+    const resolvedConfigPath = findUp.sync('config', {cwd: flinkordCliPath});
     if (!resolvedConfigPath) {
         console.error('No configurations found in configuration directory');
         process.exit(1);
