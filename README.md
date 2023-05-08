@@ -142,23 +142,28 @@ being accidentally committed.
 You should see the following output:
 
 ```shell
- _____ _ _       _                 _ 
+  _____ _ _       _                 _ 
  |  ___| (_)_ __ | | _____  _ __ __| |
  | |_  | | | '_ \| |/ / _ \| '__/ _` |
  |  _| | | | | | |   < (_) | | | (_| |
  |_|   |_|_|_| |_|_|\_\___/|_|  \__,_|
                                       
-Usage: flinkord [options]
+Usage: flinkord [options] [command]
 
 A CLI tool for order management
 
 Options:
   -V, --version       output the version number
   create <arguments>  Create an order with parameters or with default values
+  free <arguments>    Deal with 'Something went wrong: hub is closed right now' error
   cancel <value>      Cancel by order name
   defaults            list defaults
   -h, --help          display help for command
 
+Commands:
+  create [options]
+  free [options]
+  help [command]      display help for command
 ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -198,6 +203,13 @@ or
 flinkord create --help
 ```
 
+### Deal with _Something went wrong: hub is closed right now_ error
+This error often appears when there are too many orders in the hub queue. To free the hub queue, use this command:
+
+```shell
+flinkord free -h fr_par_lepe
+```
+
 _For more examples, please refer to
 the [Documentation](https://docs.google.com/document/d/1aGe_5EBZ-VZ-27SChg9Ouc9E6NQlTNZf5FiS7AhimXQ/edit#)_
 
@@ -208,7 +220,7 @@ the [Documentation](https://docs.google.com/document/d/1aGe_5EBZ-VZ-27SChg9Ouc9E
 
 ## Roadmap
 
-- [ ] "Create" command with default values
+- [x] "Create" command with default values
     - [x] Implement -h (--hub) option ([HO-1044](https://goflink.atlassian.net/browse/HO-1044))
     - [x] Implement -m (--email) option  ([HO-1070](https://goflink.atlassian.net/browse/HO-1070))
 - [ ] Deploy artifact to GCP Artifact Registry

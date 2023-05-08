@@ -3,6 +3,7 @@
 import {Command} from "commander";
 import create from "./commands/create";
 import path from "path";
+import free from "./commands/free";
 
 const figlet = require("figlet");
 const gradient = require('gradient-string');
@@ -17,6 +18,7 @@ const program = new Command();
 
 
 export const createOrder = new Command("create");
+export const freeHub = new Command("free");
 
 createOrder
     .option("-h, --hub <hub_slug>", "the hub for the order")
@@ -26,6 +28,12 @@ createOrder
         create('en-fr', commandAndOptions.hub, commandAndOptions.email).catch(e => console.log(e));
     });
 
+freeHub
+    .requiredOption("-h, --hub <hub_slug>", "the hub to open")
+    .action((commandAndOptions) => {
+        console.log(commandAndOptions);
+        free(commandAndOptions.hub).catch(e => console.log(e));
+    });
 
 program
     .version(pkg.version)
@@ -33,6 +41,8 @@ program
     .showSuggestionAfterError(true)
     .option("create <arguments>", "Create an order with parameters or with default values")
     .addCommand(createOrder)
+    .option("free <arguments>", "Cancel all orders in the hub to deal with 'Something went wrong: hub is closed right now' error")
+    .addCommand(freeHub)
     .option("cancel <value>", "Cancel by order name")
     .option("defaults", "list defaults");
 

@@ -26,10 +26,11 @@ const rootDir = process.cwd();
 
 const emptyCartRequest = require(path.join(rootDir, 'resources/fixtures/new_create_cart_request.json'));
 
+const hubSlugRegex = /\b[a-z]{2}_[a-z]+_[a-z1-9]+\b/;
+
+
 // a variable for the future option of adding a different number of products
 const DEFAULT_NUMBER_OF_PRODUCTS = 2;
-
-const hubSlugRegex = /\b[a-z]{2}_[a-z]+_[a-z]+\b/;
 
 
 let cartId: string;
@@ -47,6 +48,7 @@ export default async function create(locale: string, hubSlug: string, email: str
         hubSlug = response.hub;
     }
     if (!hubSlugRegex.test(hubSlug)) {
+        console.log("This hub does not exist!")
         return "This hub does not exist!";
     }
     const cartApi = await new CartApi({

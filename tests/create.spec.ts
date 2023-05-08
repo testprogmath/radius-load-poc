@@ -1,6 +1,6 @@
 import {afterAll, describe, expect, test} from '@jest/globals';
 import create from "../src/commands/create";
-import {getOrderInfoById, updateOrder} from "../src/commercetools/ct-client";
+import {cancelOrder} from "../src/commercetools/ct-client";
 
 const {execSync} = require('child_process');
 const config = require('config');
@@ -16,7 +16,7 @@ describe('Test create command', () => {
 
     test('CLI: Create an order with a specified hub', async () => {
         const output = execSync(`flinkord create --hub ${options.hub}`).toString();
-
+        console.log(output);
         expect(output).toContain(`The cart is created with the id`);
         expect(output).toContain('The order is created!');
         expect(output).toContain(`The order number is`);
@@ -29,6 +29,7 @@ describe('Test create command', () => {
 
     test('CLI: Create an order with a specified email', async () => {
         const output = execSync(`flinkord create --hub ${options.hub} -m ${options.email}`).toString();
+        console.log(output);
         expect(output).toContain(`email: '${options.email}'`);
         expect(output).toContain('The order is created!');
         expect(output).not.toContain('The cart is not assigned to the order. Please try later');
@@ -45,29 +46,7 @@ describe('Test create command', () => {
 
     afterAll(async () => {
         for (const orderId of orderIds) {
-            //get last version
-            let orderInfo = await getOrderInfoById(orderId);
-            //complete the order
-            await updateOrder(orderId, orderInfo.body.version, {
-                action: 'changeOrderState',
-                orderState: "Complete"
-            });
-
-            orderInfo = await getOrderInfoById(orderId);
-            await updateOrder(orderId, orderInfo.body.version, {
-                action: 'transitionState',
-                state: {
-                    id: "0fa77453-da4d-4ace-a973-71082415d723",
-                    typeId: "state"
-                }
-            })
-
-            orderInfo = await getOrderInfoById(orderId);
-            await updateOrder(orderId, orderInfo.body.version, {
-                action: "changeShipmentState",
-                shipmentState: "Delivered"
-            });
-            console.log(`The order ${orderId} is completed!`)
+            await cancelOrder(orderId);
         }
     });
 
