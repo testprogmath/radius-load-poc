@@ -1,6 +1,6 @@
 {
   "name": "@flink/flinkord-cli",
-  "version": "1.0.43",
+  "version": "1.0.48",
   "description": "CLI tool for easy order generation and management",
   "main": "dist/src/index.js",
   "bin": {
