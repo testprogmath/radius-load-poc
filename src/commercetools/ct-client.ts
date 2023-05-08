@@ -145,6 +145,7 @@ export async function completeOrder(orderId: string) {
 }
 
 export async function cancelOrder(orderId: string) {
+    const CANCELLED_ORDER_STATE_ID = "58e94703-3324-45d2-bd7c-fa311f004f49";
     let orderInfo = await getOrderInfoById(orderId);
     console.log(`The version of the order ${orderInfo.body.id} is: ${orderInfo.body.version}`);
     //complete the order
@@ -157,13 +158,14 @@ export async function cancelOrder(orderId: string) {
     console.log(orderInfo.body.orderState);
     console.log(orderInfo.body.state);
     console.log(`The version of the order ${orderInfo.body.id} is: ${orderInfo.body.version}`);
-    await updateOrder(orderId, orderInfo.body.version, {
-        action: 'transitionState',
-        state: {
-            id: "58e94703-3324-45d2-bd7c-fa311f004f49",
-            typeId: "state"
-        }
-    });
+    if (orderInfo.body.state?.id !== CANCELLED_ORDER_STATE_ID)
+        await updateOrder(orderId, orderInfo.body.version, {
+            action: 'transitionState',
+            state: {
+                id: CANCELLED_ORDER_STATE_ID,
+                typeId: "state"
+            }
+        });
 
     console.log(`The order ${orderId} is cancelled!`)
 
