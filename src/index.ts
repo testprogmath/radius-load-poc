@@ -36,7 +36,6 @@ freeHub
     });
 
 program
-    .version(pkg.version)
     .description("A CLI tool for order management")
     .showSuggestionAfterError(true)
     .option("create <arguments>", "Create an order with parameters or with default values")
@@ -44,7 +43,8 @@ program
     .option("free <arguments>", "Cancel all orders in the hub to deal with 'Something went wrong: hub is closed right now' error")
     .addCommand(freeHub)
     .option("cancel <value>", "Cancel by order name")
-    .option("defaults", "list defaults");
+    .option("defaults", "list defaults")
+    .version(pkg.version);
 
 
 program.parse(process.argv);
