@@ -16,7 +16,8 @@
     "lint": "npx eslint",
     "postbuild": "npm link",
     "test": "jest dist/tests",
-    "preinstall": "npx google-artifactregistry-auth"
+    "preinstall": "npx google-artifactregistry-auth",
+    "postinstall": "node create-env.js"
   },
   "repository": {
     "type": "git",
