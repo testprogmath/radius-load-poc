@@ -60,7 +60,7 @@ const DEFAULT_NUMBER_OF_PRODUCTS = 2;
 
 let cartId: string;
 let totalPrice: number;
-export default async function create(locale: string, hubSlug: string, email: string) {
+export async function create(locale: string, hubSlug: string, email: string) {
     const consumerApiUrl = config.get("consumerApiUrl") as string;
     const hubManagerApiUrl = config.get("hubManagerApiUrl") as string;
 

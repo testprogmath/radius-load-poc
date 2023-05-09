@@ -1,5 +1,5 @@
 import {afterAll, describe, expect, test} from '@jest/globals';
-import create from "../src/commands/create";
+import {create} from "../src/commands";
 import {cancelOrder} from "../src/commercetools/ct-client";
 
 const {execSync} = require('child_process');

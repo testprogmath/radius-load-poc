@@ -1,10 +1,10 @@
 #! /usr/bin/env node
 
 import {Command} from "commander";
-import create from "./commands/create";
+import {create} from "./commands";
 import path from "path";
-import free from "./commands/free";
-import {setupEnv} from "./commands/setup";
+import {free} from "./commands";
+import {setupEnv} from "./commands";
 
 const figlet = require("figlet");
 const gradient = require('gradient-string');
