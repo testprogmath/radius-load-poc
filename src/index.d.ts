@@ -1,6 +1,5 @@
-export * from './commands/create';
-export * from './commands/free';
-export * from './commands/setup';
+export { create, free, setupEnv } from './commands/index';
+
 
 declare module '@flink/flinkord-cli' {
     export function create(locale: string, hubSlug: string, email: string): Promise<void>;

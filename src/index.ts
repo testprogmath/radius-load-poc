@@ -1,13 +1,12 @@
 #! /usr/bin/env node
+import path from "path";
 
 import {Command} from "commander";
-import {create} from "./commands";
-import path from "path";
-import {free} from "./commands";
-import {setupEnv} from "./commands";
+import {create, free, setupEnv} from "./commands";
 
 const figlet = require("figlet");
 const gradient = require('gradient-string');
+
 
 const rootDir = process.cwd();
 
@@ -18,10 +17,10 @@ console.log(gradient.rainbow(figlet.textSync("Flinkord")));
 const program = new Command();
 
 
-export const createOrder = new Command("create");
-export const freeHub = new Command("free");
+const createOrder = new Command("create");
+const freeHub = new Command("free");
 
-export const setup = new Command("setup");
+const setup = new Command("setup");
 createOrder
     .option("-h, --hub <hub_slug>", "the hub for the order")
     .option("-m, --email <email>", "the email to receive notifications about the order", "flinkordautotest@goflink.com")
@@ -57,6 +56,3 @@ program
 
 
 program.parse(process.argv);
-
-
-
