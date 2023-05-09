@@ -40,7 +40,7 @@ describe('Test create command', () => {
 
     test('Create an order with an unknown hub', async () => {
         let orderInfo;
-        orderInfo = await create('en-de', "test", 'flinkord@goflink.com');
+        orderInfo = await create('en-de', "test", 'flinkord@goflink.com', true);
         expect(orderInfo).toEqual("This hub does not exist!");
     });
 

@@ -1,4 +1,4 @@
-import {CartApi} from "./api/cart-api";
+import {CartApi, CartOrder} from "./api/cart-api";
 import {LegacyHubDetailsService} from "@flink/hub-manager";
 import {spinnerError, stopSpinner} from "./spinner";
 import {printErrorAndStopSpinner} from "./utils";
@@ -76,7 +76,7 @@ export async function getCart(customerDomainApi: CartApi<any>, cartId: string) {
     return response?.data;
 }
 
-export async function checkoutCart(customerDomainApi: CartApi<any>, cartId: string, totalPrice: number) {
+export async function checkoutCart(customerDomainApi: CartApi<any>, cartId: string, totalPrice: number): Promise<CartOrder | undefined> {
     cartToken.amount.value = totalPrice;
     let orderInfo;
     try {

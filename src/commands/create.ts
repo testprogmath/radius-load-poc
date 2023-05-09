@@ -10,8 +10,8 @@ import {
 } from "../cart";
 import {spinnerSuccess, updateSpinnerText} from "../spinner";
 import {OpenAPI as HubManagerConfig} from "@flink/hub-manager";
-import {Colors} from "../shared/enums";
 import {getConfigPath} from "../utils";
+import {Colors} from "../shared/enums";
 
 const chalk = require("chalk");
 const emojic = require("emojic");
@@ -60,10 +60,10 @@ const DEFAULT_NUMBER_OF_PRODUCTS = 2;
 
 let cartId: string;
 let totalPrice: number;
-export async function create(locale: string, hubSlug: string, email: string) {
+
+export async function create(locale: string, hubSlug: string, email: string, isCLI: boolean) {
     const consumerApiUrl = config.get("consumerApiUrl") as string;
     const hubManagerApiUrl = config.get("hubManagerApiUrl") as string;
-
 
     HubManagerConfig.BASE = hubManagerApiUrl;
     if (!hubSlug) {
@@ -86,7 +86,7 @@ export async function create(locale: string, hubSlug: string, email: string) {
     });
 
 
-    updateSpinnerText(chalk.hex(Colors.MEXICAN_PINK_DARK)("Processing... \n"));
+    updateSpinnerText(chalk.hex(Colors.MEXICAN_PINK_DARK)("Processing... \n"), isCLI);
 
     setEmail(emptyCartRequest, email);
     await setDeliveryAddress(emptyCartRequest, hubSlug)
@@ -101,5 +101,5 @@ export async function create(locale: string, hubSlug: string, email: string) {
     // @ts-ignore
     totalPrice = (await getCart(cartApi, cartId)).totalPrice?.centAmount as number;
     spinnerSuccess();
-    await checkoutCart(cartApi, cartId, totalPrice);
+    return await checkoutCart(cartApi, cartId, totalPrice);
 }

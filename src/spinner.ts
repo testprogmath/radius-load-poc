@@ -1,12 +1,15 @@
 import ora from 'ora';
 
-const spinner = ora({ // make a singleton so we don't ever have 2 spinners
+const spinner = ora({
     spinner: 'dots3',
-})
+});
 
-export const updateSpinnerText = (message: string) => {
-    spinnerText(message);
-    spinner.start(message)
+
+export const updateSpinnerText = (message: string, isCLI: boolean) => {
+    if (isCLI) {
+        spinnerText(message);
+        spinner.start(message);
+    }
 }
 
 export const stopSpinner = () => {
