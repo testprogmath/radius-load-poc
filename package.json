@@ -1,9 +1,9 @@
 {
   "name": "@flink/flinkord-cli",
-  "version": "1.0.50",
+  "version": "1.0.51",
   "description": "CLI tool for easy order generation and management",
   "main": "dist/src/index.js",
-  "types": "dist/types/index.d.ts",
+  "types": "dist/types/src/index.d.ts",
   "bin": {
     "flinkord": "./dist/src/index.js"
   },
