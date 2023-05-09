@@ -7,5 +7,4 @@ export async function free(hubSlug: string) {
     response.body.hits.forEach(order => {
         cancelOrder(order.id);
     });
-
 }
