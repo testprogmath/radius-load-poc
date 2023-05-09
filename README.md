@@ -212,7 +212,8 @@ This error often appears when there are too many orders in the hub queue. To fre
 flinkord free -h fr_par_lepe
 ```
 
-For the first time, you need to enter your CommerceTools client creds. You can also use default ones. Run 
+For the first time, you need to enter your CommerceTools client creds. You can also use default ones. Run
+
 ```shell
 flinkord setup
 ```
@@ -222,6 +223,7 @@ Enter CT_CLIENT_ID (default: wxgadKVe9YfVkHWUDhgpIIJ6):
 Enter CT_CLIENT_SECRET (to use the default value, press enter):
 .env file successfully created 
 ```
+
 _For more examples, please refer to
 the [Documentation](https://docs.google.com/document/d/1aGe_5EBZ-VZ-27SChg9Ouc9E6NQlTNZf5FiS7AhimXQ/edit#)_
 
