@@ -3,6 +3,7 @@
   "version": "1.0.49",
   "description": "CLI tool for easy order generation and management",
   "main": "dist/src/index.js",
+  "types": "dist/types/index.d.ts",
   "bin": {
     "flinkord": "./dist/src/index.js"
   },

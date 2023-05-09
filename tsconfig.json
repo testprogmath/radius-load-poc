@@ -1,6 +1,8 @@
 {
   "compilerOptions": {
     "skipLibCheck": true,
+    "declaration": true,
+    "declarationDir": "dist/types",
     "rootDirs": [
       "src",
       "tests"
