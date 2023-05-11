@@ -5,6 +5,7 @@ import {printErrorAndStopSpinner} from "./utils";
 import chalk from "chalk";
 import {Colors} from "./shared/enums";
 import {getProducts} from "./api/catalog-api";
+import {Hubs} from "./shared/hubs";
 
 const cartToken = {
     "amount": {
@@ -145,9 +146,17 @@ export async function addProductLines(emptyCartRequest: any, hubSlug: string, lo
 export async function setDeliveryAddress(emptyCartRequest: any, hubSlug: string): Promise<any> {
     try {
         const hubInfo = await LegacyHubDetailsService.getHubDetailsWithSlugRequest({hubSlug: hubSlug});
-        // let's check any turf from the list:
-        // @ts-ignore
-        const hubCoordinates = hubInfo.turfs[0][2];
+
+        let hubCoordinates = Hubs[hubSlug];
+
+        if (!hubCoordinates) {
+            // @ts-ignore
+            hubCoordinates = hubInfo.turfs[0][2];
+        }
+
+        if (!hubCoordinates || !hubCoordinates.latitude || !hubCoordinates.longitude) {
+            return 'Unable to find hub coordinates';
+        }
 
         emptyCartRequest.delivery_coordinates = {
             latitude: hubCoordinates.latitude,
