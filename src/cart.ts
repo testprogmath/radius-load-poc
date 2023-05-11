@@ -78,19 +78,26 @@ export async function getCart(customerDomainApi: CartApi<any>, cartId: string) {
 }
 
 export async function checkoutCart(customerDomainApi: CartApi<any>, cartId: string, totalPrice: number): Promise<CartOrder | undefined> {
+    const MAX_RETRIES = 3;
     cartToken.amount.value = totalPrice;
     let orderInfo;
+    let response;
     try {
-        const response = await customerDomainApi.v3.checkoutV3(cartId, {
-                "amount": totalPrice,
-                "token": JSON.stringify(cartToken)
+        let retry = 0;
+        while (retry < MAX_RETRIES) {
+            response = await customerDomainApi.v3.checkoutV3(cartId, {
+                    "amount": totalPrice,
+                    "token": JSON.stringify(cartToken)
+                }
+            );
+            if (response.status === 200) {
+                console.log(`${emojic.confettiBall} The order is created!`);
+                orderInfo = await checkIfOrderIsCreated(customerDomainApi, cartId);
+                break;
+            } else {
+                console.log("The order was not created.")
             }
-        );
-        if (response.status === 200) {
-            console.log(`${emojic.confettiBall} The order is created!`);
-            orderInfo = await checkIfOrderIsCreated(customerDomainApi, cartId);
-        } else {
-            console.log("The order was not created.")
+            retry++;
         }
         return orderInfo;
     } catch
