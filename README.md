@@ -177,6 +177,7 @@ Usage: flinkord [options]
 
 To create the order in the chosen hub, please use -h (--hub option):
 
+### Create an order in a particular hub
 ```shell
 flinkord create -h fr_par_lepe
 ```
@@ -188,8 +189,32 @@ default one:
 
 To receive notifications to your email, please use -m (--email option):
 
+### Create an order with your email to receive a receipt
+
 ```shell
 flinkord create -h fr_par_lepe -m myemail@goflink.com
+```
+
+### Create an in-store order
+
+To create an in-store order, please use --instore flag:
+
+```shell
+flinkord create -h fr_par_lepe --instore
+```
+
+### Create an order with clickAndCollect option
+To switch on clickAndCollect option, please use -s (--shipping) flag:
+
+```shell
+flinkord create -h fr_par_lepe -s true
+```
+
+### Create an order with particular products in it
+To add your items to the cart, use -p flag with the following format:
+sku1:quantity1,sku2:quantity2. For example:
+```shell
+flinkord create -h de_ham_wint -p  15012024:2,11014933:3,11013382:4 
 ```
 
 Don't hesitate to use help command to discover all possible options:

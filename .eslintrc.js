@@ -15,11 +15,12 @@ module.exports = {
         "ecmaVersion": "latest"
     },
     "plugins": [
-        "@typescript-eslint"
+        "@typescript-eslint",
+        'promise',
     ],
     "rules": {
         '@typescript-eslint/no-var-requires': 0,
-        "@typescript-eslint/ban-ts-comment": "off",
-        "@typescript-eslint/no-explicit-any": "off"
+        "@typescript-eslint/no-explicit-any": "off",
+        'promise/space-in-brackets': ['error', 'always'],
     }
 }

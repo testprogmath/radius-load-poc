@@ -6,5 +6,8 @@
   "CTApiUrl": "https://api.europe-west1.gcp.commercetools.com",
   "hubForTests": "de_ham_wint",
   "testEmail": "test@goflink.com",
-  "hubApiKey": "a07e2812-4789-4916-8cf5-6577f7408174"
+  "hubApiKey": "a07e2812-4789-4916-8cf5-6577f7408174",
+  "identityToolkitUrl": "https://identitytoolkit.googleapis.com",
+  "instoreLogin": "fr_lyo_libe_instore@goflink.fr",
+  "genericPassword": "password123&"
 }

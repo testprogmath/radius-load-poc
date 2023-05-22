@@ -1,11 +1,26 @@
-import {CartApi, CartOrder} from "./api/cart-api";
+import {CartApi, CartOrder, GetCartResponseV3} from "./api/cart-api";
 import {LegacyHubDetailsService} from "@flink/hub-manager";
-import {spinnerError, stopSpinner} from "./spinner";
-import {printErrorAndStopSpinner} from "./utils";
+import {spinnerError, spinnerSuccess, stopSpinner} from "./spinner";
+import {getConfigPath, wait} from "./utils";
 import chalk from "chalk";
 import {Colors} from "./shared/enums";
 import {getProducts} from "./api/catalog-api";
 import {Hubs} from "./shared/hubs";
+import {authorizeInStore} from "./api/website-api";
+import {AxiosResponse} from "axios";
+import {CartLine, CartRequest} from "./api/objects/cart-request";
+import {Product} from "@flink/catalog";
+import {printErrorAndStopSpinner} from "./utils/spinner";
+import {parseProductsArray} from "./utils/cli-arguments";
+
+require('dotenv').config();
+
+const config = getConfigPath();
+const inStoreLogin = config.get('instoreLogin');
+const password = config.get('genericPassword');
+
+// a variable for the future option of adding a different number of products
+const DEFAULT_NUMBER_OF_PRODUCTS = 2;
 
 const cartToken = {
     "amount": {
@@ -33,8 +48,8 @@ const cartToken = {
 
 const emojic = require("emojic");
 
-export async function createCart(customerDomainApi: CartApi<any>, cartRequest: any) {
-    let response;
+export async function createCart(customerDomainApi: CartApi<any>, cartRequest: CartRequest) {
+    let response: AxiosResponse<GetCartResponseV3> | undefined;
     try {
         response = await customerDomainApi.v3.createCartV3(cartRequest);
         if (response.status === 200) {
@@ -46,10 +61,10 @@ export async function createCart(customerDomainApi: CartApi<any>, cartRequest: a
         (e) {
         printErrorAndStopSpinner(e);
     }
-    return response?.data;
+    return response?.data || null;
 }
 
-export async function addShippingMethod(customerDomainApi: CartApi<any>, cartId: string, clickAndCollect = false) {
+export async function addShippingMethod(customerDomainApi: CartApi<any>, cartId: string, clickAndCollect: boolean = false) {
     try {
         const response = await customerDomainApi.v2.setShippingMethodV2(cartId, {clickAndCollect: clickAndCollect});
         if (response.status === 200) {
@@ -63,10 +78,10 @@ export async function addShippingMethod(customerDomainApi: CartApi<any>, cartId:
 }
 
 export async function getCart(customerDomainApi: CartApi<any>, cartId: string) {
-    let response
+    let response: AxiosResponse<GetCartResponseV3> | undefined;
     try {
         response = await customerDomainApi.v3.getCartV3(cartId);
-        if (response.status === 200) {
+        if (response && response.status === 200) {
             console.log(`The cart is created with the id ${chalk.hex(Colors.MEXICAN_PINK)(cartId)}`);
         }
         console.log();
@@ -74,10 +89,10 @@ export async function getCart(customerDomainApi: CartApi<any>, cartId: string) {
         (e) {
         printErrorAndStopSpinner(e);
     }
-    return response?.data;
+    return response?.data ?? null;
 }
 
-export async function checkoutCart(customerDomainApi: CartApi<any>, cartId: string, totalPrice: number): Promise<CartOrder | undefined> {
+export async function checkoutCart(customerDomainApi: CartApi<any>, cartId: string, totalPrice: number): Promise<CartOrder | undefined | null> {
     const MAX_RETRIES = 3;
     cartToken.amount.value = totalPrice;
     let orderInfo;
@@ -106,51 +121,133 @@ export async function checkoutCart(customerDomainApi: CartApi<any>, cartId: stri
     }
 }
 
+export async function checkoutCartInStore(customerDomainApi: CartApi<any>, cartId: string, totalPrice: number) {
+    const tokenResponse = await authorizeInStore(inStoreLogin, password);
+    const response = await customerDomainApi.v3.checkoutInStoreRequest(cartId, {
+            "amount": {
+                currency: "EUR",
+                value: totalPrice
+            }
+        },
+        {
+            headers: {'Authorization': `Bearer ${tokenResponse.idToken}`}
+        }
+    );
+    let orderInfo;
+    if (response.status === 200) {
+        console.log(`${emojic.confettiBall} The order is created!`);
+        await checkPaymentStatus(customerDomainApi, cartId);
+        orderInfo = await checkIfOrderIsCreated(customerDomainApi, cartId);
+
+    } else {
+        console.log("The order was not created.")
+    }
+    return orderInfo;
+}
+
+
+export async function checkPaymentStatus(customerDomainApi: CartApi<any>, cartId: string,) {
+    let response = await customerDomainApi.v3.getPaymentStatusInStore(cartId);
+    const MAX_RETRIES_COUNT = 10;
+    let retries = 0;
+    while (response.data.status === "PENDING" && retries < MAX_RETRIES_COUNT) {
+        response = await customerDomainApi.v3.getPaymentStatusInStore(cartId);
+        if (response.data.status === "PENDING" && retries < MAX_RETRIES_COUNT) {
+            await wait(1000); // Wait for 1 second
+        }
+    }
+    if (response.data.status === "PAID") {
+        console.log(`${emojic.confettiBall} The order is paid!`);
+    } else console.log(`${emojic.confettiBall} The order is not paid! Please try again.`);
+}
 
 async function checkIfOrderIsCreated(customerDomainApi: CartApi<any>, cartId: string) {
     const MAX_RETRIES = 10;
-    let retry = 0;
-    let getCartResponse = await customerDomainApi.v3.getCartV3(cartId);
+    const RETRY_DELAY = 200;
     let order;
-    if (getCartResponse.status === 200) {
-        // it takes 1-2 seconds sometimes to assign the order id to the cart
-        while (retry < MAX_RETRIES) {
-            getCartResponse = await customerDomainApi.v3.getCartV3(cartId);
-            if (getCartResponse.data.order) break;
-            retry++;
+
+    try {
+        const getCartResponse = await customerDomainApi.v3.getCartV3(cartId);
+
+        if (getCartResponse.status === 200) {
+            order = await waitForOrderAssignment(customerDomainApi, cartId, MAX_RETRIES, RETRY_DELAY);
+
+            if (!order) {
+                console.log("The cart is not assigned to the order. Please try later");
+                spinnerError("Your request failed. Please find the stacktrace above");
+                stopSpinner();
+                return;
+            }
+
+            console.log(`${emojic.memo} The order number is ${chalk.hex(Colors.LAVENDER_PINK).bold(order?.number)} and the order id is ${chalk.hex(Colors.THULIAN_PINK).bold(order?.id)}`);
+        } else {
+            console.log("Something went wrong. Please check the logs and try later.");
         }
-        order = getCartResponse.data.order;
-        if (!order) {
-            console.log("The cart is not assigned to the order. Please try later");
-            spinnerError("Your request failed. Please find the stacktrace above");
-            stopSpinner();
-            return;
-        }
-        console.log(`${emojic.memo} The order number is ${chalk.hex(Colors.LAVENDER_PINK).bold(order?.number)} and the order id is ${chalk.hex(Colors.THULIAN_PINK).bold(order?.id)}`);
-    } else console.log("Something went wrong. Please check the logs and try later.");
+    } catch (error) {
+        console.error("An error occurred while checking if the order is created:", error);
+    }
+
     return order;
 }
 
-export async function addProductLines(emptyCartRequest: any, hubSlug: string, locale: string, numberOfProducts: number) {
-    console.log(`${emojic.grapes} Setting products available in the hub...\n`);
-    try {
-        const products = await getProducts(locale, hubSlug);
-        if (numberOfProducts > 0) {
-            for (let i = 0; i < numberOfProducts; i++) {
-                emptyCartRequest.lines[i].variant_id = products[i].sku;
-                emptyCartRequest.lines[i].product_sku = products[i].sku;
-                emptyCartRequest.lines[i].quantity = 2;
-            }
-        } else console.log("Please enter a positive number of products!");
-    } catch
-        (e) {
-        printErrorAndStopSpinner(e);
+async function waitForOrderAssignment(customerDomainApi: CartApi<any>, cartId: string, maxRetries: number, retryDelay: number) {
+    let retry = 0;
+
+    while (retry < maxRetries) {
+        const getCartResponse = await customerDomainApi.v3.getCartV3(cartId);
+
+        if (getCartResponse.data.order) {
+            return getCartResponse.data.order;
+        }
+
+        retry++;
+        await wait(retryDelay);
     }
-    return emptyCartRequest;
+
+    return null;
 }
 
 
-export async function setDeliveryAddress(emptyCartRequest: any, hubSlug: string): Promise<any> {
+export async function addProductLines(cartRequest: CartRequest, hubSlug: string, locale: string, productsArray?: string) {
+    console.log(`${emojic.grapes} Setting products available in the hub...\n`);
+    try {
+        if (!productsArray) {
+            const numberOfProducts = DEFAULT_NUMBER_OF_PRODUCTS;
+            const products = await getProducts(locale, hubSlug);
+            if (numberOfProducts > 0) {
+                addDefaultProductLines(cartRequest, products, numberOfProducts);
+            } else {
+                console.log("Please enter a positive number of products!");
+            }
+        } else {
+            const products = parseProductsArray(productsArray);
+            console.log(products);
+            addCustomProductLines(cartRequest, products);
+        }
+
+        console.log(cartRequest);
+    } catch (e) {
+        printErrorAndStopSpinner(e);
+    }
+    return cartRequest;
+}
+
+function addDefaultProductLines(cartRequest: CartRequest, products: Product[], numberOfProducts: number) {
+    for (let i = 0; i < numberOfProducts; i++) {
+        const lineItem = new CartLine(products[i].sku, products[i].sku, 2);
+        cartRequest.lines.push(lineItem);
+    }
+}
+
+function addCustomProductLines(cartRequest: CartRequest, products: Record<string, number>) {
+    for (const [sku, number] of Object.entries(products)) {
+        const lineItem = new CartLine(sku, sku, number);
+        cartRequest.lines.push(lineItem);
+    }
+}
+
+
+export async function setDeliveryAddress(cartRequest: CartRequest, hubSlug: string): Promise<any> {
     try {
         const hubInfo = await LegacyHubDetailsService.getHubDetailsWithSlugRequest({hubSlug: hubSlug});
 
@@ -165,12 +262,12 @@ export async function setDeliveryAddress(emptyCartRequest: any, hubSlug: string)
             return 'Unable to find hub coordinates';
         }
 
-        emptyCartRequest.delivery_coordinates = {
+        cartRequest.delivery_coordinates = {
             latitude: hubCoordinates.latitude,
             longitude: hubCoordinates.longitude
         }
 
-        emptyCartRequest.shipping_address = {
+        cartRequest.shipping_address = {
             street_address_1: hubInfo.address,
             city: hubInfo.city,
             country: hubInfo.country,
@@ -180,11 +277,67 @@ export async function setDeliveryAddress(emptyCartRequest: any, hubSlug: string)
         printErrorAndStopSpinner(e);
     }
 
-    return emptyCartRequest;
+    return cartRequest;
 }
 
-export function setEmail(emptyCartRequest: any, email: string) {
+export function setEmail(cartRequest: CartRequest, email: string) {
     console.log(`${emojic.outboxTray} Setting the email to receive notifications about your order...\n`);
-    emptyCartRequest.email = email;
-    return emptyCartRequest;
+    cartRequest.email = email;
+    return cartRequest;
+}
+
+
+export async function buildCartRequest(email: string, hubSlug: string, locale: string, productsArray?: string) {
+    const cartRequestBody = new CartRequest();
+    setEmail(cartRequestBody, email);
+    await setDeliveryAddress(cartRequestBody, hubSlug);
+    await addProductLines(cartRequestBody, hubSlug, locale, productsArray);
+    return cartRequestBody;
+}
+
+export async function createCartWithAssignedData(cartApi: CartApi<any>, cartRequest: CartRequest) {
+    const createCartResult = await createCart(cartApi, cartRequest);
+    if (!createCartResult) {
+        throw new Error("A cart cannot be created.");
+    }
+    return createCartResult.id as string;
+}
+
+export async function getCreatedCart(cartApi: CartApi<any>, cartId: string) {
+    const getCartResponse = await getCart(cartApi, cartId);
+    if (!getCartResponse) {
+        throw new Error("A cart does not exist.");
+    }
+    return getCartResponse;
+}
+
+export async function createAndCheckoutCartInStore(cartApi: CartApi<any>, cartRequest: CartRequest) {
+    cartRequest.shipping_method_id = "8fb7876a-4d17-49fb-ac6e-8f4971ccba4c";
+    cartRequest.delivery_tier_id = "core";
+
+    console.log(`${emojic.shoppingCart} The cart content is:`);
+    console.log(cartRequest);
+
+    const cartId = await createCartWithAssignedData(cartApi, cartRequest);
+    const cart = await getCreatedCart(cartApi, cartId);
+    const totalPrice = cart.totalPrice?.centAmount as number;
+
+    spinnerSuccess();
+
+    return await checkoutCartInStore(cartApi, cartId, totalPrice);
+}
+
+export async function createAndCheckoutCart(cartApi: CartApi<any>, cartRequest: CartRequest, clickAndCollect = false) {
+    console.log(`${emojic.shoppingCart} The cart content is:`);
+    console.log(cartRequest);
+
+    const cartId = await createCartWithAssignedData(cartApi, cartRequest);
+    await addShippingMethod(cartApi, cartId, clickAndCollect);
+
+    const cart = await getCreatedCart(cartApi, cartId);
+    const totalPrice = cart.totalPrice?.centAmount as number;
+
+    spinnerSuccess();
+
+    return await checkoutCart(cartApi, cartId, totalPrice);
 }

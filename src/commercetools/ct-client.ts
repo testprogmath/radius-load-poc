@@ -5,7 +5,7 @@ import {createAuthMiddlewareForClientCredentialsFlow} from "@commercetools/sdk-m
 // @ts-ignore
 import {createHttpMiddleware} from "@commercetools/sdk-middleware-http";
 import dotenv from "dotenv";
-import {getConfigPath} from "../utils";
+import {getConfigPath, wait} from "../utils";
 
 const fetch = require('node-fetch');
 
@@ -153,6 +153,7 @@ export async function cancelOrder(orderId: string) {
         action: 'changeOrderState',
         orderState: "Cancelled"
     });
+    await wait(200);
     //get last version
     orderInfo = await getOrderInfoById(orderId);
     console.log(orderInfo.body.orderState);

@@ -10,6 +10,7 @@ const config: Config = {
     clearMocks: true,
     // An array of file extensions your modules use
     moduleFileExtensions: ["js"],
+    verbose: true,
 };
 
 export default config;

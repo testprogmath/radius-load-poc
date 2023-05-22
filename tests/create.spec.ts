@@ -1,6 +1,9 @@
 import {afterAll, describe, expect, test} from '@jest/globals';
-import {create} from "../src/commands";
+import {create} from "../src";
 import {cancelOrder} from "../src/commercetools/ct-client";
+import {CreateOptions} from "../src/commands/create";
+import {Colors} from "../src/shared/enums";
+import chalk from "chalk";
 
 const {execSync} = require('child_process');
 const config = require('config');
@@ -34,20 +37,67 @@ describe('Test create command', () => {
         expect(output).toContain('The order is created!');
         expect(output).not.toContain('The cart is not assigned to the order. Please try later');
         orderIds.push(getOrderId(output));
+    });
+
+    test('CLI: Create an order with clickAndCollect value', async () => {
+        const output = execSync(`flinkord create --hub ${options.hub} -s true`).toString();
+        console.log(output);
+        // expect(output).toContain(`clickAndCollect is ${chalk.hex(Colors.MEXICAN_PINK)("true")}`);
+        expect(output).toContain('The order is created!');
+        expect(output).not.toContain('The cart is not assigned to the order. Please try later');
+        const orderId = getOrderId(output)
+        console.log(`The order id is: ${orderId}`);
+        orderIds.push(orderId);
+    });
+
+    test('CLI: Create an order with particular products', async () => {
+        const output = execSync(`flinkord create --hub ${options.hub} -p 15012024:2,11014933:3,11013382:4`).toString();
+        console.log(output);
+        expect(output).toContain("variant_id: '11013382'");
+        expect(output).toContain("product_sku: '11013382'");
+        expect(output).toContain("quantity: 4");
+        expect(output).toContain("variant_id: '11014933'");
+        expect(output).toContain("product_sku: '11014933'");
+        expect(output).toContain("quantity: 3");
+        expect(output).toContain("variant_id: '15012024'");
+        expect(output).toContain("product_sku: '15012024'");
+        expect(output).toContain("quantity: 2");
+        expect(output).toContain('The order is created!');
+        expect(output).not.toContain('The cart is not assigned to the order. Please try later');
+        const orderId = getOrderId(output)
+        console.log(`The order id is: ${orderId}`);
+        orderIds.push(orderId);
+    });
 
 
+    test('CLI: Create an in-store order', async () => {
+        const output = execSync(`flinkord create --hub fr_par_lepe --instore`).toString();
+        console.log(output);
+        expect(output).toContain('instore: true');
+        expect(output).toContain('The order is created!');
+        expect(output).not.toContain('The cart is not assigned to the order. Please try later');
+        const orderId = getOrderId(output)
+        console.log(`The order id is: ${orderId}`);
+        orderIds.push(orderId);
     });
 
     test('Create an order with an unknown hub', async () => {
         let orderInfo;
-        orderInfo = await create('en-de', "test", 'flinkord@goflink.com', true);
+        const options: CreateOptions = {
+            locale: 'en-de',
+            hubSlug: 'test',
+            email: 'flinkord@goflink.com',
+            clickAndCollect: false,
+            isCLI: true,
+            productsArray: '14007689:3,11019025:4'
+        };
+        orderInfo = await create(options);
         expect(orderInfo).toEqual("This hub does not exist!");
     });
 
     afterAll(async () => {
-        for (const orderId of orderIds) {
-            await cancelOrder(orderId);
-        }
+        execSync(`flinkord free -h ${options.hub}`);
+        execSync(`flinkord free -h 'fr_par_lepe'`)
     });
 
     function getOrderId(output: string) {

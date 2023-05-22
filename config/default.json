@@ -3,5 +3,8 @@
   "hubManagerApiUrl": "https://api.staging.goflink.com/hub/hub-manager",
   "hubApiUrl": "https://hub-api.staging.goflink.com",
   "CTAuthUrl": "https://auth.europe-west1.gcp.commercetools.com",
-  "CTApiUrl": "https://api.europe-west1.gcp.commercetools.com"
+  "CTApiUrl": "https://api.europe-west1.gcp.commercetools.com",
+  "identityToolkitUrl": "https://identitytoolkit.googleapis.com",
+  "instoreLogin": "fr_lyo_libe_instore@goflink.fr",
+  "genericPassword": "password123&"
 }

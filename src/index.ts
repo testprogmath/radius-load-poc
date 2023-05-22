@@ -3,6 +3,7 @@ import path from "path";
 
 import {Command} from "commander";
 import {create, free, setupEnv} from "./commands";
+import {CreateOptions} from "./commands/create";
 
 const figlet = require("figlet");
 const gradient = require('gradient-string');
@@ -30,9 +31,21 @@ const isCLI = true;
 createOrder
     .option("-h, --hub <hub_slug>", "the hub for the order")
     .option("-m, --email <email>", "the email to receive notifications about the order", "flinkordautotest@goflink.com")
+    .option("-s, --shipping <clickAndCollect>", "a flag for clickAndCollect orders", "false")
+    .option("-i, --instore", "a flag for in-store orders")
+    .option("-p, --products <products>", "products array in the format sku1:quantity1,sku2:quantity2")
     .action((commandAndOptions) => {
         console.log(commandAndOptions);
-        create('en-fr', commandAndOptions.hub, commandAndOptions.email, isCLI).catch(e => console.log(e));
+        const options: CreateOptions = {
+            locale: 'en-fr',
+            hubSlug: commandAndOptions.hub,
+            email: commandAndOptions.email,
+            clickAndCollect: commandAndOptions.shipping,
+            isCLI: isCLI,
+            inStore: commandAndOptions.instore !== undefined,
+            productsArray: commandAndOptions.products
+        };
+        create(options).catch(e => console.log(e));
     });
 
 freeHub

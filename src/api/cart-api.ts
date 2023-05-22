@@ -10,6 +10,8 @@
  * ---------------------------------------------------------------
  */
 
+import {CartRequest} from "./objects/cart-request";
+
 /** Address represents the details of a shipping and/or billing address */
 export interface Address {
     address_id?: string;
@@ -290,6 +292,23 @@ export interface GetPaymentMethodsResponse {
 export interface GetRiderTipsResponse {
     riderTips?: RiderTipResponse[];
 }
+
+export interface GetPaymentsStatusResponse {
+    status: string;
+    receipts: Receipt[];
+}
+
+interface Receipt {
+    type: string;
+    contents: Content[];
+}
+
+interface Content {
+    style: string;
+    endOfLineFlag: boolean;
+    text: string;
+}
+
 
 /** Line represents a product once added to the cart and/or order */
 export interface Line {
@@ -701,22 +720,6 @@ export class CartApi<SecurityDataType extends unknown> extends HttpClient<Securi
                 ...params,
             }),
 
-        /**
-         * @description Performs the checkout for the in-store-payment flow
-         *
-         * @tags v1-in-store-payment
-         * @name CheckoutInStoreRequest
-         * @request POST:/v1/cart/{id}/checkout-in-store
-         */
-        checkoutInStoreRequest: (id: string, Body: CheckoutInStoreRequestPayload, params: RequestParams = {}) =>
-            this.request<CheckoutInStoreResponse, ErrorResponseDetail>({
-                path: `/v1/cart/${id}/checkout-in-store`,
-                method: "POST",
-                body: Body,
-                type: ContentType.Json,
-                format: "json",
-                ...params,
-            }),
 
         /**
          * @description Attach a payment to the cart and fulfills the cart - returns an order
@@ -791,7 +794,9 @@ export class CartApi<SecurityDataType extends unknown> extends HttpClient<Securi
             this.request<SetShippingMethodResponse, ErrorResponse>({
                 path: `/v2/cart/${id}/shipping-method`,
                 method: "PUT",
-                body: ShippingMethod,
+                body: {
+                    clickAndCollect: ShippingMethod.clickAndCollect === true,
+                },
                 format: "json",
                 ...params,
             }),
@@ -834,7 +839,7 @@ export class CartApi<SecurityDataType extends unknown> extends HttpClient<Securi
          * @name CreateCartV3
          * @request POST:/v3/cart
          */
-        createCartV3: (body: Object, params: RequestParams = {}) =>
+        createCartV3: (body: CartRequest, params: RequestParams = {}) =>
             this.request<GetCartResponseV3, V1ErrorResponse>({
                 path: `/v3/cart`,
                 method: "POST",
@@ -865,10 +870,27 @@ export class CartApi<SecurityDataType extends unknown> extends HttpClient<Securi
          * @name UpdateCartV3
          * @request PUT:/v3/cart/{id}
          */
-        updateCartV3: (id: string, params: RequestParams = {}) =>
+        updateCartV3: (id: string, body: Object, params: RequestParams = {}) =>
             this.request<GetCartResponseV3, V1ErrorResponse | ErrorResponse>({
                 path: `/v3/cart/${id}`,
                 method: "PUT",
+                format: "json",
+                body: Object,
+                ...params,
+            }),
+        /**
+         * @description Performs the checkout for the in-store-payment flow
+         *
+         * @tags v3-in-store-payment
+         * @name CheckoutInStoreRequest
+         * @request POST:/v3/cart/{id}/checkout-in-store
+         */
+        checkoutInStoreRequest: (id: string, Body: CheckoutInStoreRequestPayload, params: RequestParams = {}) =>
+            this.request<CheckoutInStoreResponse, ErrorResponseDetail>({
+                path: `/v3/cart/${id}/checkout-in-store`,
+                method: "POST",
+                body: Body,
+                type: ContentType.Json,
                 format: "json",
                 ...params,
             }),
@@ -981,5 +1003,13 @@ export class CartApi<SecurityDataType extends unknown> extends HttpClient<Securi
                 format: "json",
                 ...params,
             }),
+
+        getPaymentStatusInStore: (id: string, params: RequestParams = {}) =>
+            this.request<GetPaymentsStatusResponse, any>({
+                path: `/v3/cart/${id}/payment-status-in-store`,
+                method: "GET",
+                format: "json",
+                ...params
+            })
     };
 }

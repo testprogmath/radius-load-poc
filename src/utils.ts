@@ -1,16 +1,8 @@
-import {spinnerError, stopSpinner} from "./spinner";
-import {program} from "commander";
 import path from "path";
 import * as fs from "fs";
 
 const findUp = require('find-up');
 
-export function printErrorAndStopSpinner(e: any) {
-    console.log(e);
-    spinnerError("Your request failed. Please find the stacktrace above");
-    stopSpinner();
-    program.error('', {exitCode: 1});
-}
 
 export function getConfigPath() {
     const currentDir = process.cwd();
@@ -28,3 +20,7 @@ export function getConfigPath() {
     process.env.NODE_CONFIG_DIR = resolvedConfigPath;
     return require('config');
 }
+
+export const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+
