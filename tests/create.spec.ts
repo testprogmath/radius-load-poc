@@ -1,9 +1,6 @@
 import {afterAll, describe, expect, test} from '@jest/globals';
 import {create} from "../src";
-import {cancelOrder} from "../src/commercetools/ct-client";
 import {CreateOptions} from "../src/commands/create";
-import {Colors} from "../src/shared/enums";
-import chalk from "chalk";
 
 const {execSync} = require('child_process');
 const config = require('config');
