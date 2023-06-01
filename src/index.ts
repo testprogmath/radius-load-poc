@@ -1,5 +1,4 @@
 #! /usr/bin/env node
-import path from "path";
 
 import {Command} from "commander";
 import {create, free, setupEnv} from "./commands";
@@ -8,10 +7,6 @@ import {CreateOptions} from "./commands/create";
 const figlet = require("figlet");
 const gradient = require('gradient-string');
 
-
-const rootDir = process.cwd();
-
-const pkg = require(path.join(rootDir, 'package.json'));
 
 console.log(gradient.rainbow(figlet.textSync("Flinkord")));
 
@@ -70,9 +65,7 @@ program
     .option("setup", "This command creates .env file with given or default CommerceTools credentials")
     .addCommand(setup)
     .option("cancel <value>", "Cancel by order name")
-    .option("defaults", "list defaults")
-    .version(pkg.version);
-
+    .option("defaults", "list defaults");
 
 if (require.main === module) {
     program.parse(process.argv);
