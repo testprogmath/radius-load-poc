@@ -40,12 +40,24 @@ IDENTITY_KEY="${identityKeySecret}"
 GENERIC_PASSWORD="${genericPassword}"
 `;
 
-    fs.writeFile(envFilePath, envFileContent, (err) => {
-        if (err) {
-            console.error('Failed to create .env file:', err);
-        } else {
-            console.log('.env file successfully created');
-        }
-        rl.close();
-    });
+    // check if .env file already exists
+    if(fs.existsSync(envFilePath)) {
+        fs.appendFile(envFilePath, envFileContent, (err) => {
+            if (err) {
+                console.error('Failed to append to .env file:', err);
+            } else {
+                console.log('.env file successfully updated');
+            }
+            rl.close();
+        });
+    } else {
+        fs.writeFile(envFilePath, envFileContent, (err) => {
+            if (err) {
+                console.error('Failed to create .env file:', err);
+            } else {
+                console.log('.env file successfully created');
+            }
+            rl.close();
+        });
+    }
 }
