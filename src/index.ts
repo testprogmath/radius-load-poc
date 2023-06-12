@@ -1,7 +1,7 @@
 #! /usr/bin/env node
 
 import {Command} from "commander";
-import {create, free, setupEnv} from "./commands";
+import {create, free, deliver, setupEnv} from "./commands";
 import {CreateOptions} from "./commands/create";
 
 const figlet = require("figlet");
@@ -15,6 +15,7 @@ const program = new Command();
 
 const createOrder = new Command("create");
 const freeHub = new Command("free");
+const deliverOrder = new Command("deliver");
 
 const setup = new Command("setup");
 
@@ -50,6 +51,10 @@ freeHub
         free(commandAndOptions.hub).catch(e => console.log(e));
     });
 
+deliverOrder.argument("orderId").action((orderId) => {
+    console.log(orderId);
+    deliver(orderId).catch(e => console.log(e));
+})
 setup
     .action(() => {
         setupEnv().catch(e => console.log(e));
@@ -65,7 +70,9 @@ program
     .option("setup", "This command creates .env file with given or default CommerceTools credentials")
     .addCommand(setup)
     .option("cancel <value>", "Cancel by order name")
-    .option("defaults", "list defaults");
+    .option("defaults", "list defaults")
+    .addCommand(deliverOrder)
+    .option("deliver <orderId>", "Deliver the order");
 
 if (require.main === module) {
     program.parse(process.argv);

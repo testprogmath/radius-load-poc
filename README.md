@@ -249,6 +249,12 @@ Enter CT_CLIENT_SECRET (to use the default value, press enter):
 .env file successfully created 
 ```
 
+### To deliver an order, use "deliver" command with an orderId:
+
+```shell
+flinkord deliver <orderId>
+```
+
 _For more examples, please refer to
 the [Documentation](https://docs.google.com/document/d/1aGe_5EBZ-VZ-27SChg9Ouc9E6NQlTNZf5FiS7AhimXQ/edit#)_
 
@@ -262,7 +268,7 @@ the [Documentation](https://docs.google.com/document/d/1aGe_5EBZ-VZ-27SChg9Ouc9E
 - [x] "Create" command with default values
     - [x] Implement -h (--hub) option ([HO-1044](https://goflink.atlassian.net/browse/HO-1044))
     - [x] Implement -m (--email) option  ([HO-1070](https://goflink.atlassian.net/browse/HO-1070))
-- [ ] Deploy artifact to GCP Artifact Registry
+- [x] Deploy artifact to GCP Artifact Registry
 - [ ] Support custom config file
 - [ ] "Cancel" command by order_name
     - [ ] Support order_id in "cancel" command
