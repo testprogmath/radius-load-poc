@@ -254,6 +254,11 @@ Enter CT_CLIENT_SECRET (to use the default value, press enter):
 ```shell
 flinkord deliver <orderId>
 ```
+or with the order number:
+
+```shell
+flinkord deliver de-ber-nqqa-rkx5
+```
 
 _For more examples, please refer to
 the [Documentation](https://docs.google.com/document/d/1aGe_5EBZ-VZ-27SChg9Ouc9E6NQlTNZf5FiS7AhimXQ/edit#)_

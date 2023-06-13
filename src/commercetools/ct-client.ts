@@ -6,6 +6,7 @@ import {createAuthMiddlewareForClientCredentialsFlow} from "@commercetools/sdk-m
 import {createHttpMiddleware} from "@commercetools/sdk-middleware-http";
 import dotenv from "dotenv";
 import {getConfigPath, wait} from "../utils";
+import {isUuid} from "../utils/types";
 
 const fetch = require('node-fetch');
 
@@ -173,7 +174,12 @@ export async function cancelOrder(orderId: string) {
 }
 
 
-export async function deliverOrder(orderId: string): Promise<string> {
+export async function deliverOrder(orderIdentifier: string): Promise<string> {
+    let orderId;
+    if (!isUuid(orderIdentifier)) {
+       const orderInfo = await api.orders().withOrderNumber({orderNumber: orderIdentifier}).get().execute();
+       orderId = orderInfo.body.id;
+    } else orderId = orderIdentifier;
     let orderInfo = await getOrderInfoById(orderId);
     if (orderInfo.body.orderState === "Complete") {
         console.log("The order is complete! Exiting the command...");
@@ -198,6 +204,6 @@ export async function deliverOrder(orderId: string): Promise<string> {
     orderInfo = await getOrderInfoById(orderId);
     console.log(orderInfo.body.orderState);
     console.log(orderInfo.body.state);
-console.log(`The order ${orderId} is delivered!`)
+    console.log(`The order ${orderId} is delivered!`)
     return `The order ${orderId} is delivered!`
 }
