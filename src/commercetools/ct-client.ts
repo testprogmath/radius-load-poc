@@ -174,12 +174,15 @@ export async function cancelOrder(orderId: string) {
 }
 
 
-export async function deliverOrder(orderIdentifier: string): Promise<string> {
-    let orderId;
+export async function getOrderId(orderIdentifier: string) {
     if (!isUuid(orderIdentifier)) {
-       const orderInfo = await api.orders().withOrderNumber({orderNumber: orderIdentifier}).get().execute();
-       orderId = orderInfo.body.id;
-    } else orderId = orderIdentifier;
+        const orderInfo = await api.orders().withOrderNumber({orderNumber: orderIdentifier}).get().execute();
+        return orderInfo.body.id;
+    } else return orderIdentifier;
+}
+
+export async function deliverOrder(orderIdentifier: string): Promise<string> {
+    let orderId = await getOrderId(orderIdentifier);
     let orderInfo = await getOrderInfoById(orderId);
     if (orderInfo.body.orderState === "Complete") {
         console.log("The order is complete! Exiting the command...");
@@ -207,3 +210,4 @@ export async function deliverOrder(orderIdentifier: string): Promise<string> {
     console.log(`The order ${orderId} is delivered!`)
     return `The order ${orderId} is delivered!`
 }
+

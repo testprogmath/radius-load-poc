@@ -3,6 +3,7 @@
 import {Command} from "commander";
 import {create, free, deliver, setupEnv} from "./commands";
 import {CreateOptions} from "./commands/create";
+import {cancel} from "./commands/cancel";
 
 const figlet = require("figlet");
 const gradient = require('gradient-string');
@@ -16,11 +17,14 @@ const program = new Command();
 const createOrder = new Command("create");
 const freeHub = new Command("free");
 const deliverOrder = new Command("deliver");
+const cancelOrder = new Command("cancel");
 
 const setup = new Command("setup");
 
 export {create} from "./commands/create";
 export {free} from "./commands/free";
+export {deliver} from "./commands/deliver";
+export {cancel} from "./commands/cancel";
 export {setupEnv} from "./commands/setup";
 
 const isCLI = true;
@@ -54,6 +58,11 @@ freeHub
 deliverOrder.argument("orderId").action((orderId) => {
     console.log(orderId);
     deliver(orderId).catch(e => console.log(e));
+});
+
+cancelOrder.argument("order").action(order=> {
+    console.log(order);
+    cancel(order).catch(e => console.log(e));
 })
 setup
     .action(() => {
@@ -70,6 +79,7 @@ program
     .option("setup", "This command creates .env file with given or default CommerceTools credentials")
     .addCommand(setup)
     .option("cancel <value>", "Cancel by order name")
+    .addCommand(cancelOrder)
     .option("defaults", "list defaults")
     .addCommand(deliverOrder)
     .option("deliver <orderId>", "Deliver the order");

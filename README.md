@@ -234,7 +234,7 @@ flinkord create --help
 This error often appears when there are too many orders in the hub queue. To free the hub queue, use this command:
 
 ```shell
-flinkord free -h fr_par_lepe
+flinkord free -h de_ber_mit2
 ```
 
 For the first time, you need to enter your CommerceTools client creds. You can also use default ones. Run
@@ -260,6 +260,16 @@ or with the order number:
 flinkord deliver de-ber-nqqa-rkx5
 ```
 
+### To cancel the order, use "cancel" command with an orderId:
+
+```shell
+flinkord cancel <orderId>
+```
+or with the order number:
+
+```shell
+flinkord cancel de-ber-nqqa-rkx5
+```
 _For more examples, please refer to
 the [Documentation](https://docs.google.com/document/d/1aGe_5EBZ-VZ-27SChg9Ouc9E6NQlTNZf5FiS7AhimXQ/edit#)_
 

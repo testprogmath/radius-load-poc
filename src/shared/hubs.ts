@@ -39,5 +39,9 @@ export const Hubs: Hubs = {
         latitude: 53.564408,
         longitude: 10.034963
     },
+    "de_ber_fran": {
+        latitude: 52.513962,
+        longitude: 13.469216
+    },
     // Add more hubs as needed
 };
