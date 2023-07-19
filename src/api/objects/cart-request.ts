@@ -40,6 +40,7 @@ class ShippingAddress {
     postal_code: string;
     country?: string;
     phone?: string;
+    tag?: string;
 
     constructor() {
         this.first_name = '';
@@ -49,6 +50,7 @@ class ShippingAddress {
         this.postal_code = '';
         this.country = '';
         this.phone = '';
+        this.tag = "";
     }
 }
 

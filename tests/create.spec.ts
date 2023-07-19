@@ -78,6 +78,17 @@ describe('Test create command', () => {
         orderIds.push(orderId);
     });
 
+    test('CLI: Create an order with a deliveryTag "outdoor" ', async () => {
+        const output = execSync(`flinkord create --hub fr_par_lepe -d outdoor`).toString();
+        console.log(output);
+        expect(output).toContain('tag: \'outdoor\'');
+        expect(output).toContain('The order is created!');
+        expect(output).not.toContain('The cart is not assigned to the order. Please try later');
+        const orderId = getOrderId(output)
+        console.log(`The order id is: ${orderId}`);
+        orderIds.push(orderId);
+    });
+
     test('Create an order with an unknown hub', async () => {
         let orderInfo;
         const options: CreateOptions = {

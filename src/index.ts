@@ -33,6 +33,7 @@ createOrder
     .option("-m, --email <email>", "the email to receive notifications about the order", "flinkordautotest@goflink.com")
     .option("-s, --shipping <clickAndCollect>", "a flag for clickAndCollect orders", "false")
     .option("-i, --instore", "a flag for in-store orders")
+    .option("-d, --deliveryTag <tagValue>", "a delivery tag, possible values: outdoor, work, home, other")
     .option("-p, --products <products>", "products array in the format sku1:quantity1,sku2:quantity2")
     .action((commandAndOptions) => {
         console.log(commandAndOptions);
@@ -43,6 +44,7 @@ createOrder
             clickAndCollect: commandAndOptions.shipping,
             isCLI: isCLI,
             inStore: commandAndOptions.instore !== undefined,
+            deliveryTag: commandAndOptions.deliveryTag,
             productsArray: commandAndOptions.products
         };
         create(options).catch(e => console.log(e));

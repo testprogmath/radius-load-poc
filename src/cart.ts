@@ -249,7 +249,7 @@ function addCustomProductLines(cartRequest: CartRequest, products: Record<string
 }
 
 
-export async function setDeliveryAddress(cartRequest: CartRequest, hubSlug: string): Promise<any> {
+export async function setDeliveryAddress(cartRequest: CartRequest, hubSlug: string, deliveryTag?: string): Promise<any> {
     try {
         const hubInfo = await LegacyHubDetailsService.getHubDetailsWithSlugRequest({hubSlug: hubSlug});
 
@@ -270,10 +270,13 @@ export async function setDeliveryAddress(cartRequest: CartRequest, hubSlug: stri
         }
 
         cartRequest.shipping_address = {
+            first_name: "Test",
+            last_name: "Flinkord",
             street_address_1: hubInfo.address,
             city: hubInfo.city,
             country: hubInfo.country,
-            postal_code: "1111"
+            postal_code: "1111",
+            tag: deliveryTag
         }
     } catch (e) {
         printErrorAndStopSpinner(e);
@@ -289,10 +292,10 @@ export function setEmail(cartRequest: CartRequest, email: string) {
 }
 
 
-export async function buildCartRequest(email: string, hubSlug: string, locale: string, productsArray?: string) {
-    const cartRequestBody = new CartRequest();
+export async function buildCartRequest(email: string, hubSlug: string, locale: string, productsArray?: string, deliveryTag?: string) {
+    let cartRequestBody = new CartRequest();
     setEmail(cartRequestBody, email);
-    await setDeliveryAddress(cartRequestBody, hubSlug);
+    await setDeliveryAddress(cartRequestBody, hubSlug, deliveryTag);
     await addProductLines(cartRequestBody, hubSlug, locale, productsArray);
     return cartRequestBody;
 }

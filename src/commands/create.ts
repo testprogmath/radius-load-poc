@@ -20,6 +20,7 @@ export interface CreateOptions {
     clickAndCollect?: boolean;
     isCLI: boolean;
     inStore?: boolean;
+    deliveryTag?: string,
     productsArray?: string;
 }
 
@@ -35,7 +36,7 @@ export async function create(options: CreateOptions) {
     HubManagerConfig.BASE = config.get("hubManagerApiUrl") as string;
     updateSpinnerText(chalk.hex(Colors.MEXICAN_PINK_DARK)("Processing... \n"), options.isCLI);
 
-    const cartRequest = await buildCartRequest(options.email, hubSlug, options.locale, options.productsArray);
+    const cartRequest = await buildCartRequest(options.email, hubSlug, options.locale, options.productsArray, options.deliveryTag);
     let checkoutResult;
     if (options.inStore) {
         checkoutResult = await createAndCheckoutCartInStore(cartApi, cartRequest);

@@ -217,6 +217,18 @@ sku1:quantity1,sku2:quantity2. For example:
 flinkord create -h de_ham_wint -p  15012024:2,11014933:3,11013382:4 
 ```
 
+### Create an order with a deliveryTag
+You can set a deliveryTag to the order. Please use -d or --deliveryTag option with 
+the following values:
+- outdoor
+- home
+- work
+- other
+```shell
+flinkord create -h de_ham_wint -d outdoor
+```
+
+### Help
 Don't hesitate to use help command to discover all possible options:
 
 ```shell
