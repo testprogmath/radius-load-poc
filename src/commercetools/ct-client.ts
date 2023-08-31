@@ -145,33 +145,71 @@ export async function completeOrder(orderId: string) {
 
 }
 
+const MAX_RETRIES = 3;  // Maximum number of times to retry
+
 export async function cancelOrder(orderId: string) {
     const CANCELLED_ORDER_STATE_ID = "58e94703-3324-45d2-bd7c-fa311f004f49";
-    let orderInfo = await getOrderInfoById(orderId);
-    console.log(`The version of the order ${orderInfo.body.id} is: ${orderInfo.body.version}`);
-    //complete the order
-    await updateOrder(orderId, orderInfo.body.version, {
-        action: 'changeOrderState',
-        orderState: "Cancelled"
-    });
-    await wait(200);
-    //get last version
-    orderInfo = await getOrderInfoById(orderId);
-    console.log(orderInfo.body.orderState);
-    console.log(orderInfo.body.state);
-    console.log(`The version of the order ${orderInfo.body.id} is: ${orderInfo.body.version}`);
-    if (orderInfo.body.state?.id !== CANCELLED_ORDER_STATE_ID)
-        await updateOrder(orderId, orderInfo.body.version, {
-            action: 'transitionState',
-            state: {
-                id: CANCELLED_ORDER_STATE_ID,
-                typeId: "state"
+    let retries = 0;
+
+    while (retries < MAX_RETRIES) {
+        try {
+            let orderInfo = await getOrderInfoById(orderId);
+            console.log(`The version of the order ${orderInfo.body.id} is: ${orderInfo.body.version}`);
+
+            await updateOrder(orderId, orderInfo.body.version, {
+                action: 'changeOrderState',
+                orderState: "Cancelled"
+            });
+
+            await wait(200);
+
+            // Refresh order info to get the latest state and version
+            orderInfo = await getOrderInfoById(orderId);
+
+            if (orderInfo.body.state?.id !== CANCELLED_ORDER_STATE_ID) {
+                await updateOrder(orderId, orderInfo.body.version, {
+                    action: 'transitionState',
+                    state: {
+                        id: CANCELLED_ORDER_STATE_ID,
+                        typeId: "state"
+                    }
+                });
             }
-        });
 
-    console.log(`The order ${orderId} is cancelled!`)
+            console.log(`The order ${orderId} is cancelled!`);
+            break;  // Exit the loop if successful
+        } catch (error) {
+            if (error instanceof Error) {  // Type guard
+                if (error.message.includes('ConcurrentModification')) {
+                    const actualVersionMatch = error.message.match(/Actual: (\d+)/);
+                    const actualVersion = parseInt(actualVersionMatch?.[1] || '0');
+                    if (actualVersion) {
+                        console.log(`Concurrent modification detected. Updating version to ${actualVersion} and retrying...`);
 
+                        retries++;
+                        await wait(200);  // Wait before retrying
+                    } else {
+                        console.log('Could not extract the actual version from the error message');
+                        break;
+                    }
+                } else {
+                    console.log('An unexpected error occurred:', error);
+                    break;
+                }
+            }
+            else {
+                console.log('Caught an exception of an unknown type:', error);
+                break;
+            }
+        }
+
+    }
+
+    if (retries >= MAX_RETRIES) {
+        console.log(`Failed to cancel the order ${orderId} after ${MAX_RETRIES} attempts.`);
+    }
 }
+
 
 
 export async function getOrderId(orderIdentifier: string) {
