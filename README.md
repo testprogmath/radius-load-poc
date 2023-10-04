@@ -289,7 +289,6 @@ or with the order number:
 flinkord cancel de-ber-nqqa-rkx5
 ```
 
-Ой, точно, спасибо что напомнила про badge number! Давай обновим описание:
 
 ---
 
