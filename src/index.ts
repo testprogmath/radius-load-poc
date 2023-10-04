@@ -1,9 +1,10 @@
 #! /usr/bin/env node
 
 import {Command} from "commander";
-import {create, free, deliver, setupEnv} from "./commands";
+import {create, free, deliver, setupEnv, addShift} from "./commands";
 import {CreateOptions} from "./commands/create";
 import {cancel} from "./commands/cancel";
+import {QuinyxShiftType} from "./shared/enums";
 
 const figlet = require("figlet");
 const gradient = require('gradient-string');
@@ -21,11 +22,14 @@ const cancelOrder = new Command("cancel");
 
 const setup = new Command("setup");
 
+const addQuinyxShift = new Command("add_shift");
+
 export {create} from "./commands/create";
 export {free} from "./commands/free";
 export {deliver} from "./commands/deliver";
 export {cancel} from "./commands/cancel";
 export {setupEnv} from "./commands/setup";
+export {addShift} from "./commands/addShift"
 
 const isCLI = true;
 createOrder
@@ -71,6 +75,33 @@ setup
         setupEnv().catch(e => console.log(e));
     });
 
+addQuinyxShift
+    .option("-u, --username <username>", "Username for Quinyx")
+    .option("-p, --password <password>", "Password for Quinyx")
+    .option("-b, --begin <beginDateTime>", "Begin date and time for the shift (format: YYYY-MM-DDTHH:mm:ss)")
+    .option("-e, --end <endDateTime>", "End date and time for the shift (format: YYYY-MM-DDTHH:mm:ss)")
+    .option("-h, --hub <hubSlug>", "the hub for the shift (please make sure that your user has all required permissions)")
+    .option("-n, --badge <badgeNumber>", "Badge number for another user you want to schedule the shift for")
+
+    .action((commandAndOptions) => {
+        const { username, password, begin, end, hub, badge } = commandAndOptions;
+
+
+        if (!username || !password) {
+            console.error("Username and password are required!");
+            return;
+        }
+
+        if (!hub) {
+            console.error("Please pass hubSlug with -h option");
+            return;
+        }
+
+        addShift(hub, badge, QuinyxShiftType.OPS_ASSOCIATE, username, password, begin, end)
+            .catch(e => console.log(e));
+    });
+
+
 program
     .description("A CLI tool for order management")
     .showSuggestionAfterError(true)
@@ -84,7 +115,9 @@ program
     .addCommand(cancelOrder)
     .option("defaults", "list defaults")
     .addCommand(deliverOrder)
-    .option("deliver <orderId>", "Deliver the order");
+    .option("deliver <orderId>", "Deliver the order")
+    .option("add_shift", "Add a shift in Quinyx")
+    .addCommand(addQuinyxShift);
 
 if (require.main === module) {
     program.parse(process.argv);

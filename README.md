@@ -154,17 +154,23 @@ Usage: flinkord [options] [command]
 A CLI tool for order management
 
 Options:
-  -V, --version       output the version number
-  create <arguments>  Create an order with parameters or with default values
-  free <arguments>    Deal with 'Something went wrong: hub is closed right now' error
-  cancel <value>      Cancel by order name
-  defaults            list defaults
-  -h, --help          display help for command
+  create <arguments>   Create an order with parameters or with default values
+  free <arguments>     Cancel all orders in the hub to deal with 'Something went wrong: hub is closed right now' error
+  setup                This command creates .env file with given or default CommerceTools credentials
+  cancel <value>       Cancel by order name
+  defaults             list defaults
+  deliver <orderId>    Deliver the order
+  add_shift            Add a shift in Quinyx
+  -h, --help           display help for command
 
 Commands:
   create [options]
   free [options]
-  help [command]      display help for command
+  setup
+  cancel <order>
+  deliver <orderId>
+  add_shift [options]
+  help [command]       display help for command
 ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -282,6 +288,46 @@ or with the order number:
 ```shell
 flinkord cancel de-ber-nqqa-rkx5
 ```
+
+Ой, точно, спасибо что напомнила про badge number! Давай обновим описание:
+
+---
+
+### To add a new shift in Quinyx and bypass device claiming feature, use "add_shift" command with required options:
+
+This command will let you add a new shift. Note that `username`, `password`, and `hub` are mandatory fields.
+
+```shell
+flinkord add_shift -u <username> -p <password> -h <hubSlug> [-b <beginDateTime>] [-e <endDateTime>] [-n <badgeNumber>]
+```
+
+#### Options:
+
+- `-u, --username <username>`: **[Mandatory]** Username for Quinyx.
+- `-p, --password <password>`: **[Mandatory]** Password for Quinyx.
+- `-h, --hub <hubSlug>`: **[Mandatory]** The hub for the shift (please make sure that your user has all required permissions).
+- `-b, --begin <beginDateTime>`: **[Optional]** Begin date and time for the shift (format: YYYY-MM-DDTHH:mm:ss). Defaults to today at 08:00.
+- `-e, --end <endDateTime>`: **[Optional]** End date and time for the shift (format: YYYY-MM-DDTHH:mm:ss). Defaults to today at 21:59.
+- `-n, --badge <badgeNumber>`: **[Optional]** Badge number for another user you want to schedule the shift for.
+
+#### Example:
+
+```shell
+flinkord add_shift -u my_username -p my_password -h de_ham_wint -b 2023-09-29T04:00:00 -e 2023-09-29T23:59:00 -n 101961
+```
+
+#### Output:
+
+After running this command, you should see a nicely formatted output:
+
+```shell
+📆 Shift Details 📆
+Begin Time: 2023-09-29T04:00:00
+End Time: 2023-09-29T23:59:00
+```
+
+---
+
 _For more examples, please refer to
 the [Documentation](https://docs.google.com/document/d/1aGe_5EBZ-VZ-27SChg9Ouc9E6NQlTNZf5FiS7AhimXQ/edit#)_
 
@@ -297,8 +343,8 @@ the [Documentation](https://docs.google.com/document/d/1aGe_5EBZ-VZ-27SChg9Ouc9E
     - [x] Implement -m (--email) option  ([HO-1070](https://goflink.atlassian.net/browse/HO-1070))
 - [x] Deploy artifact to GCP Artifact Registry
 - [ ] Support custom config file
-- [ ] "Cancel" command by order_name
-    - [ ] Support order_id in "cancel" command
+- [x] "Cancel" command by order_name
+    - [x] Support order_id in "cancel" command
 
 See the [jira story](https://goflink.atlassian.net/browse/HO-1010) for a full list of proposed features (and known
 issues).

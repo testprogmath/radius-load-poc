@@ -1,0 +1,58 @@
+{
+  "id": null,
+  "groupId": 223369,
+  "worker": null,
+  "begin": "2023-09-29T04:00:00",
+  "end": "2023-09-29T23:59:00",
+  "shiftTypeId": 666453,
+  "status": null,
+  "breaks": [],
+  "breakIsWorkTime": false,
+  "employeeId": 2700699,
+  "timePunches": [],
+  "punchIds": [],
+  "subShifts": [],
+  "tags": [],
+  "salaryTypeRules": [],
+  "leaveRequestIds": [],
+  "isLendShift": false,
+  "agreementId": 5287671,
+  "projectId": null,
+  "clientId": "fa715c85-e506-4c22-ba86-9ee596cdcef8",
+  "countScheduleHours": true,
+  "grabbAble": false,
+  "comment": "",
+  "freeDay": false,
+  "productiveTime": 1,
+  "overtime": false,
+  "fixedTask": false,
+  "taskHours": 0,
+  "countPunchHours": true,
+  "breakType": true,
+  "accountNo": 0,
+  "scheduledHours": 19.48,
+  "transShift": null,
+  "acceptedValidationErrors": [
+    {
+      "message": "error.schedule.shift.validation.maxWorkingHoursWithoutBreak",
+      "userMessage": "Exceeding {{maxWorkingHoursWithoutBreak}} working hours without break ({{actualWorkingHoursWithoutBreak}} hours).",
+      "severity": "OVERRIDABLE"
+    },
+    {
+      "message": "error.baseSchedule.shift.employee.notAvailableInPeriod",
+      "userMessage": "Employee not available",
+      "severity": "OVERRIDABLE"
+    },
+    {
+      "message": "error.schedule.shift.employee.maxHoursPerDay",
+      "userMessage": "Exceeding maximum {{maxHours}} scheduled hours per day ({{actualHours}} hours)",
+      "severity": "OVERRIDABLE"
+    },
+    {
+      "message": "error.schedule.shift.validation.missingSkills",
+      "userMessage": "Employee missing skill(s): {{missingSkills}}",
+      "severity": "OVERRIDABLE"
+    }
+  ],
+  "overrideOnOverlappingShiftsAction": null
+}

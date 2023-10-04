@@ -4,3 +4,4 @@ dist
 **/*.js
 .npmrc
 .env
+config/user_config.json
