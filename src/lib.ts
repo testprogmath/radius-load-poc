@@ -1,5 +1,6 @@
-import {create} from "./commands/create";
-import {free} from "./commands/free";
-import {setupEnv} from "./commands/setup";
+import {create} from "./commands";
+import {free} from "./commands";
+import {setupEnv} from "./commands";
+import {addShift} from "./commands";
 
-export {create, free, setupEnv};
+export {create, free, setupEnv, addShift};

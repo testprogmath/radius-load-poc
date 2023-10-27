@@ -6,7 +6,7 @@ import chalk from "chalk";
 
 const emojic = require("emojic");
 
-export async function addShift(hubSlug: string, badgeNumber: string, shiftType: QuinyxShiftType, username: string, password: string, beginDateTime?: string, endDateTime?: string) {
+export async function addShift(hubSlug: string, badgeNumber: string, shiftType: QuinyxShiftType, username: string, password: string, beginDateTime?: string, endDateTime?: string, isCLI = true) {
     const quinyxApi = new QuinyxApi();
 
     console.log("🚀 Starting to create a new shift...");
@@ -39,7 +39,7 @@ export async function addShift(hubSlug: string, badgeNumber: string, shiftType: 
 
         const result = await quinyxApi.createShift(hub.id, beginDate, endDate, shiftType);
 
-        spinnerSuccess("🚀 The shift successfully created!");
+        if (isCLI) spinnerSuccess("🚀 The shift successfully created!");
         const { begin, end } = result;
         console.log(`${emojic.calendar} ${chalk.hex(Colors.LAVENDER_PINK).bold("Shift Details")} ${emojic.calendar}`);
         console.log(`Begin Time: ${chalk.hex(Colors.THULIAN_PINK).bold(begin)}`)
