@@ -6,11 +6,11 @@ import chalk from "chalk";
 
 const emojic = require("emojic");
 
-export async function addShift(hubSlug: string, badgeNumber: string, shiftType: QuinyxShiftType, username: string, password: string, beginDateTime?: string, endDateTime?: string, isCLI = true) {
+export async function addShift(hubSlug: string, badgeNumber: string, shiftType: QuinyxShiftType, username: string, password: string,  isCLI = true, beginDateTime?: string, endDateTime?: string) {
     const quinyxApi = new QuinyxApi();
 
     console.log("🚀 Starting to create a new shift...");
-    updateSpinnerText(chalk.hex(Colors.MEXICAN_PINK_DARK)("Processing.... \n"), true);
+    if (isCLI)  updateSpinnerText(chalk.hex(Colors.MEXICAN_PINK_DARK)("Processing.... \n"), true);
     const hub = hubMap[hubSlug.toLowerCase()];
     if (!hub) {
         console.error("Invalid hub specified! If you're sure that the hub is correct, contact the author to add your hub to the list.");
@@ -54,7 +54,7 @@ export async function addShift(hubSlug: string, badgeNumber: string, shiftType: 
         console.log(chalk.hex(Colors.LAVENDER_PINK)("Last Name: ").padEnd(15) + chalk.hex(Colors.WHITE)((employee.lastName ? employee.lastName : 'N/A')));
         console.log(chalk.hex(Colors.THULIAN_PINK)("Email: ").padEnd(15) + chalk.hex(Colors.WHITE)((employee.email ? employee.email : 'N/A')));
         console.log(chalk.hex(Colors.MEXICAN_PINK_DARK)("Badge Number: ").padEnd(15) + chalk.hex(Colors.WHITE)((employee.badgeNumber ? employee.badgeNumber : 'N/A')));
-
+        return {begin, end};
     } catch (error) {
         console.error("Oops, something went wrong:", error);
         spinnerError("Your request failed. Please find the stacktrace above");
