@@ -4,3 +4,11 @@ export function isUuid(uuid: string): boolean {
     );
     return uuidRegex.test(uuid);
 }
+
+
+export function formatDate(date: Date) {
+    date.setUTCHours(0, 0, 0, 0);
+
+    let newDateString = date.toISOString();
+    return newDateString.replace(/\.\d{3}Z$/, '');
+}

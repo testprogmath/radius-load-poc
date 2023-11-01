@@ -3,6 +3,7 @@ import {Buffer} from "buffer";
 import {getConfigPath} from "../utils";
 import createShiftRequest from './files/create_shift_request.json';
 import {QuinyxGroup, QuinyxShiftType} from "../shared/enums";
+import {formatDate} from "../utils/types";
 
 
 const baseConfig = getConfigPath();
@@ -149,7 +150,8 @@ export class QuinyxApi {
         const endDate = new Date(startDate);
         endDate.setDate(startDate.getDate() + 1);
 
-        const url = `${QUINYX_URL}/v2/schedule/shifts/by-group/${groupId}?endDate=${endDate}&startDate=${startDate}`;
+
+        const url = `${QUINYX_URL}/v2/schedule/shifts/by-group/${groupId}?endDate=${formatDate(endDate)}&startDate=${formatDate(startDate)}`;
         const headers = {
             'cookie': `api_session=${this.cookies['api_session']}; qshard=${this.cookies['qshard']}; SESSIONID=${this.cookies['SESSIONID']}`,
 
@@ -158,11 +160,13 @@ export class QuinyxApi {
         try {
             const response = await axios.get(url, { headers });
             const filteredShifts = response.data.filter((shift: any) => shift.employeeId === this.userId);
+            console.log(filteredShifts);
             return filteredShifts.map((shift: any) => shift.id);
         } catch (error) {
             throw new Error(`Failed to get shifts: ${error}`);
         }
     }
+
     public async deleteShift(shiftId: number, groupId: number): Promise<void> {
         const url = `${QUINYX_URL}/v1/schedule/shifts/${shiftId}/groups/${groupId}?deletePunches=true&ignoreValidationRules=true`;
 

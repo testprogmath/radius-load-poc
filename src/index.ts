@@ -1,7 +1,7 @@
 #! /usr/bin/env node
 
 import {Command} from "commander";
-import {create, free, deliver, setupEnv, addShift} from "./commands";
+import {create, free, deliver, setupEnv, addShift, deleteShifts} from "./commands";
 import {CreateOptions} from "./commands/create";
 import {cancel} from "./commands/cancel";
 import {QuinyxShiftType} from "./shared/enums";
@@ -24,12 +24,15 @@ const setup = new Command("setup");
 
 const addQuinyxShift = new Command("add_shift");
 
+const deleteAllQuinyxShifts = new Command("delete_shifts")
+
 export {create} from "./commands/create";
 export {free} from "./commands/free";
 export {deliver} from "./commands/deliver";
 export {cancel} from "./commands/cancel";
 export {setupEnv} from "./commands/setup";
 export {addShift} from "./commands/addShift"
+export {deleteShifts} from "./commands/deleteShifts"
 
 const isCLI = true;
 createOrder
@@ -75,6 +78,29 @@ setup
         setupEnv().catch(e => console.log(e));
     });
 
+deleteAllQuinyxShifts
+    .option("-u, --username <username>", "Username for Quinyx")
+    .option("-p, --password <password>", "Password for Quinyx")
+    .option("-h, --hub <hubSlug>", "the hub with shifts")
+    .action((commandAndOptions) => {
+        const { username, password, hub, badge } = commandAndOptions;
+
+
+        if (!username || !password) {
+            console.error("Username and password are required!");
+            return;
+        }
+
+        if (!hub) {
+            console.error("Please pass hubSlug with -h option");
+            return;
+        }
+
+        deleteShifts(hub, badge, username, password, true)
+            .catch(e => console.log(e));
+    });
+
+
 addQuinyxShift
     .option("-u, --username <username>", "Username for Quinyx")
     .option("-p, --password <password>", "Password for Quinyx")
@@ -117,7 +143,9 @@ program
     .addCommand(deliverOrder)
     .option("deliver <orderId>", "Deliver the order")
     .option("add_shift", "Add a shift in Quinyx")
-    .addCommand(addQuinyxShift);
+    .addCommand(addQuinyxShift)
+    .option("delete_shifts", "Remove all shifts in the hub for the user in Quinyx")
+    .addCommand(deleteAllQuinyxShifts);
 
 if (require.main === module) {
     program.parse(process.argv);

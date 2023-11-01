@@ -1,0 +1,1382 @@
+consumes:
+  - application/json
+definitions:
+  Address:
+    description: Address represents the details of a shipping and/or billing address
+    properties:
+      address_id:
+        type: string
+        x-go-name: AddressID
+      building_location:
+        type: string
+        x-go-name: BuildingLocation
+      building_type:
+        type: string
+        x-go-name: BuildingType
+      city:
+        type: string
+        x-go-name: City
+      company_name:
+        type: string
+        x-go-name: CompanyName
+      country:
+        type: string
+        x-go-name: Country
+      first_name:
+        type: string
+        x-go-name: FirstName
+      floor_number:
+        type: string
+        x-go-name: FloorNumber
+      house_number:
+        type: string
+        x-go-name: HouseNumber
+      id:
+        type: string
+        x-go-name: ID
+      last_name:
+        type: string
+        x-go-name: LastName
+      name_on_doorbell:
+        type: string
+        x-go-name: NameOnDoorbell
+      phone:
+        type: string
+        x-go-name: Phone
+      postal_code:
+        type: string
+        x-go-name: PostalCode
+      street_address_1:
+        type: string
+        x-go-name: StreetAddress1
+      street_address_2:
+        type: string
+        x-go-name: StreetAddress2
+      tag:
+        type: string
+        x-go-name: Tag
+    type: object
+    x-go-package: github.com/goflink/cart/pkg/models
+  AddressV3:
+    description: AddressV3 represents the details of a shipping and/or billing address
+    properties:
+      addressId:
+        type: string
+        x-go-name: AddressID
+      buildingLocation:
+        type: string
+        x-go-name: BuildingLocation
+      buildingType:
+        type: string
+        x-go-name: BuildingType
+      city:
+        type: string
+        x-go-name: City
+      companyName:
+        type: string
+        x-go-name: CompanyName
+      country:
+        type: string
+        x-go-name: Country
+      firstName:
+        type: string
+        x-go-name: FirstName
+      floorNumber:
+        type: string
+        x-go-name: FloorNumber
+      houseNumber:
+        type: string
+        x-go-name: HouseNumber
+      id:
+        type: string
+        x-go-name: ID
+      lastName:
+        type: string
+        x-go-name: LastName
+      nameOnDoorbell:
+        type: string
+        x-go-name: NameOnDoorbell
+      phone:
+        type: string
+        x-go-name: Phone
+      postalCode:
+        type: string
+        x-go-name: PostalCode
+      streetAddress1:
+        type: string
+        x-go-name: StreetAddress1
+      streetAddress2:
+        type: string
+        x-go-name: StreetAddress2
+      tag:
+        type: string
+        x-go-name: Tag
+    type: object
+    x-go-package: github.com/goflink/cart/pkg/models
+  Amount:
+    description: Amount encompasses amount details
+    properties:
+      currency:
+        description: 'Currency is alpha-3 codes from ISO 3166: https://en.wikipedia.org/wiki/ISO_3166-1_alpha-3'
+        type: string
+        x-go-name: Currency
+      value:
+        description: value is the Amount in the minimum units
+        format: int64
+        type: integer
+        x-go-name: Value
+    type: object
+    x-go-package: github.com/goflink/cart/pkg/models
+  Cart:
+    description: Cart is the Flink representation of a Cart
+    properties:
+      clickAndCollect:
+        type: boolean
+        x-go-name: ClickAndCollect
+      id:
+        type: string
+        x-go-name: ID
+      lines:
+        items:
+          $ref: '#/definitions/LineItem'
+        type: array
+        x-go-name: Lines
+      priceBreakdown:
+        $ref: '#/definitions/PriceBreakdown'
+      voucher:
+        $ref: '#/definitions/Voucher'
+    type: object
+    x-go-package: github.com/goflink/cart/pkg/api
+  CartOrder:
+    description: CartOrder if the cart has been order this is the order that was created
+    properties:
+      id:
+        type: string
+        x-go-name: ID
+      number:
+        type: string
+        x-go-name: Number
+      state:
+        type: string
+        x-go-name: State
+    type: object
+    x-go-package: github.com/goflink/cart/pkg/models
+  CentPrice:
+    description: CentPrice is a price representation using the currency's smallest
+      unit
+    properties:
+      centAmount:
+        format: int64
+        type: integer
+        x-go-name: CentAmount
+      currency:
+        type: string
+        x-go-name: Currency
+    type: object
+    x-go-package: github.com/goflink/cart/pkg/models
+  CheckoutInStoreRequestPayload:
+    description: CheckoutInStoreRequestPayload expected request payload for in-store
+      checkout
+    properties:
+      amount:
+        $ref: '#/definitions/Amount'
+    type: object
+    x-go-package: github.com/goflink/cart/pkg/models
+  CheckoutInStoreResponse:
+    description: CheckoutInStoreResponse response for successful in-store checkout
+      request
+    properties:
+      transaction_id:
+        type: string
+        x-go-name: TransactionID
+    type: object
+    x-go-package: github.com/goflink/cart/pkg/models
+  CheckoutRequestPayload:
+    description: CheckoutRequestPayload expected request payload for cart checkout
+    properties:
+      amount:
+        description: amount to be paid
+        format: double
+        minimum: 1
+        type: number
+        x-go-name: Amount
+      token:
+        description: payment token retrieved from payment gateway
+        type: string
+        x-go-name: Token
+    required:
+      - token
+      - amount
+    type: object
+    x-go-package: github.com/goflink/cart/pkg/models
+  CheckoutResponseV1:
+    description: OrderCreateResponse is the response the client receives upon checkingout
+      the cart
+    properties:
+      confirmation_data:
+        description: ConfirmationData is an Adyen specific field
+        type: string
+        x-go-name: ConfirmationData
+      confirmation_needed:
+        description: ConfirmationNeeded is an Adyen specific field
+        type: boolean
+        x-go-name: ConfirmationNeeded
+      id:
+        type: string
+        x-go-name: ID
+      number:
+        type: string
+        x-go-name: Number
+      token:
+        type: string
+        x-go-name: Token
+    type: object
+    x-go-name: OrderCreateResponse
+    x-go-package: github.com/goflink/cart/pkg/models
+  CheckoutResponseV3:
+    description: OrderCreateResponseV3 is the response the client receives upon checking
+      out the cart
+    properties:
+      confirmationData:
+        description: ConfirmationData is an Adyen specific field
+        type: string
+        x-go-name: ConfirmationData
+      confirmationNeeded:
+        description: ConfirmationNeeded is an Adyen specific field
+        type: boolean
+        x-go-name: ConfirmationNeeded
+      id:
+        type: string
+        x-go-name: ID
+      number:
+        type: string
+        x-go-name: Number
+      token:
+        type: string
+        x-go-name: Token
+    type: object
+    x-go-name: OrderCreateResponseV3
+    x-go-package: github.com/goflink/cart/pkg/models
+  Coordinates:
+    properties:
+      latitude:
+        format: double
+        type: number
+        x-go-name: Latitude
+      longitude:
+        format: double
+        type: number
+        x-go-name: Longitude
+    title: Coordinates ...
+    type: object
+    x-go-package: github.com/goflink/cart/pkg/models
+  CreateCartResponseV1:
+    description: CartCreateResponse is the response the clients get upon creating
+      a cart
+    properties:
+      cart:
+        $ref: '#/definitions/GetCartResponseV1'
+      id:
+        type: string
+        x-go-name: ID
+      payment_gateway:
+        $ref: '#/definitions/PaymentGateway'
+      payment_gateways:
+        items:
+          $ref: '#/definitions/PaymentGateway'
+        type: array
+        x-go-name: PaymentGateways
+    type: object
+    x-go-name: CartCreateResponse
+    x-go-package: github.com/goflink/cart/pkg/models
+  Customer:
+    description: Customer is the Flink representation of a Customer
+    properties:
+      emailAddress:
+        type: string
+        x-go-name: EmailAddress
+      firstName:
+        type: string
+        x-go-name: FirstName
+      id:
+        type: string
+        x-go-name: ID
+      lastName:
+        type: string
+        x-go-name: LastName
+      phoneNumber:
+        type: string
+        x-go-name: PhoneNumber
+    type: object
+    x-go-package: github.com/goflink/cart/pkg/api
+  ErrorResponse:
+    description: ErrorResponse to marshal as jsJSON
+    properties:
+      error:
+        $ref: '#/definitions/ErrorResponseDetail'
+      order:
+        $ref: '#/definitions/ErrorResponseOrder'
+    type: object
+    x-go-package: github.com/goflink/cart/pkg/api
+  ErrorResponseDetail:
+    description: ErrorResponseDetail inner code and message
+    properties:
+      code:
+        type: string
+        x-go-name: Code
+      message:
+        type: string
+        x-go-name: Message
+    type: object
+    x-go-package: github.com/goflink/cart/pkg/api
+  ErrorResponseOrder:
+    description: ErrorResponseOrder optional if appropriate
+    properties:
+      id:
+        type: string
+        x-go-name: ID
+      number:
+        type: string
+        x-go-name: Number
+    type: object
+    x-go-package: github.com/goflink/cart/pkg/api
+  Fee:
+    description: Fee represents a fee object
+    properties:
+      name:
+        type: string
+        x-go-name: Name
+      price:
+        $ref: '#/definitions/CentPrice'
+      type:
+        type: string
+        x-go-name: FeeType
+    type: object
+    x-go-package: github.com/goflink/cart/pkg/models
+  GetCartResponse:
+    description: GetCartResponse is the JSON model returned when user gets a cart
+    properties:
+      cart:
+        $ref: '#/definitions/Cart'
+      customer:
+        $ref: '#/definitions/Customer'
+      order:
+        $ref: '#/definitions/Order'
+    type: object
+    x-go-package: github.com/goflink/cart/pkg/api
+  GetCartResponseV1:
+    description: Cart is the full representation of a cart domain object (maps checkout
+      object on the ecom side)
+    properties:
+      billing_address:
+        $ref: '#/definitions/Address'
+      click_and_collect:
+        type: boolean
+        x-go-name: ClickAndCollect
+      delivery_coordinates:
+        $ref: '#/definitions/Coordinates'
+      delivery_tier_id:
+        type: string
+        x-go-name: DeliveryTierID
+      discount:
+        $ref: '#/definitions/Price'
+      email:
+        type: string
+        x-go-name: Email
+      hub_slug:
+        description: HubSlug is the Hub that the cart is generated for. It should
+          not be returned to clients.
+        type: string
+        x-go-name: HubSlug
+      id:
+        type: string
+        x-go-name: ID
+      lines:
+        items:
+          $ref: '#/definitions/Line'
+        type: array
+        x-go-name: Lines
+      order:
+        $ref: '#/definitions/CartOrder'
+      payment_gateway:
+        $ref: '#/definitions/PaymentGateway'
+      recycling_deposit:
+        $ref: '#/definitions/Price'
+      rider_tip:
+        $ref: '#/definitions/Price'
+      shipping_address:
+        $ref: '#/definitions/Address'
+      shipping_method_id:
+        type: string
+        x-go-name: ShippingMethodID
+      shipping_price:
+        $ref: '#/definitions/Price'
+      storage_fee:
+        $ref: '#/definitions/Price'
+      sub_total_price:
+        $ref: '#/definitions/Price'
+      timeslot_id:
+        type: string
+        x-go-name: TimeslotID
+      total_price:
+        $ref: '#/definitions/Price'
+      version:
+        description: Version is CT specific history-like versioning, that will be
+          implemented by the mobile later
+        format: int32
+        type: integer
+        x-go-name: Version
+      voucher_code:
+        type: string
+        x-go-name: VoucherCode
+    type: object
+    x-go-name: Cart
+    x-go-package: github.com/goflink/cart/pkg/models
+  GetCartResponseV3:
+    description: |-
+      It can be either a response at the root level or a nested field (in CartCreateResponse).
+      Changes from v1 (v2 is skipped/deprecated):
+      all money values are returned as integers (`cent_amount`)
+      fees are returned in a list
+      deposit and discount are only returned if populated (value != 0)
+    properties:
+      billingAddress:
+        $ref: '#/definitions/AddressV3'
+      clickAndCollect:
+        type: boolean
+        x-go-name: ClickAndCollect
+      deliveryCoordinates:
+        $ref: '#/definitions/Coordinates'
+      deliveryTierID:
+        type: string
+        x-go-name: DeliveryTierID
+      discount:
+        $ref: '#/definitions/CentPrice'
+      email:
+        type: string
+        x-go-name: Email
+      fees:
+        items:
+          $ref: '#/definitions/Fee'
+        type: array
+        x-go-name: Fees
+      hubSlug:
+        type: string
+        x-go-name: HubSlug
+      id:
+        type: string
+        x-go-name: ID
+      lines:
+        items:
+          $ref: '#/definitions/LineV3'
+        type: array
+        x-go-name: Lines
+      order:
+        $ref: '#/definitions/CartOrder'
+      recyclingDeposit:
+        $ref: '#/definitions/CentPrice'
+      riderTip:
+        $ref: '#/definitions/CentPrice'
+      shippingAddress:
+        $ref: '#/definitions/AddressV3'
+      shippingMethodID:
+        type: string
+        x-go-name: ShippingMethodID
+      subTotalPrice:
+        $ref: '#/definitions/CentPrice'
+      timeslotID:
+        type: string
+        x-go-name: TimeslotID
+      totalPrice:
+        $ref: '#/definitions/CentPrice'
+      version:
+        format: int64
+        type: integer
+        x-go-name: Version
+      voucherCode:
+        type: string
+        x-go-name: VoucherCode
+    title: CartResponseV3 represents the v3 output struct of a cart.
+    type: object
+    x-go-name: CartResponseV3
+    x-go-package: github.com/goflink/cart/pkg/models
+  GetPaymentMethodsResponse:
+    description: GetPaymentMethodsResponse is the model for payment-methods allowed
+      to the customer
+    properties:
+      paymentMethods:
+        $ref: '#/definitions/paymentMethodsConfig'
+      preferredMethods:
+        items:
+          $ref: '#/definitions/preferredMethod'
+        type: array
+        x-go-name: PreferredMethods
+    type: object
+    x-go-package: github.com/goflink/cart/pkg/api
+  GetRiderTipsResponse:
+    description: GetRiderTipsResponse is the model for country-level suggested rider
+      tips
+    properties:
+      riderTips:
+        items:
+          $ref: '#/definitions/RiderTipResponse'
+        type: array
+        x-go-name: RiderTips
+    type: object
+    x-go-package: github.com/goflink/cart/pkg/api
+  Line:
+    description: Line represents a product once added to the cart and/or order
+    properties:
+      id:
+        type: string
+        x-go-name: ID
+      product_name:
+        type: string
+        x-go-name: ProductName
+      product_sku:
+        type: string
+        x-go-name: ProductSKU
+      quantity:
+        format: int64
+        type: integer
+        x-go-name: Quantity
+      thumbnail:
+        type: string
+        x-go-name: Thumbnail
+      total_price:
+        $ref: '#/definitions/Price'
+      unit_price:
+        $ref: '#/definitions/Price'
+      variant_id:
+        type: string
+        x-go-name: VariantID
+    type: object
+    x-go-package: github.com/goflink/cart/pkg/models
+  LineItem:
+    description: LineItem is the Flink representation of a LineItem in a Cart
+    properties:
+      quantity:
+        format: int64
+        type: integer
+        x-go-name: Quantity
+      sku:
+        type: string
+        x-go-name: SKU
+    type: object
+    x-go-package: github.com/goflink/cart/pkg/api
+  LineV3:
+    description: LineV3 represents a product once added to the cart and/or order
+    properties:
+      id:
+        type: string
+        x-go-name: ID
+      productName:
+        type: string
+        x-go-name: ProductName
+      productSku:
+        type: string
+        x-go-name: ProductSKU
+      quantity:
+        format: int64
+        type: integer
+        x-go-name: Quantity
+      thumbnail:
+        type: string
+        x-go-name: Thumbnail
+      totalPrice:
+        $ref: '#/definitions/Price'
+      unitPrice:
+        $ref: '#/definitions/Price'
+      variantId:
+        type: string
+        x-go-name: VariantID
+    type: object
+    x-go-package: github.com/goflink/cart/pkg/models
+  Money:
+    description: Money is the Flink representation of Money
+    properties:
+      centAmount:
+        description: CentAmount is the amount in the minimum units
+        format: int64
+        type: integer
+        x-go-name: CentAmount
+      currency:
+        description: 'Currency is alpha-3 codes from ISO 3166: https://en.wikipedia.org/wiki/ISO_3166-1_alpha-3'
+        type: string
+        x-go-name: Currency
+    type: object
+    x-go-package: github.com/goflink/cart/pkg/api
+  Order:
+    description: Order is the Flink representation of a Order
+    properties:
+      id:
+        type: string
+        x-go-name: ID
+    type: object
+    x-go-package: github.com/goflink/cart/pkg/api
+  PaymentGateway:
+    description: PaymentGateway is a representation for the payment gateway that we
+      support. Communicates payment tokens that the clients use for the tokenisation
+      process
+    properties:
+      client_api_key:
+        description: ClientAPIKey is only provided if the gateway is Adyen
+        type: string
+        x-go-name: ClientAPIKey
+      config:
+        description: Config is only provided if the gateway is Adyen
+        type: string
+        x-go-name: Config
+      name:
+        description: Name is the name of the payment provider.
+        example: Adyen
+        type: string
+        x-go-name: Name
+    type: object
+    x-go-package: github.com/goflink/cart/pkg/models
+  Price:
+    description: Price is the price representation
+    properties:
+      amount:
+        format: double
+        type: number
+        x-go-name: Amount
+      currency:
+        type: string
+        x-go-name: Currency
+    type: object
+    x-go-package: github.com/goflink/cart/pkg/models
+  PriceBreakdown:
+    description: PriceBreakdown is the Flink representation of a PriceBreakdown for
+      a Cart
+    properties:
+      discount:
+        $ref: '#/definitions/Money'
+      recyclingDeposit:
+        $ref: '#/definitions/Money'
+      riderTip:
+        $ref: '#/definitions/Money'
+      shipping:
+        $ref: '#/definitions/Money'
+      storageFee:
+        $ref: '#/definitions/Money'
+      subTotal:
+        $ref: '#/definitions/Money'
+      total:
+        $ref: '#/definitions/Money'
+    type: object
+    x-go-package: github.com/goflink/cart/pkg/api
+  RiderTipResponse:
+    description: RiderTipResponse represents a rider tip
+    properties:
+      emoji:
+        description: emoji to be rendered on the client
+        type: string
+        x-go-name: Emoji
+      price:
+        $ref: '#/definitions/Money'
+    required:
+      - price
+    type: object
+    x-go-package: github.com/goflink/cart/pkg/api
+  SetRiderTipResponseV2:
+    description: SetRiderTipResponseV2 is the JSON model returned when a tip is added
+      on a cart
+    properties:
+      cart:
+        $ref: '#/definitions/Cart'
+    type: object
+    x-go-package: github.com/goflink/cart/pkg/api
+  SetRiderTipResponseV3:
+    description: SetRiderTipResponseV3 is the JSON model returned when a tip is added
+      on a cart
+    properties:
+      cart:
+        $ref: '#/definitions/GetCartResponseV3'
+    type: object
+    x-go-package: github.com/goflink/cart/pkg/api
+  SetShippingMethodResponse:
+    description: SetShippingMethodResponse is the JSON response sent when successfully
+      completing the request
+    properties:
+      cart:
+        $ref: '#/definitions/Cart'
+    type: object
+    x-go-package: github.com/goflink/cart/pkg/api
+  SetShippingMethodResponseV3:
+    description: SetShippingMethodResponseV3 is the JSON response sent when successfully
+      completing the request
+    properties:
+      cart:
+        $ref: '#/definitions/GetCartResponseV3'
+    type: object
+    x-go-package: github.com/goflink/cart/pkg/models
+  ShippingMethod:
+    properties:
+      clickAndCollect:
+        type: boolean
+        x-go-name: ClickAndCollect
+    title: ShippingMethod ...
+    type: object
+    x-go-package: github.com/goflink/cart/pkg/api
+  ShippingTier:
+    description: ShippingTier represents a shipping method tier
+    properties:
+      deliveryPrice:
+        $ref: '#/definitions/Money'
+      minimumOrderValue:
+        $ref: '#/definitions/Money'
+    required:
+      - minimumOrderValue
+      - deliveryPrice
+    type: object
+    x-go-package: github.com/goflink/cart/pkg/api
+  ShippingTierV3:
+    description: ShippingTierV3 represents a shipping method tier
+    properties:
+      deliveryPrice:
+        $ref: '#/definitions/CentPrice'
+      minimumOrderValue:
+        $ref: '#/definitions/CentPrice'
+    required:
+      - minimumOrderValue
+      - deliveryPrice
+    type: object
+    x-go-package: github.com/goflink/cart/pkg/models
+  ShippingTiers:
+    description: ShippingTiers is the model representing the Shipping Rate Tiers
+    properties:
+      deliveryTiers:
+        items:
+          $ref: '#/definitions/ShippingTier'
+        type: array
+        x-go-name: DeliveryTiers
+    type: object
+    x-go-package: github.com/goflink/cart/pkg/api
+  ShippingTiersV3:
+    description: ShippingTiersV3 is the model representing shipping rate tiers for
+      the V3 endpoint
+    properties:
+      deliveryTierId:
+        type: string
+        x-go-name: DeliveryTierID
+      deliveryTiers:
+        items:
+          $ref: '#/definitions/ShippingTierV3'
+        type: array
+        x-go-name: DeliveryTiers
+      shippingMethodId:
+        type: string
+        x-go-name: ShippingMethodID
+    type: object
+    x-go-package: github.com/goflink/cart/pkg/models
+  V1ErrorResponse:
+    description: V1ErrorResponse from an http request to augment the HTTP status code
+    properties:
+      code:
+        description: Code specific error code
+        type: string
+        x-go-name: Code
+      field:
+        description: |-
+          The error message
+          in:body
+          Field that is in error
+        type: string
+        x-go-name: Field
+      message:
+        description: Message human-readable message
+        type: string
+        x-go-name: Message
+    type: object
+    x-go-package: github.com/goflink/cart/pkg/api
+  Voucher:
+    description: Voucher is the Flink representation of a Voucher for a Cart
+    properties:
+      code:
+        type: string
+        x-go-name: Code
+    type: object
+    x-go-package: github.com/goflink/cart/pkg/api
+  paymentMethodsConfig:
+    properties:
+      apiKey:
+        type: string
+        x-go-name: ClientAPIKey
+      config:
+        type: string
+        x-go-name: Config
+    type: object
+    x-go-package: github.com/goflink/cart/pkg/api
+  preferredMethod:
+    properties:
+      brand:
+        type: string
+        x-go-name: Brand
+      enforceSave:
+        type: boolean
+        x-go-name: EnforceSave
+      type:
+        type: string
+        x-go-name: Type
+    type: object
+    x-go-package: github.com/goflink/cart/pkg/api
+  riderTip:
+    description: riderTip is a http abstract representation of commercetools.TypedMoney
+      interface
+    properties:
+      centAmount:
+        description: CentAmount is the amount in the minimum units
+        format: int64
+        type: integer
+        x-go-name: CentAmount
+      currency:
+        description: 'Currency is alpha-3 codes from ISO 3166: https://en.wikipedia.org/wiki/ISO_3166-1_alpha-3'
+        type: string
+        x-go-name: Currency
+    type: object
+    x-go-package: github.com/goflink/cart/pkg/api
+info:
+  description: the purpose of the cart service is to offer an API to create, modify,
+    and pay for carts.
+  title: Cart API.
+  version: 0.0.1
+paths:
+  /v1/cart:
+    post:
+      deprecated: true
+      description: Creates a cart
+      operationId: CreateCartV1
+      responses:
+        "200":
+          description: CreateCartResponseV1
+          schema:
+            $ref: '#/definitions/CreateCartResponseV1'
+      tags:
+        - v1-cart
+  /v1/cart/{id}:
+    get:
+      deprecated: true
+      description: Retrieves all information related to cart
+      operationId: GetCartV1
+      parameters:
+        - description: ID of a cart
+          in: path
+          name: id
+          required: true
+          type: string
+          x-go-name: ID
+      responses:
+        "200":
+          description: GetCartResponseV1
+          schema:
+            $ref: '#/definitions/GetCartResponseV1'
+      tags:
+        - v1-cart
+    put:
+      deprecated: true
+      description: Updates cart with mutable information
+      operationId: UpdateCartV1
+      parameters:
+        - description: ID is the cart ID
+          in: path
+          name: id
+          required: true
+          type: string
+          x-go-name: ID
+      responses:
+        "200":
+          description: GetCartResponse
+          schema:
+            $ref: '#/definitions/GetCartResponse'
+      tags:
+        - v1-cart
+  /v1/cart/{id}/checkout:
+    post:
+      description: Attach a payment to the cart and fulfills the cart - returns an
+        order
+      operationId: CheckoutV1
+      parameters:
+        - description: ID of a cart
+          in: path
+          name: id
+          required: true
+          type: string
+          x-go-name: ID
+      responses:
+        "200":
+          description: CheckoutResponseV1
+          schema:
+            $ref: '#/definitions/CheckoutResponseV1'
+        "406":
+          description: V1ErrorResponse
+          schema:
+            $ref: '#/definitions/V1ErrorResponse'
+      tags:
+        - v1-payment
+  /v1/cart/{id}/checkout-in-store:
+    post:
+      description: Performs the checkout for the in-store-payment flow
+      operationId: CheckoutInStoreRequest
+      parameters:
+        - in: body
+          name: Body
+          schema:
+            $ref: '#/definitions/CheckoutInStoreRequestPayload'
+        - description: ID of a cart
+          in: path
+          name: id
+          required: true
+          type: string
+          x-go-name: ID
+      responses:
+        "200":
+          description: CheckoutInStoreResponse
+          schema:
+            $ref: '#/definitions/CheckoutInStoreResponse'
+        "400":
+          description: ErrorResponseDetail
+          schema:
+            $ref: '#/definitions/ErrorResponseDetail'
+        "422":
+          description: ErrorResponseDetail
+          schema:
+            $ref: '#/definitions/ErrorResponseDetail'
+        "500":
+          description: ErrorResponseDetail
+          schema:
+            $ref: '#/definitions/ErrorResponseDetail'
+      tags:
+        - v1-in-store-payment
+  /v1/cart/{id}/checkout/details:
+    post:
+      description: Attach a payment to the cart and fulfills the cart - returns an
+        order
+      operationId: CheckoutDetailsV1
+      parameters:
+        - description: ID of a cart
+          in: path
+          name: id
+          required: true
+          type: string
+          x-go-name: ID
+      responses:
+        "200":
+          description: CheckoutResponseV1
+          schema:
+            $ref: '#/definitions/CheckoutResponseV1'
+        "406":
+          description: V1ErrorResponse
+          schema:
+            $ref: '#/definitions/V1ErrorResponse'
+      tags:
+        - v1-payment
+  /v2/cart/{id}:
+    get:
+      description: Retrieves all information related to cart
+      operationId: GetCart
+      parameters:
+        - description: ID of a cart
+          in: path
+          name: id
+          required: true
+          type: string
+          x-go-name: ID
+      responses:
+        "200":
+          description: GetCartResponse
+          schema:
+            $ref: '#/definitions/GetCartResponse'
+      tags:
+        - v2-cart
+  /v2/cart/{id}/payment-methods:
+    post:
+      description: Retrieves the payment methods for the cart
+      operationId: GetPaymentMethodsV2
+      parameters:
+        - description: Id of a cart
+          in: path
+          name: id
+          required: true
+          type: string
+          x-go-name: CartID
+      responses:
+        "200":
+          description: GetPaymentMethodsResponse
+          schema:
+            $ref: '#/definitions/GetPaymentMethodsResponse'
+      tags:
+        - v2-payment
+  /v2/cart/{id}/rider-tips:
+    put:
+      operationId: SetRiderTipV2
+      parameters:
+        - in: body
+          name: riderTip
+          schema:
+            $ref: '#/definitions/riderTip'
+          x-go-name: RiderTip
+        - description: ID of a cart
+          in: path
+          name: id
+          required: true
+          type: string
+          x-go-name: CartID
+      responses:
+        "200":
+          description: SetRiderTipResponseV2
+          schema:
+            $ref: '#/definitions/SetRiderTipResponseV2'
+        "400":
+          description: ErrorResponse
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "404":
+          description: ErrorResponse
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      tags:
+        - v2-cart
+  /v2/cart/{id}/shipping-method:
+    put:
+      operationId: SetShippingMethodV2
+      parameters:
+        - description: ID of the cart
+          in: path
+          name: id
+          required: true
+          type: string
+          x-go-name: CartID
+        - description: |-
+            Whether the order is for delivery or collection.
+            By default all orders are for delivery.
+          in: body
+          name: ShippingMethod
+          schema:
+            $ref: '#/definitions/ShippingMethod'
+      responses:
+        "200":
+          description: SetShippingMethodResponse
+          schema:
+            $ref: '#/definitions/SetShippingMethodResponse'
+        "400":
+          description: ErrorResponse
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "404":
+          description: ErrorResponse
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: ErrorResponse
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "503":
+          description: ErrorResponse
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      tags:
+        - v2-cart
+  /v2/cart/delivery-tiers/{countryCode}:
+    get:
+      description: Retrieves the shipping methods for the country code
+      operationId: GetShippingTiersV2
+      parameters:
+        - in: path
+          name: countryCode
+          required: true
+          type: string
+          x-go-name: CountryCode
+      responses:
+        "200":
+          description: ShippingTiers
+          schema:
+            $ref: '#/definitions/ShippingTiers'
+      tags:
+        - v2-cart
+  /v2/cart/rider-tips/{countryCode}:
+    get:
+      description: Retrieves the suggested rider tips for the country code
+      operationId: GetRiderTipsV2
+      parameters:
+        - in: path
+          name: countryCode
+          required: true
+          type: string
+          x-go-name: Country
+      responses:
+        "200":
+          description: GetRiderTipsResponse
+          schema:
+            $ref: '#/definitions/GetRiderTipsResponse'
+      tags:
+        - v2-cart
+  /v3/cart:
+    post:
+      description: Creates a cart
+      operationId: CreateCartV3
+      responses:
+        "200":
+          description: GetCartResponseV3
+          schema:
+            $ref: '#/definitions/GetCartResponseV3'
+        "400":
+          description: V1ErrorResponse
+          schema:
+            $ref: '#/definitions/V1ErrorResponse'
+        "500":
+          description: V1ErrorResponse
+          schema:
+            $ref: '#/definitions/V1ErrorResponse'
+      tags:
+        - v3-cart
+  /v3/cart/{id}:
+    get:
+      description: Retrieves all information related to cart
+      operationId: GetCartV3
+      parameters:
+        - description: ID of a cart
+          in: path
+          name: id
+          required: true
+          type: string
+          x-go-name: ID
+      responses:
+        "200":
+          description: GetCartResponseV3
+          schema:
+            $ref: '#/definitions/GetCartResponseV3'
+        "400":
+          description: V1ErrorResponse
+          schema:
+            $ref: '#/definitions/V1ErrorResponse'
+        "503":
+          description: V1ErrorResponse
+          schema:
+            $ref: '#/definitions/V1ErrorResponse'
+      tags:
+        - v3-cart
+    put:
+      description: Updates cart with mutable information
+      operationId: UpdateCartV3
+      parameters:
+        - description: ID is the cart ID
+          in: path
+          name: id
+          required: true
+          type: string
+          x-go-name: ID
+      responses:
+        "200":
+          description: GetCartResponseV3
+          schema:
+            $ref: '#/definitions/GetCartResponseV3'
+        "400":
+          description: V1ErrorResponse
+          schema:
+            $ref: '#/definitions/V1ErrorResponse'
+        "409":
+          description: ErrorResponse
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: ErrorResponse
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      tags:
+        - v3-cart
+  /v3/cart/{id}/checkout:
+    post:
+      description: Attach a payment to the cart and fulfills the cart - returns an
+        order
+      operationId: CheckoutV3
+      parameters:
+        - in: body
+          name: Body
+          schema:
+            $ref: '#/definitions/CheckoutRequestPayload'
+        - description: ID of a cart
+          in: path
+          name: id
+          required: true
+          type: string
+          x-go-name: ID
+      responses:
+        "200":
+          description: CheckoutResponseV3
+          schema:
+            $ref: '#/definitions/CheckoutResponseV3'
+        "400":
+          description: V1ErrorResponse
+          schema:
+            $ref: '#/definitions/V1ErrorResponse'
+        "406":
+          description: V1ErrorResponse
+          schema:
+            $ref: '#/definitions/V1ErrorResponse'
+        "409":
+          description: V1ErrorResponse
+          schema:
+            $ref: '#/definitions/V1ErrorResponse'
+        "422":
+          description: V1ErrorResponse
+          schema:
+            $ref: '#/definitions/V1ErrorResponse'
+        "500":
+          description: V1ErrorResponse
+          schema:
+            $ref: '#/definitions/V1ErrorResponse'
+      tags:
+        - v3-payment
+  /v3/cart/{id}/checkout/details:
+    post:
+      description: Attach a payment to the cart and fulfills the cart - returns an
+        order
+      operationId: CheckoutDetailsV3
+      parameters:
+        - description: ID of a cart
+          in: path
+          name: id
+          required: true
+          type: string
+          x-go-name: ID
+      responses:
+        "200":
+          description: CheckoutResponseV3
+          schema:
+            $ref: '#/definitions/CheckoutResponseV3'
+        "406":
+          description: V1ErrorResponse
+          schema:
+            $ref: '#/definitions/V1ErrorResponse'
+      tags:
+        - v3-payment
+  /v3/cart/{id}/payment-methods:
+    post:
+      description: Retrieves the payment methods for the cart
+      operationId: GetPaymentMethodsV3
+      parameters:
+        - description: Id of a cart
+          in: path
+          name: id
+          required: true
+          type: string
+          x-go-name: CartID
+      responses:
+        "200":
+          description: GetPaymentMethodsResponse
+          schema:
+            $ref: '#/definitions/GetPaymentMethodsResponse'
+      tags:
+        - v3-payment
+  /v3/cart/{id}/rider-tips:
+    put:
+      operationId: SetRiderTipV3
+      parameters:
+        - in: body
+          name: riderTip
+          schema:
+            $ref: '#/definitions/riderTip'
+          x-go-name: RiderTip
+        - description: ID of a cart
+          in: path
+          name: id
+          required: true
+          type: string
+          x-go-name: CartID
+      responses:
+        "200":
+          description: SetRiderTipResponseV3
+          schema:
+            $ref: '#/definitions/SetRiderTipResponseV3'
+        "400":
+          description: ErrorResponse
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "404":
+          description: ErrorResponse
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: ErrorResponse
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      tags:
+        - v3-cart
+  /v3/cart/{id}/shipping-method:
+    put:
+      operationId: SetShippingMethodV3
+      parameters:
+        - description: ID of the cart
+          in: path
+          name: id
+          required: true
+          type: string
+          x-go-name: CartID
+        - description: |-
+            Whether the order is for delivery or collection.
+            By default all orders are for delivery.
+          in: body
+          name: ShippingMethod
+          schema:
+            $ref: '#/definitions/ShippingMethod'
+      responses:
+        "200":
+          description: SetShippingMethodResponseV3
+          schema:
+            $ref: '#/definitions/SetShippingMethodResponseV3'
+        "400":
+          description: ErrorResponse
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "404":
+          description: ErrorResponse
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "500":
+          description: ErrorResponse
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        "503":
+          description: ErrorResponse
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      tags:
+        - v3-cart
+  /v3/cart/delivery-tiers/{countryCode}:
+    get:
+      description: Retrieves the shipping methods for the country code
+      operationId: GetShippingTiersV3
+      parameters:
+        - in: path
+          name: countryCode
+          required: true
+          type: string
+          x-go-name: CountryCode
+      responses:
+        "200":
+          description: ShippingTiersV3
+          schema:
+            $ref: '#/definitions/ShippingTiersV3'
+      tags:
+        - v3-cart
+  /v3/cart/rider-tips/{countryCode}:
+    get:
+      description: Retrieves the suggested rider tips for the country code
+      operationId: GetRiderTipsV3
+      parameters:
+        - in: path
+          name: countryCode
+          required: true
+          type: string
+          x-go-name: Country
+      responses:
+        "200":
+          description: GetRiderTipsResponse
+          schema:
+            $ref: '#/definitions/GetRiderTipsResponse'
+      tags:
+        - v3-cart
+produces:
+  - application/json
+swagger: "2.0"
