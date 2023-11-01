@@ -43,6 +43,6 @@ export async function deleteShifts(hubSlug: string, badgeNumber: string, usernam
 
        } catch (error) {
         console.error("Oops, something went wrong:", error);
-        spinnerError("Your request failed. Please find the stacktrace above");
+        if (isCLI) spinnerError("Your request failed. Please find the stacktrace above");
     }
 }
