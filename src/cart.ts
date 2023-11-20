@@ -4,12 +4,11 @@ import {spinnerError, spinnerSuccess, stopSpinner} from "./spinner";
 import {getConfigPath, wait} from "./utils";
 import chalk from "chalk";
 import {Colors} from "./shared/enums";
-import {getProducts} from "./api/catalog-api";
+import {getProductsForTheHub, Product} from "./api/catalog-api";
 import {Hubs} from "./shared/hubs";
 import {authorizeInStore} from "./api/website-api";
 import {AxiosResponse} from "axios";
 import {CartLine, CartRequest} from "./api/objects/cart-request";
-import {Product} from "@flink/catalog";
 import {printErrorAndStopSpinner} from "./utils/spinner";
 import {parseProductsArray} from "./utils/cli-arguments";
 
@@ -215,7 +214,7 @@ export async function addProductLines(cartRequest: CartRequest, hubSlug: string,
     try {
         if (!productsArray) {
             const numberOfProducts = DEFAULT_NUMBER_OF_PRODUCTS;
-            const products = await getProducts(locale, hubSlug);
+            const products: Product[] = await getProductsForTheHub(locale, hubSlug);
             if (numberOfProducts > 0) {
                 addDefaultProductLines(cartRequest, products, numberOfProducts);
             } else {

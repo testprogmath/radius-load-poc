@@ -5,7 +5,14 @@ const axios = require('axios');
 const config = getConfigPath();
 const CONSUMER_URL = config.get("consumerApiUrl")
 
-export async function getProducts(locale: string, hubSlug: string) {
+
+export interface Product {
+    sku: string;
+    slug: string;
+    variant_id: string;
+}
+
+export async function getProductsForTheHub(locale: string, hubSlug: string): Promise<Product[]> {
     const headers = {
         'locale': locale,
         'hub-slug': hubSlug
