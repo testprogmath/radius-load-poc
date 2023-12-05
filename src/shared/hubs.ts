@@ -3,10 +3,10 @@ interface Hub {
     longitude: number;
 }
 
-type Hubs = {
+type HubsType = {
     [key: string]: Hub;
 };
-export const Hubs: Hubs = {
+export const Hubs: HubsType = {
     "nl_ams_diem": {
         latitude: 52.320093,
         longitude: 4.957252

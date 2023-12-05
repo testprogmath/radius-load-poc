@@ -4,22 +4,17 @@ import {spinnerError, spinnerSuccess, stopSpinner} from "./spinner";
 import {getConfigPath, wait} from "./utils";
 import chalk from "chalk";
 import {Colors} from "./shared/enums";
-import {getProductsForTheHub, Product} from "./api/catalog-api";
 import {Hubs} from "./shared/hubs";
 import {authorizeInStore} from "./api/website-api";
 import {AxiosResponse} from "axios";
 import {CartLine, CartRequest} from "./api/objects/cart-request";
 import {printErrorAndStopSpinner} from "./utils/spinner";
-import {parseProductsArray} from "./utils/cli-arguments";
 
 require('dotenv').config();
 
 const config = getConfigPath();
 const inStoreLogin = config.get('instoreLogin');
 const password = config.get('genericPassword');
-
-// a variable for the future option of adding a different number of products
-const DEFAULT_NUMBER_OF_PRODUCTS = 2;
 
 const cartToken = {
     "amount": {
@@ -60,7 +55,7 @@ export async function createCart(customerDomainApi: CartApi<any>, cartRequest: C
         (e) {
         printErrorAndStopSpinner(e);
     }
-    return response?.data || null;
+    return response?.data ?? null;
 }
 
 export async function addShippingMethod(customerDomainApi: CartApi<any>, cartId: string, clickAndCollect: boolean = false) {
@@ -209,20 +204,13 @@ async function waitForOrderAssignment(customerDomainApi: CartApi<any>, cartId: s
 }
 
 
-export async function addProductLines(cartRequest: CartRequest, hubSlug: string, locale: string, productsArray?: string) {
+export async function addProductLines(cartRequest: CartRequest, hubSlug: string, locale: string, products: Record<string, number>) {
     console.log(`${emojic.grapes} Setting products available in the hub...\n`);
     try {
-        if (!productsArray) {
-            const numberOfProducts = DEFAULT_NUMBER_OF_PRODUCTS;
-            const products: Product[] = await getProductsForTheHub(locale, hubSlug);
-            if (numberOfProducts > 0) {
-                addDefaultProductLines(cartRequest, products, numberOfProducts);
-            } else {
-                console.log("Please enter a positive number of products!");
-            }
-        } else {
-            const products = parseProductsArray(productsArray);
-            console.log(products);
+        if (Array.isArray(products))
+                addDefaultProductLines(cartRequest, products);
+        else {
+
             addCustomProductLines(cartRequest, products);
         }
 
@@ -233,10 +221,11 @@ export async function addProductLines(cartRequest: CartRequest, hubSlug: string,
     return cartRequest;
 }
 
-function addDefaultProductLines(cartRequest: CartRequest, products: Product[], numberOfProducts: number) {
-    for (let i = 0; i < numberOfProducts; i++) {
-        const lineItem = new CartLine(products[i].sku, products[i].sku, 2);
+function addDefaultProductLines(cartRequest: CartRequest, products: Record<string, number>) {
+    for (const [sku, number] of Object.entries(products)) {
+        const lineItem = new CartLine(sku, sku, number as number);
         cartRequest.lines.push(lineItem);
+
     }
 }
 
@@ -259,7 +248,7 @@ export async function setDeliveryAddress(cartRequest: CartRequest, hubSlug: stri
             hubCoordinates = hubInfo.turfs[0][2];
         }
 
-        if (!hubCoordinates || !hubCoordinates.latitude || !hubCoordinates.longitude) {
+        if (!hubCoordinates?.latitude || !hubCoordinates?.longitude) {
             return 'Unable to find hub coordinates';
         }
 
@@ -291,7 +280,7 @@ export function setEmail(cartRequest: CartRequest, email: string) {
 }
 
 
-export async function buildCartRequest(email: string, hubSlug: string, locale: string, productsArray?: string, deliveryTag?: string) {
+export async function buildCartRequest(email: string, hubSlug: string, locale: string, productsArray: {}, deliveryTag?: string) {
     let cartRequestBody = new CartRequest();
     setEmail(cartRequestBody, email);
     await setDeliveryAddress(cartRequestBody, hubSlug, deliveryTag);

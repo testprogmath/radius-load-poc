@@ -1,11 +1,12 @@
 {
   "consumerApiUrl": "https://consumer-api.staging.goflink.com",
   "hubManagerApiUrl": "https://api.staging.goflink.com/hub/hub-manager",
-  "hubApiUrl": "https://hub-api.staging.goflink.com",
   "CTAuthUrl": "https://auth.europe-west1.gcp.commercetools.com",
   "CTApiUrl": "https://api.europe-west1.gcp.commercetools.com",
   "identityToolkitUrl": "https://identitytoolkit.googleapis.com",
   "quinyxUrl": "https://web-rc.quinyx.com/extapi",
+  "inventoryServiceUrl": "https://api.staging.goflink.com/hub/inventory-service",
   "instoreLogin": "fr_lyo_libe_instore@goflink.fr",
-  "genericPassword": "password123&"
+  "genericPassword": "password123&",
+  "inventoryServiceToken": "3de4381e0f53411596c0aa8fde12bbdc8a37d3352dd9dc868a50643533ba8b17"
 }

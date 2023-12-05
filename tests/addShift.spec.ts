@@ -1,10 +1,16 @@
 import {describe, test} from "@jest/globals";
-import {addShift} from "../src";
+import {addShift, deleteShifts} from "../src";
 import {QuinyxShiftType} from "../src/shared/enums";
 
 describe('Test addShift command', () => {
     jest.retryTimes(3, {logErrorsBeforeRetry: true});
-
+beforeEach(async () => {
+    await deleteShifts("de_ham_wint",
+        "10133422",
+        "autotest-hubone@goflink.com",
+        "password123&",
+        false,);
+})
     test('AddShift command', async () => {
 
         let shiftDetails = await addShift( "de_ham_wint",

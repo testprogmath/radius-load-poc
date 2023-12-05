@@ -563,7 +563,7 @@ export class HttpClient<SecurityDataType = unknown> {
     private format?: ResponseType;
 
     constructor({securityWorker, secure, format, ...axiosConfig}: ApiConfig<SecurityDataType> = {}) {
-        this.instance = axios.create({...axiosConfig, baseURL: axiosConfig.baseURL || ""});
+        this.instance = axios.create({...axiosConfig, baseURL: axiosConfig.baseURL ?? ""});
         this.secure = secure;
         this.format = format;
         this.securityWorker = securityWorker;
@@ -588,13 +588,13 @@ export class HttpClient<SecurityDataType = unknown> {
                 (await this.securityWorker(this.securityData))) ||
             {};
         const requestParams = this.mergeRequestParams(params, secureParams);
-        const responseFormat = format || this.format || undefined;
+        const responseFormat = (format ?? this.format) ?? undefined;
 
-        if (type === ContentType.FormData && body && body !== null && typeof body === "object") {
+        if (type === ContentType.FormData && body && typeof body === "object") {
             body = this.createFormData(body as Record<string, unknown>);
         }
 
-        if (type === ContentType.Text && body && body !== null && typeof body !== "string") {
+        if (type === ContentType.Text && body && typeof body !== "string") {
             body = JSON.stringify(body);
         }
 
@@ -612,16 +612,16 @@ export class HttpClient<SecurityDataType = unknown> {
     };
 
     protected mergeRequestParams(params1: AxiosRequestConfig, params2?: AxiosRequestConfig): AxiosRequestConfig {
-        const method = params1.method || (params2 && params2.method);
+        const method = params1.method ?? params2?.method;
 
         return {
             ...this.instance.defaults,
             ...params1,
-            ...(params2 || {}),
+            ...(params2 ?? {}),
             headers: {
                 ...((method && this.instance.defaults.headers[method.toLowerCase() as keyof HeadersDefaults]) || {}),
-                ...(params1.headers || {}),
-                ...((params2 && params2.headers) || {}),
+                ...(params1.headers ?? {}),
+                ...(params2?.headers ?? {}),
             },
         };
     }

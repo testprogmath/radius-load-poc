@@ -3,6 +3,7 @@ import { QuinyxApi} from "../api/quinyx-api";
 import {hubMap} from "../utils/hub";
 import {spinnerError, spinnerSuccess, updateSpinnerText} from "../spinner";
 import chalk from "chalk";
+import {AxiosError} from "axios";
 
 const emojic = require("emojic");
 
@@ -56,7 +57,12 @@ export async function addShift(hubSlug: string, badgeNumber: string, shiftType: 
         console.log(chalk.hex(Colors.MEXICAN_PINK_DARK)("Badge Number: ").padEnd(15) + chalk.hex(Colors.WHITE)((employee.badgeNumber ? employee.badgeNumber : 'N/A')));
         return {begin, end};
     } catch (error) {
-        console.error("Oops, something went wrong:", error);
+        if (error instanceof AxiosError) {
+            console.error("Oops, something went wrong:", error.message);
+            console.error("Response:", error.response?.data);
+        } else {
+            console.error("Oops, something went wrong:", error);
+        }
         spinnerError("Your request failed. Please find the stacktrace above");
     }
 }

@@ -30,6 +30,5 @@ export const spinnerSuccess = (message?: string) => {
 export const spinnerText = (message: string) => {
     if (spinner.isSpinning) {
         spinner.text = message
-        return;
     }
 }

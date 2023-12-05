@@ -13,7 +13,7 @@ export async function deleteShifts(hubSlug: string, badgeNumber: string, usernam
         console.log(hubSlug.toUpperCase());
         // @ts-ignore
         quinyxGroupValue = QuinyxGroup[hubSlug.toUpperCase()];
-        console.log(`${emojic.calendar} ${chalk.hex(Colors.LAVENDER_PINK).bold(`Group number is ${quinyxGroupValue}`)} ${emojic.calendar}`);
+        console.log(`${emojic.calendar} ${chalk.hex(Colors.LAVENDER_PINK).bold("Group number is " + quinyxGroupValue)} ${emojic.calendar}`);
 
         console.log(quinyxGroupValue);
     } else {
@@ -39,7 +39,7 @@ export async function deleteShifts(hubSlug: string, badgeNumber: string, usernam
 
         if (isCLI) spinnerSuccess(`All shifts for ${hubSlug} have been removed!`);
 
-        console.log(`${emojic.calendar} ${chalk.hex(Colors.LAVENDER_PINK).bold(`All shifts for ${hubSlug} have been removed`)} ${emojic.calendar}`);
+        console.log(`${emojic.calendar} ${chalk.hex(Colors.LAVENDER_PINK).bold("All shifts for " + hubSlug + " have been removed")} ${emojic.calendar}`);
 
        } catch (error) {
         console.error("Oops, something went wrong:", error);
