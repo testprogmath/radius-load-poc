@@ -288,7 +288,48 @@ or with the order number:
 ```shell
 flinkord cancel de-ber-nqqa-rkx5
 ```
+### To get refunds for the particular order, use `get_returns` command:
 
+```shell
+flinkord get_returns <orderId>
+```
+or with the order number:
+
+```shell
+flinkord get_returns de-ber-nqqa-rkx5
+```
+
+If there are no returned items, you'll receive a message:
+```shell
+No return info or items found in the order.
+```
+
+Otherwise, you'll see the table with all info: 
+```shell
+Item 1:
+type           LineItemReturnItem
+id             45cd13a1-0258-4967-b1c5-201755538a26
+quantity       1
+lineItemId     03f9dd3f-a0fc-4c13-b608-9b401891b6d5
+comment        goods_not_on_shelf
+shipmentState  Returned
+paymentState   Initial
+lastModifiedAt 2023-12-04T14:45:49.040Z
+createdAt      2023-12-04T14:45:49.040Z
+
+
+Item 2:
+type           LineItemReturnItem
+id             82185c4c-a1b4-4eee-b5ae-5703f3adef1e
+quantity       3
+lineItemId     c2f45231-401d-4c0b-9a24-86e32e8f33a9
+comment        goods_not_on_shelf
+shipmentState  Returned
+paymentState   Initial
+lastModifiedAt 2023-12-04T14:45:49.040Z
+createdAt      2023-12-04T14:45:49.040Z
+
+```
 
 ---
 

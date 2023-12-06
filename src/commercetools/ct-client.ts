@@ -1,4 +1,4 @@
-import {createApiBuilderFromCtpClient, OrderUpdateAction} from "@commercetools/platform-sdk";
+import {ClientResponse, createApiBuilderFromCtpClient, Order, OrderUpdateAction} from "@commercetools/platform-sdk";
 import {createClient} from "@commercetools/sdk-client-v2";
 // @ts-ignore
 import {createAuthMiddlewareForClientCredentialsFlow} from "@commercetools/sdk-middleware-auth";
@@ -7,6 +7,7 @@ import {createHttpMiddleware} from "@commercetools/sdk-middleware-http";
 import dotenv from "dotenv";
 import {getConfigPath, wait} from "../utils";
 import {isUuid} from "../utils/types";
+import chalk from "chalk";
 
 const fetch = require('node-fetch');
 
@@ -261,5 +262,25 @@ export async function deliverOrder(orderIdentifier: string): Promise<string> {
     console.log(orderInfo.body.state);
     console.log(`The order ${orderId} is delivered!`)
     return `The order ${orderId} is delivered!`
+}
+
+export function getReturnsFromTheOrder(orderInfo: ClientResponse<Order>) {
+    if (orderInfo.body.returnInfo && orderInfo.body.returnInfo.length > 0) {
+        orderInfo.body.returnInfo.forEach((returnInfoItem) => {
+            if (returnInfoItem.items && returnInfoItem.items.length > 0) {
+                returnInfoItem.items.forEach((item, index) => {
+                    console.log(chalk.hex("#FF00FF")(`Item ${index + 1}:`));
+                    Object.entries(item).forEach(([key, value]) => {
+                        console.log(chalk.hex("#FFC0CB")(key.padEnd(15)) + chalk.hex("#FFFFFF")(value ? value : 'N/A'));
+                    });
+                    console.log('\n');
+                });
+            }
+        });
+        return orderInfo.body.returnInfo;
+    } else {
+        console.log("No return info or items found in the order.");
+        return null;
+    }
 }
 

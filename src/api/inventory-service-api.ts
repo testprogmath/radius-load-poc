@@ -33,7 +33,7 @@ export async function updateStockInTheHub(sku: string, hubSlug: string, amount:n
     const token = await getAuthToken();
     const stockInfo = await getItemStockInHub(sku, hubSlug);
     console.log(stockInfo);
-    if (!stockInfo || stockInfo.length === 0 || !stockInfo.results[0].sku) {
+    if (!stockInfo || stockInfo.results.length === 0 || !stockInfo.results[0].sku) {
         console.log(`Product with SKU ${sku} not found in hub ${hubSlug}. Skipping update.`);
         return;
     }

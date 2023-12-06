@@ -1,7 +1,7 @@
 #! /usr/bin/env node
 
 import {Command} from "commander";
-import {create, free, deliver, setupEnv, addShift, deleteShifts} from "./commands";
+import {create, free, deliver, setupEnv, addShift, deleteShifts, getOrderReturns} from "./commands";
 import {CreateOptions} from "./commands/create";
 import {cancel} from "./commands/cancel";
 import {QuinyxShiftType} from "./shared/enums";
@@ -24,7 +24,9 @@ const setup = new Command("setup");
 
 const addQuinyxShift = new Command("add_shift");
 
-const deleteAllQuinyxShifts = new Command("delete_shifts")
+const deleteAllQuinyxShifts = new Command("delete_shifts");
+
+const getReturns = new Command("get_returns");
 
 export {create} from "./commands/create";
 export {free} from "./commands/free";
@@ -34,6 +36,7 @@ export {setupEnv} from "./commands/setup";
 export {addShift} from "./commands/addShift"
 export {deleteShifts} from "./commands/deleteShifts"
 export {getProducts} from "./commands/getProducts"
+export {getOrderReturns} from "./commands/getOrderReturns"
 
 const isCLI = true;
 createOrder
@@ -128,6 +131,10 @@ addQuinyxShift
             .catch(e => console.log(e));
     });
 
+getReturns.argument("orderId").action((orderId) => {
+    console.log(orderId);
+    getOrderReturns(orderId).catch(e => console.log(e));
+});
 
 program
     .description("A CLI tool for order management")
@@ -146,7 +153,9 @@ program
     .option("add_shift", "Add a shift in Quinyx")
     .addCommand(addQuinyxShift)
     .option("delete_shifts", "Remove all shifts in the hub for the user in Quinyx")
-    .addCommand(deleteAllQuinyxShifts);
+    .addCommand(deleteAllQuinyxShifts)
+    .option("get_returns <orderId>", "Get order refunds info from CT by order ID or name")
+    .addCommand(getReturns);
 
 if (require.main === module) {
     program.parse(process.argv);
