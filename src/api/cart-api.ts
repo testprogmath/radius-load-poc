@@ -902,13 +902,17 @@ export class CartApi<SecurityDataType extends unknown> extends HttpClient<Securi
          * @name CheckoutV3
          * @request POST:/v3/cart/{id}/checkout
          */
-        checkoutV3: (id: string, Body: CheckoutRequestPayload, params: RequestParams = {}) =>
+        checkoutV3: (id: string, Body: CheckoutRequestPayload, token: string, params: RequestParams = {}) =>
             this.request<CheckoutResponseV3, V1ErrorResponse>({
                 path: `/v3/cart/${id}/checkout`,
                 method: "POST",
                 body: Body,
                 type: ContentType.Json,
                 format: "json",
+                headers: {
+                    ...params.headers,
+                    Authorization: `Bearer ${token}`
+                },
                 ...params,
             }),
 

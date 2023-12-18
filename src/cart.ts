@@ -6,7 +6,7 @@ import chalk from "chalk";
 import {Colors} from "./shared/enums";
 import {Hubs} from "./shared/hubs";
 import {authorizeInStore} from "./api/website-api";
-import {AxiosResponse} from "axios";
+import axios, {AxiosResponse} from "axios";
 import {CartLine, CartRequest} from "./api/objects/cart-request";
 import {printErrorAndStopSpinner} from "./utils/spinner";
 
@@ -86,7 +86,32 @@ export async function getCart(customerDomainApi: CartApi<any>, cartId: string) {
     return response?.data ?? null;
 }
 
+async function getToken() {
+    const url = config.get("firebaseUrl");
+    const apiKey = config.get("firebaseApiKey");
+    try {
+        const response = await axios.post(url, {
+            email: "qa@goflink.com",
+            password: "123456",
+            returnSecureToken: true
+        }, {
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            params: {
+                key: apiKey
+            }
+        });
+
+        return response.data.idToken as string;
+    } catch (error) {
+        console.error('Error during sign in:', error);
+        return null;
+    }
+}
 export async function checkoutCart(customerDomainApi: CartApi<any>, cartId: string, totalPrice: number): Promise<CartOrder | undefined | null> {
+
+    let token = await getToken() as string;
     const MAX_RETRIES = 3;
     cartToken.amount.value = totalPrice;
     let orderInfo;
@@ -97,7 +122,7 @@ export async function checkoutCart(customerDomainApi: CartApi<any>, cartId: stri
             response = await customerDomainApi.v3.checkoutV3(cartId, {
                     "amount": totalPrice,
                     "token": JSON.stringify(cartToken)
-                }
+                },  token
             );
             if (response.status === 200) {
                 console.log(`${emojic.confettiBall} The order is created!`);
@@ -261,6 +286,7 @@ export async function setDeliveryAddress(cartRequest: CartRequest, hubSlug: stri
             first_name: "Test",
             last_name: "Flinkord",
             street_address_1: hubInfo.address,
+            phone: "+31644677890",
             city: hubInfo.city,
             country: hubInfo.country,
             postal_code: "1111",
