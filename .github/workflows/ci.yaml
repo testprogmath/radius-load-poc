@@ -74,11 +74,11 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Push new version
-        if: github.ref == 'refs/heads/main'
-        run: |
-          npm version ${{ steps.tag_version.outputs.new_version }}
-          git push
+#      - name: Push new version
+#        if: github.ref == 'refs/heads/main'
+#        run: |
+#          npm version ${{ steps.tag_version.outputs.new_version }}
+#          git push
 
       - name: Create a GitHub release
         uses: ncipollo/release-action@v1
