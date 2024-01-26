@@ -167,14 +167,14 @@ export async function checkoutCartInStore(customerDomainApi: CartApi<any>, cartI
 
 export async function checkPaymentStatus(customerDomainApi: CartApi<any>, cartId: string,) {
     let response = await customerDomainApi.v3.getPaymentStatusInStore(cartId);
-    const MAX_RETRIES_COUNT = 15;
+    const MAX_RETRIES_COUNT = 40;
     let retries = 0;
     while (response.data.status === "PENDING" && retries < MAX_RETRIES_COUNT) {
         retries = retries + 1;
         console.log(`Attempt ${retries}:Trying to get the payment done...`)
         response = await customerDomainApi.v3.getPaymentStatusInStore(cartId);
         if (response.data.status === "PENDING" && retries < MAX_RETRIES_COUNT) {
-            await wait(2000); // Wait for 1 second
+            await wait(2000);
         }
     }
     if (response.data.status === "PAID") {
