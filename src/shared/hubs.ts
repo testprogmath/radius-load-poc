@@ -28,8 +28,8 @@ export const Hubs: HubsType = {
         longitude: 13.3763289
     },
     "de_ber_mit2": {
-        latitude: 52.524619,
-        longitude: 13.387786
+        latitude: 52.532985,
+        longitude: 13.35965
     },
     "nl_ame_cent": {
         latitude: 52.173164,
