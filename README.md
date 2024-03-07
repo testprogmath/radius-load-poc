@@ -366,10 +366,11 @@ Begin Time: 2023-09-29T04:00:00
 End Time: 2023-09-29T23:59:00
 ```
 
+### To delete all shifts for the authorized user, please use 'delete_shifts' command:
+```shell
+flinkord delete_shifts -u <username> -p <password> -h <hubSlug>
+```
 ---
-
-_For more examples, please refer to
-the [Documentation](https://docs.google.com/document/d/1aGe_5EBZ-VZ-27SChg9Ouc9E6NQlTNZf5FiS7AhimXQ/edit#)_
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -423,19 +424,6 @@ Anna Khvorostianova - ext-anna.khvorostianova@goflink.com
 Project Link: [https://github.com/goflink/flinkord-cli](https://github.com/goflink/flinkord-cli)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
-
-<!-- ACKNOWLEDGMENTS -->
-
-## Acknowledgments
-
-* []()
-* []()
-* []()
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 
 
 <!-- MARKDOWN LINKS & IMAGES -->
