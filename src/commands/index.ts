@@ -6,3 +6,4 @@ export {addShift} from "./addShift";
 export {deleteShifts} from "./deleteShifts"
 export {getProducts} from "./getProducts"
 export {getOrderReturns} from "./getOrderReturns"
+export {pick} from "./pick"

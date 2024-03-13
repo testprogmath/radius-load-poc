@@ -1,0 +1,612 @@
+type CategoryV2 {
+  id: ID!
+  name: String!
+  subcategories: [SubcategoryV2!]!
+}
+
+input CheckFilters {
+  priority: [Int!]
+  type: [TaskType!]
+}
+
+type CheckMutationResponse {
+  success: Boolean!
+}
+
+enum CheckStatus {
+  CANCELED
+  DONE
+  IN_PROGRESS
+  OPEN
+  SKIPPED
+  UNFULFILLABLE
+}
+
+type CountryOfOrigin {
+  code: String
+}
+
+input CreateCheckInput {
+  metadataReason: TaskMetadataReason!
+  priority: Int!
+  shelfNumber: String!
+  sku: String!
+  type: TaskType!
+}
+
+input CreatePrivateRestockingListInput {
+  skus: [String!]!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type DeletePrivateListResponse {
+  message: String!
+  success: Boolean!
+}
+
+enum DeliveryCheckinProductCategory {
+  DRINKS
+  DRY
+  FRESH
+  FROZEN
+}
+
+type DeliveryCheckinResponse {
+  deliveryCheckin: IDeliveryCheckin!
+}
+
+type DespatchAdvice {
+  id: ID!
+  items: [DespatchAdviceItem!]!
+}
+
+type DespatchAdviceItem {
+  handlingUnitSize: Int!
+  isTotalQuantityEstimate: Boolean!
+  skus: [String!]!
+  totalQuantity: Int!
+}
+
+type DeviceClaim {
+  deviceId: String
+  employeeId: ID!
+  hubSlug: String!
+}
+
+input DeviceClaimInput {
+  employeeId: String!
+}
+
+input EndInboundingInput {
+  employeeId: String!
+}
+
+type EndInboundingResponse {
+  timestamp: DateTime!
+}
+
+type GetDeliveryCheckinsResponse {
+  deliveryCheckins: [IDeliveryCheckin!]!
+}
+
+input GetDespatchAdviceByRolliIDInput {
+  rolliID: String!
+}
+
+type GetDespatchAdviceByRolliIDResponse {
+  despatchAdvice: DespatchAdvice!
+}
+
+input GetInventoryEntriesByShelfInput {
+  shelfNumber: String!
+}
+
+type GetInventoryEntriesByShelfResponse {
+  inventoryEntries: [InventoryEntry!]!
+}
+
+type GetNextCheckForHubResponse {
+  check: ICheck
+  pendingChecksCount: Int @deprecated(reason: "Use GetOpenedChecksCountForHub instead")
+}
+
+input GetNextCheckForShelfInput {
+  filters: CheckFilters
+  shelfNumber: String!
+}
+
+type GetNextCheckForShelfResponse {
+  check: ICheck
+}
+
+input GetNonScannableCategoriesV2Input {
+  categoryId: String!
+}
+
+type GetOpenedChecksCountForHubResponse {
+  pendingChecksCount: Int
+}
+
+input GetOrderInput {
+  orderId: String!
+}
+
+type GetOrderResponse {
+  order: Order!
+}
+
+type GetPendingChecksResponse {
+  checks: [ICheck!]!
+}
+
+input GetProductInput {
+  sku: ID!
+}
+
+input GetProductsBySubcategoryInput {
+  subcategoryId: String!
+}
+
+type GetProductsBySubcategoryResponse {
+  products: [IProduct!]!
+}
+
+input GetProductsInput {
+  skus: [ID!]!
+}
+
+type GetProductsResponse {
+  products: [IProduct!]!
+}
+
+type GetPublicRestockingListResponse {
+  publicRestockingList: PublicRestockingList!
+}
+
+type GetSuppliersForHubResponse {
+  suppliers: [ISupplier!]!
+}
+
+input GetTaskByIdInput {
+  taskId: ID!
+}
+
+type GetTaskByIdResponse {
+  task: ICheck
+}
+
+type HubOneEmployee {
+  badgeNo: ID!
+  firstName: String!
+  hubs: [String!]!
+  isActive: Boolean
+  lastName: String!
+  roles: [String!]!
+}
+
+type ICheck {
+  id: ID!
+  priority: Int!
+  product: IProduct
+  productSku: String!
+  shelfNumber: String!
+  status: CheckStatus!
+  type: TaskType!
+}
+
+type IDeliveryCheckin {
+  categories: [DeliveryCheckinProductCategory!]!
+
+  """
+  Timestamp in ISO 8601 format. Example: 2023-02-06T13:33:44+00:00
+  """
+  created_at: String!
+
+  """
+  Timestamp in ISO 8601 format. Example: 2023-02-06T13:33:44+00:00
+  """
+  delivered_at: String!
+  hub_slug: String!
+  id: ID!
+  supplier: ISupplierSummary!
+}
+
+type IProduct {
+  bbd: String
+  bio: Boolean
+  countryOfOrigin: CountryOfOrigin!
+  imageUrl: String
+  inventoryEntry: InventoryEntry!
+  isShelvedInHandlingUnits: Boolean
+  minDaysToBestBeforeDate: Int
+  name: String!
+  numberOfShelfFacings: Int
+  sku: ID!
+  units: [Unit!]!
+}
+
+type ISupplier {
+  id: ID!
+  name: String!
+  sortSequence: Int!
+}
+
+type ISupplierSummary {
+  id: ID!
+  name: String!
+}
+
+enum InventoryChangeReason {
+  CORRECTION
+  EXTRA_CHECK
+  INBOUND_BULK
+  INBOUND_GOODS_RECEIVED
+  LOW_STOCK_CHECK
+  ORDER_CANCELLED
+  ORDER_CREATED
+  OUTBOUND_DELIVERY_PRODUCT_DAMAGED
+  OUTBOUND_DELIVERY_PRODUCT_EXPIRED
+  OUTBOUND_PRODUCT_DAMAGED
+  OUTBOUND_PRODUCT_EXPIRED
+  OUTBOUND_TOO_GOOD_TO_GO
+  OUT_OF_STOCK_CHECK
+  ROLLING_INVENTORY_CHECK
+  UNSPECIFIED
+}
+
+type InventoryEntry {
+  hubSlug: ID!
+  product: IProduct
+  productSku: ID!
+  shelfNumber: String
+  stock: Stock!
+}
+
+type Item {
+  id: ID!
+  product: IProduct
+  quantity: Float
+  sku: String
+}
+
+enum MatchType {
+  ean
+  name
+  sku
+}
+
+input MissingItem {
+  comment: String
+  quantity: Float!
+  sku: String!
+}
+
+type Mutation {
+  claimDevice(input: DeviceClaimInput!): DeviceClaim!
+  createCheck(input: CreateCheckInput!): CheckMutationResponse!
+  createDeliveryCheckinForHub(input: NewDeliveryCheckinInput!): DeliveryCheckinResponse!
+  createPrivateRestockingList(
+    input: CreatePrivateRestockingListInput!
+  ): PrivateRestockingListResponse!
+  deletePrivateRestockingList(input: PrivateListIdInput!): DeletePrivateListResponse!
+  endInbounding(input: EndInboundingInput!): EndInboundingResponse!
+  endPicking(
+    containersIds: [String!]
+    missingItems: [MissingItem!]!
+    orderNumber: String!
+    shelvesIds: [String!]
+  ): MutationResponse!
+  forceClaimDevice(input: DeviceClaimInput!): DeviceClaim!
+  identifyEmployee(badgeNo: String!): HubOneEmployee!
+  removeItemFromRestockingPrivateList(
+    input: RestockItemWithSKUAndListIdInput!
+  ): RestockingMutationResponse!
+  restockItem(input: RestockItemWithSKUAndListIdInput!): RestockingMutationResponse!
+  saveSkuToPublicRestockingList(input: RestockingItemInput!): SaveSkuToPublicRestockingListResponse!
+  startCheck(input: StartCheckInput!): CheckMutationResponse!
+  startInbounding(input: StartInboundingInput!): StartInboundingResponse!
+  startManualPickingV2(orderNumber: String!): StartPickingResponse!
+  startPickingV2(orderNumber: String!): StartPickingResponse!
+  unclaimDevice(input: DeviceClaimInput!): MutationResponse!
+  updateProductBBD(input: UpdateProductBBDInput!): CheckMutationResponse!
+  updateProductStockByDeltaAndMultipleReasons(
+    UpdateProductStockByDeltaAndMultipleReasonsInput: UpdateProductStockByDeltaAndMultipleReasonsInput!
+  ): UpdateProductStockByDeltaAndMultipleReasonsResponse!
+  validateBBDCheck(input: ValidateBBDCheckInput!): CheckMutationResponse!
+  validateEoyCheck(input: ValidateEoyCheckInput!): CheckMutationResponse!
+  validateFreshnessCheck(input: ValidateFreshnessCheckInput!): CheckMutationResponse!
+  validateStockCheck(input: ValidateStockCheckInput!): CheckMutationResponse!
+}
+
+type MutationResponse {
+  message: String!
+}
+
+input NewDeliveryCheckinInput {
+  categories: [String!]!
+  delivered_at: String!
+  supplier_id: String!
+}
+
+type NextOrderToBePreparedResponse {
+  order: Order
+}
+
+type NonScannableCategoriesV2Response {
+  categories: [CategoryV2!]!
+}
+
+type NonScannableSubcategoriesV2Response {
+  subcategories: [SubcategoryV2!]!
+}
+
+type Order {
+  ageVerification: String!
+  createdAt: String
+  customerFirstName: String
+  customerLastName: String
+  externalProviderId: String
+  id: ID!
+  isClickAndCollect: Boolean!
+  isInStore: Boolean!
+  isNewCustomer: Boolean!
+  items: [Item]!
+  number: String
+  pickingItemCount: Int!
+  reseller: String!
+  state: String
+  weight: Int!
+}
+
+type OrderSummary {
+  customerEmail: String
+  customerFirstName: String
+  customerLastName: String
+  externalProvider: String
+  id: ID!
+  isNewCustomer: Boolean
+  number: String
+}
+
+input PrivateListIdInput {
+  privateListId: String!
+}
+
+type PrivateRestockingListResponse {
+  hubSlug: String!
+  id: ID!
+  opsAssociateId: String!
+  restockingItems: [RestockingItem!]!
+}
+
+input ProductStockUpdateParams {
+  desadv: String
+  expectedQuantity: String
+  inboundingMethod: String
+  inboundingUnit: String
+  quantityDelta: Int!
+  reason: InventoryChangeReason!
+  scannedEAN: String
+  sscc: String
+  transactionId: String!
+}
+
+type PublicRestockingList {
+  hubSlug: String!
+  restockingItems: [RestockingItem!]!
+}
+
+type Query {
+  getDeliveryCheckInsForHubDeliveredToday: GetDeliveryCheckinsResponse!
+  getDespatchAdviceByRolliID(
+    GetDespatchAdviceByRolliIDInput: GetDespatchAdviceByRolliIDInput!
+  ): GetDespatchAdviceByRolliIDResponse!
+  getInventoryEntriesByShelf(
+    input: GetInventoryEntriesByShelfInput!
+  ): GetInventoryEntriesByShelfResponse!
+  getNextCheckForHub: GetNextCheckForHubResponse!
+  getNextCheckForShelf(input: GetNextCheckForShelfInput!): GetNextCheckForShelfResponse!
+  getNonScannableCategories: NonScannableCategoriesV2Response!
+  getNonScannableSubcategoriesForCategory(
+    input: GetNonScannableCategoriesV2Input!
+  ): NonScannableSubcategoriesV2Response!
+  getOpenedChecksCountForHub(input: CheckFilters): GetOpenedChecksCountForHubResponse!
+  getOrder(input: GetOrderInput!): GetOrderResponse!
+  getPendingChecks(input: CheckFilters): GetPendingChecksResponse!
+  getPrivateRestockingList: PrivateRestockingListResponse!
+  getProduct(input: GetProductInput!): IProduct!
+  getProducts(input: GetProductsInput!): GetProductsResponse!
+  getProductsBySubcategoryV2(
+    input: GetProductsBySubcategoryInput!
+  ): GetProductsBySubcategoryResponse!
+  getPublicRestockingList: GetPublicRestockingListResponse!
+  getSummaryOfNextOrderToPick: SummaryOfNextOrderToPickResponse!
+  getSuppliersForHub: GetSuppliersForHubResponse!
+  getTaskById(input: GetTaskByIdInput!): GetTaskByIdResponse!
+  nextOrderForPicking: NextOrderToBePreparedResponse!
+  searchUnitsByEan(searchUnitsByEanInput: SearchUnitsByEanInput!): SearchUnitsByEanResponse!
+  searchUnitsByText(searchUnitsByTextInput: SearchUnitsByTextInput!): SearchUnitsByTextResponse!
+}
+
+input RestockItemWithSKUAndListIdInput {
+  listId: String!
+  sku: String!
+}
+
+type RestockingItem {
+  hubSlug: String!
+  privateListId: String
+  product: IProduct
+  sku: String!
+  status: RestockingItemStatus!
+}
+
+input RestockingItemInput {
+  sku: String!
+}
+
+enum RestockingItemStatus {
+  DONE
+  NEW
+}
+
+type RestockingMutationResponse {
+  message: String!
+}
+
+type SaveSkuToPublicRestockingListResponse {
+  success: Boolean!
+}
+
+input SearchUnitsByEanInput {
+  ean: String!
+}
+
+type SearchUnitsByEanResponse {
+  units: [Unit!]!
+}
+
+input SearchUnitsByTextInput {
+  query: String!
+}
+
+type SearchUnitsByTextResponse {
+  matchType: MatchType
+  units: [Unit!]!
+}
+
+input StartCheckInput {
+  checkId: ID!
+}
+
+input StartInboundingInput {
+  employeeId: String!
+}
+
+type StartInboundingResponse {
+  timestamp: DateTime!
+}
+
+type StartPickingResponse {
+  deliveryTag: String
+  externalDeliveryProvider: String
+  handoverIdentifier: String
+  order: Order
+}
+
+type Stock {
+  """
+  The stock available for clients
+  """
+  available: Int!
+
+  """
+  The number of item already ordered but still on the shelf
+  """
+  reserved: Int!
+
+  """
+  The real stock in the hub
+  """
+  shelf: Int!
+}
+
+type SubcategoryV2 {
+  id: ID!
+  imageUrl: String
+  name: String!
+  productsCount: Int!
+}
+
+type SummaryOfNextOrderToPickResponse {
+  orderSummary: OrderSummary
+}
+
+enum TaskMetadataReason {
+  BBD
+  BBD_MISSING
+  EOY_INVENTORY
+  EOY_INVENTORY_RECOUNT
+  EXPENSIVE
+  EXTRA
+  FRESHNESS
+  LOW_STOCK
+  MISSING
+  ROLLING_8_WEEKS
+  ROLLING_12_WEEKS
+  SPONTANEOUS_CORRECTION
+  TOBACCO
+}
+
+enum TaskType {
+  BBD_CHECK
+  EOY_INVENTORY_CHECK
+  EOY_INVENTORY_RECOUNT_CHECK
+  FRESHNESS_CHECK
+  STOCK_CHECK
+}
+
+type Unit {
+  ean: String
+  id: ID!
+  product: IProduct!
+  productSku: ID!
+  quantity: Int!
+  type: String!
+}
+
+input UpdateProductBBDInput {
+  closestBBDAfterOutbound: String!
+  sku: String!
+}
+
+input UpdateProductStockByDeltaAndMultipleReasonsInput {
+  sku: String!
+  stockUpdates: [ProductStockUpdateParams!]!
+}
+
+type UpdateProductStockByDeltaAndMultipleReasonsResponse {
+  updateResults: [UpdateProductStockByDeltaResponse!]!
+}
+
+type UpdateProductStockByDeltaResponse {
+  success: Boolean!
+  transactionId: String!
+}
+
+input ValidateBBDCheckInput {
+  checkId: ID!
+  closestBBDAfterOutbound: String
+  quantityExpired: Int
+  quantityTooGoodToGo: Int
+}
+
+input ValidateEoyCheckInput {
+  checkId: ID!
+  name: String!
+  quantity: Int!
+  type: TaskType!
+}
+
+input ValidateFreshnessCheckInput {
+  checkId: ID!
+  quantityDamaged: Int
+  quantityExpired: Int
+  quantityTooGoodToGo: Int
+}
+
+input ValidateStockCheckInput {
+  checkId: ID!
+
+  """
+  This is the final counted stock, after removing damaged and perished
+  """
+  quantity: Int!
+  quantityDamaged: Int
+  quantityExpired: Int
+  quantityTooGoodToGo: Int
+}

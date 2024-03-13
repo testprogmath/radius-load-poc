@@ -1,7 +1,7 @@
 #! /usr/bin/env node
 
 import {Command} from "commander";
-import {create, free, deliver, setupEnv, addShift, deleteShifts, getOrderReturns} from "./commands";
+import {create, free, deliver, setupEnv, addShift, deleteShifts, getOrderReturns, pick} from "./commands";
 import {CreateOptions} from "./commands/create";
 import {cancel} from "./commands/cancel";
 import {QuinyxShiftType} from "./shared/enums";
@@ -28,6 +28,8 @@ const deleteAllQuinyxShifts = new Command("delete_shifts");
 
 const getReturns = new Command("get_returns");
 
+const pickOrder = new Command("pick")
+
 export {create} from "./commands/create";
 export {free} from "./commands/free";
 export {deliver} from "./commands/deliver";
@@ -37,6 +39,7 @@ export {addShift} from "./commands/addShift"
 export {deleteShifts} from "./commands/deleteShifts"
 export {getProducts} from "./commands/getProducts"
 export {getOrderReturns} from "./commands/getOrderReturns"
+export {pick} from "./commands/pick"
 
 const isCLI = true;
 createOrder
@@ -136,6 +139,14 @@ getReturns.argument("orderId").action((orderId) => {
     getOrderReturns(orderId).catch(e => console.log(e));
 });
 
+pickOrder
+    .requiredOption("-h, --hub <hub_slug>", "the hub for the order")
+    .requiredOption("-o, --order <order_number>", "order number for picking")
+    .action((commandAndOptions) => {
+        console.log(`Order number: ${commandAndOptions.order}`);
+        pick(commandAndOptions.order, commandAndOptions.hub).catch(e => console.log(e));
+    });
+
 program
     .description("A CLI tool for order management")
     .showSuggestionAfterError(true)
@@ -155,7 +166,9 @@ program
     .option("delete_shifts", "Remove all shifts in the hub for the user in Quinyx")
     .addCommand(deleteAllQuinyxShifts)
     .option("get_returns <orderId>", "Get order refunds info from CT by order ID or name")
-    .addCommand(getReturns);
+    .addCommand(getReturns)
+    .option("pick", "Pick order id by order number and hub slug")
+    .addCommand(pickOrder);
 
 if (require.main === module) {
     program.parse(process.argv);

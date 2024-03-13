@@ -266,7 +266,23 @@ Enter CT_CLIENT_ID (default: wxgadKVe9YfVkHWUDhgpIIJ6):
 Enter CT_CLIENT_SECRET (to use the default value, press enter):
 .env file successfully created 
 ```
+### To pick the order via HubOne API, use "pick" command with your order number and hubSlug:
+```shell
+flinkord pick -o <order-number> -h <hub-slug>
+```
+For example,
+```shell
+flinkord pick -o de-ham-fjpq-q9su -h de_ham_wint
+```
+Please make sure that your order is eligible for picking, and nobody has started picking it yet!
 
+In case of success, you'll see
+```
+✔ 🚀 The order de-ham-fjpq-q9su is picked!
+🤝 Handover Details 🤝
+Container id: 1UO1MIXX
+Shelf number: 6
+```
 ### To deliver an order, use "deliver" command with an orderId:
 
 ```shell
