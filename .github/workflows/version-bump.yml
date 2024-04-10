@@ -1,8 +1,6 @@
 name: Bump version on PR merge
 
 on:
-  push:
-    branches: [ '*' ]
   pull_request:
     branches:
       - main
