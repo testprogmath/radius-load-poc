@@ -82,12 +82,6 @@ export async function getOrders(hubSlug: string) {
                             {
                                 "exact": {
                                     "field": "orderState",
-                                    "value": "Complete"
-                                }
-                            },
-                            {
-                                "exact": {
-                                    "field": "orderState",
                                     "value": "Cancelled"
                                 }
                             }
@@ -248,6 +242,15 @@ export async function deliverOrder(orderIdentifier: string): Promise<string> {
         orderState: "Complete"
     });
     await wait(200);
+    await updateOrder(orderId, orderInfo.body.version + 1, {
+        "action": "transitionState",
+        state: {
+            "typeId": "state",
+            "key": "order-delivered"
+        }
+    });
+    await wait(200);
+
     await updateOrder(orderId, orderInfo.body.version + 1, {
         "action": "transitionState",
         state: {
