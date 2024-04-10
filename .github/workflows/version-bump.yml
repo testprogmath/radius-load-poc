@@ -39,6 +39,8 @@ jobs:
           workload_identity_provider: ${{ env.GCP_AUTH_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ env.GCP_AUTH_SERVICE_ACCOUNT }}
 
+      - name: Build application
+        run: npm run build --if-present
       # get a new auth token and set it to a temp npm configuration
       - name: Get auth for artifact registry
         run: npx google-artifactregistry-auth
