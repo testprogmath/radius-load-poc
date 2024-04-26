@@ -13,14 +13,14 @@ env:
 
 permissions:
   id-token: write
-  contents: write # This is required for actions/checkout@v3
+  contents: write # This is required for actions/checkout@v4
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Use Node.js ${{ env.NODE_VERSION }}
         uses: actions/setup-node@v3
         with:
