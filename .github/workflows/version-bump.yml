@@ -67,6 +67,7 @@ jobs:
                   git push origin --tags
               else
                   echo "Tag $NEW_TAG already exists, incrementing further"
+                  VERSION_NUMBER=$(echo $NEW_TAG | sed 's/v//') # Strip 'v' to update version number
               fi
           done
 
