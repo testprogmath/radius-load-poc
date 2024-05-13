@@ -14,18 +14,20 @@ env:
   NODE_VERSION: 18.x
   IDENTITY_SECRET: ${{secrets.IDENTITY_SECRET}}
   GENERIC_PASSWORD: ${{secrets.GENERIC_PASSWORD}}
+
 permissions:
   id-token: write
   contents: write # This is required for actions/checkout@v3
+
 jobs:
   bump-version:
-    if: github.event.pull_request.merged == true
+    if: github.event.pull_request.merged == true && github.base_ref == 'main'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.ref }}
+          ref: main
           fetch-depth: 0
 
       - name: Setup Node
@@ -33,68 +35,41 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - id: auth
-        name: Authenticate to GCP
+      - name: Authenticate to GCP
         uses: google-github-actions/auth@v2
         with:
           token_format: access_token
           workload_identity_provider: ${{ env.GCP_AUTH_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ env.GCP_AUTH_SERVICE_ACCOUNT }}
+
       - name: Install dependencies
         run: |
           npx google-artifactregistry-auth
           npm ci --cache .npm
+
       - name: Build application
         run: npm run build --if-present
-      # get a new auth token and set it to a temp npm configuration
-      - name: Get auth for artifact registry
-        run: npx google-artifactregistry-auth
-      - name: Bump version if necessary and push
+
+      - name: Bump version and push tag
         run: |
           git config --global user.email "flinkord-cli-helper@goflink.com"
           git config --global user.name "flinkord-cli-helper"
-          git fetch --tags  # Fetch all tags
-          CURRENT_VERSION=$(node -p "require('./package.json').version") # Check the current version in package.json
-          echo "Current version: $CURRENT_VERSION"
-
-          POTENTIAL_NEW_TAG="v$(npm version patch --git-tag-version=false)"
-          echo "Potential new tag: $POTENTIAL_NEW_TAG"
-          
-          if git rev-parse "$POTENTIAL_NEW_TAG" >/dev/null 2>&1; then
-              echo "Tag $POTENTIAL_NEW_TAG already exists, incrementing further"
-              UNIQUE_VERSION_FOUND="false"
-              while [ "$UNIQUE_VERSION_FOUND" = "false" ]; do
-                  POTENTIAL_NEW_TAG="v$(npm version patch --git-tag-version=false)"
-                  if ! git rev-parse "$POTENTIAL_NEW_TAG" >/dev/null 2>&1; then
-                      UNIQUE_VERSION_FOUND="true"
-                      echo "New unique version found: $POTENTIAL_NEW_TAG"
-                  fi
-              done
-          fi
-          git add .
-          git commit -m "Prep for version bump" || true
-          npm version patch
+          git fetch --tags
+          CURRENT_TAG=$(git describe --tags `git rev-list --tags --max-count=1`)
+          echo "Current tag: $CURRENT_TAG"
+          VERSION_NUMBER=${CURRENT_TAG:1} # Remove the 'v' prefix
+          NEW_TAG="v$(echo $VERSION_NUMBER | awk -F. '{$NF += 1;} 1' | sed 's/ /./g')"
+          echo "New tag: $NEW_TAG"
+          git tag $NEW_TAG
           git push origin --tags
-          git push origin ${{ github.event.pull_request.head.ref }}
-
-      - name: Bump version and push tag
-        if: github.ref == 'refs/heads/main'
-        id: tag_version
-        uses: mathieudutour/github-tag-action@v6.2
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create a GitHub release
         uses: ncipollo/release-action@v1
-        if: github.ref == 'refs/heads/main'
         with:
-          tag: ${{ steps.tag_version.outputs.new_tag }}
-          name: Release ${{ steps.tag_version.outputs.new_tag }}
-          body: ${{ steps.tag_version.outputs.changelog }}
+          tag: $NEW_TAG
+          name: "Release $NEW_TAG"
+          body: "New release $NEW_TAG"
           prerelease: true
 
       - name: Publish module
-        if: github.ref == 'refs/heads/main'
-        working-directory: '.'
-        run: |
-          npm publish --no-git-checks
+        run: npm publish --no-git-checks
