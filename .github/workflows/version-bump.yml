@@ -55,13 +55,20 @@ jobs:
           git config --global user.email "flinkord-cli-helper@goflink.com"
           git config --global user.name "flinkord-cli-helper"
           git fetch --tags
-          CURRENT_TAG=$(git describe --tags `git rev-list --tags --max-count=1`)
-          echo "Current tag: $CURRENT_TAG"
-          VERSION_NUMBER=${CURRENT_TAG:1} # Remove the 'v' prefix
-          NEW_TAG="v$(echo $VERSION_NUMBER | awk -F. '{$NF += 1;} 1' | sed 's/ /./g')"
-          echo "New tag: $NEW_TAG"
-          git tag $NEW_TAG
-          git push origin --tags
+          NEW_TAG=$(git describe --tags $(git rev-list --tags --max-count=1))
+          VERSION_NUMBER=${NEW_TAG:1} # Remove the 'v' prefix
+          UNIQUE_VERSION_FOUND="false"
+          while [ "$UNIQUE_VERSION_FOUND" = "false" ]; do
+              NEW_TAG="v$(echo $VERSION_NUMBER | awk -F. '{$NF += 1;} 1' | sed 's/ /./g')"
+              if ! git rev-parse "$NEW_TAG" >/dev/null 2>&1; then
+                  UNIQUE_VERSION_FOUND="true"
+                  echo "New unique version found: $NEW_TAG"
+                  git tag $NEW_TAG
+                  git push origin --tags
+              else
+                  echo "Tag $NEW_TAG already exists, incrementing further"
+              fi
+          done
 
       - name: Create a GitHub release
         uses: ncipollo/release-action@v1
