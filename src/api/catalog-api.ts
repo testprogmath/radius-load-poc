@@ -4,6 +4,7 @@ import {parseStringPromise} from 'xml2js';
 import {getItemStockInHub} from "./inventory-service-api";
 import {DEFAULT_PRODUCTS_NUMBER} from "../utils/constants";
 import {readCacheFile, writeCacheFile} from "../utils";
+import path from "path";
 
 const readFile = promisify(fs.readFile);
 
@@ -17,13 +18,13 @@ export async function getProductsForTheHub(locale: string, hubSlug: string, numb
     let filePath: string;
     switch (hubSlug.slice(0, 2).toLowerCase()) {
         case 'de':
-            filePath = 'resources/fixtures/sitemap-products.en-DE.xml';
+            filePath = path.resolve(__dirname, '../../../resources/fixtures/sitemap-products.en-DE.xml');
             break;
         case 'fr':
-            filePath = 'resources/fixtures/sitemap-products.en-FR.xml';
+            filePath = path.resolve(__dirname, '../../../resources/fixtures/sitemap-products.en-FR.xml');
             break;
         case 'nl':
-            filePath = 'resources/fixtures/sitemap-products.en-NL.xml';
+            filePath = path.resolve(__dirname, '../../../resources/fixtures/sitemap-products.en-NL.xml');
             break;
         default:
             throw new Error('Unsupported locale');
