@@ -8,7 +8,7 @@ module.exports = {
         "eslint:recommended",
         "plugin:@typescript-eslint/recommended"
     ],
-    "ignorePatterns": ["node_modules/", "dist/"],
+    "ignorePatterns": ["node_modules/", "dist/", "resources/"],
     "overrides": [],
     "parser": "@typescript-eslint/parser",
     "parserOptions": {

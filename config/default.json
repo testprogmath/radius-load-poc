@@ -1,5 +1,5 @@
 {
-  "consumerApiUrl": "https://consumer-api.staging.goflink.com",
+  "consumerApiUrl": "https://api.staging.goflink.com/consumer-backend/cart",
   "hubManagerApiUrl": "https://api.staging.goflink.com/hub/hub-manager",
   "CTAuthUrl": "https://auth.europe-west1.gcp.commercetools.com",
   "CTApiUrl": "https://api.europe-west1.gcp.commercetools.com",

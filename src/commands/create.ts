@@ -7,10 +7,11 @@ import {initializeCartApi} from "../utils/api";
 import {getValidatedHubSlug} from "../utils/hub";
 import {getProductsForTheHub} from "../api/catalog-api";
 import {updateStockInTheHub} from "../api/inventory-service-api";
-import {DEFAULT_NUMBER_OF_PRODUCTS} from "../utils/constants";
+import {DEFAULT_PRODUCTS_NUMBER, DEFAULT_QUANTITY_OF_PRODUCTS} from "../utils/constants";
 import {parseProductsArray} from "../utils/cli-arguments";
 
 const chalk = require("chalk");
+const emojic = require("emojic");
 
 require('dotenv').config();
 
@@ -44,13 +45,14 @@ export async function create(options: CreateOptions) {
     HubManagerConfig.BASE = config.get("hubManagerApiUrl") as string;
     updateSpinnerText(chalk.hex(Colors.MEXICAN_PINK_DARK)("Processing... \n"), options.isCLI);
 
+
     if (!options.productsArray) {
-      productsArray = await getProductsForTheHub(options.locale, hubSlug);
-      productsArray = productsArray.slice(0,2);
-      productsArray.forEach(item => updateStockInTheHub(item.sku, options.hubSlug, DEFAULT_NUMBER_OF_PRODUCTS));
+        console.log(`${emojic.banana} Looking for the products available in the hub...\n`);
+      productsArray = await getProductsForTheHub(options.locale, hubSlug, DEFAULT_PRODUCTS_NUMBER);
+      productsArray.forEach(item => updateStockInTheHub(item.sku, options.hubSlug, DEFAULT_QUANTITY_OF_PRODUCTS));
         products = productsArray.reduce((record, item) => {
             // @ts-ignore
-            record[item.sku] = DEFAULT_NUMBER_OF_PRODUCTS;
+            record[item.sku] = DEFAULT_QUANTITY_OF_PRODUCTS;
             return record;
         }, {});
 

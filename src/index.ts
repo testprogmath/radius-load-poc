@@ -52,7 +52,7 @@ createOrder
     .action((commandAndOptions) => {
         console.log(commandAndOptions);
         const options: CreateOptions = {
-            locale: 'en-fr',
+            locale: 'en-de',
             hubSlug: commandAndOptions.hub,
             email: commandAndOptions.email,
             clickAndCollect: commandAndOptions.shipping,

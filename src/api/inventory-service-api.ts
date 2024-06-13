@@ -31,19 +31,12 @@ export async function getItemStockInHub(sku:string, hubSlug:string) {
 
 export async function updateStockInTheHub(sku: string, hubSlug: string, amount:number, reason = "INVENTORY_CHANGE_REASON_CORRECTION") {
     const token = await getAuthToken();
-    const stockInfo = await getItemStockInHub(sku, hubSlug);
-    console.log(stockInfo);
-    if (!stockInfo || stockInfo.results.length === 0 || !stockInfo.results[0].sku) {
-        console.log(`Product with SKU ${sku} not found in hub ${hubSlug}. Skipping update.`);
-        return;
-    }
     const url = `${INVENTORY_SERVICE_URL}/v1/inventory/hub/${hubSlug}/sku/${sku}`;
     const data = {
         actor: { id: "qa" },
         amount,
         reason
     };
-console.log(url);
     try {
         const response = await fetch(url, {
             method: 'POST',
