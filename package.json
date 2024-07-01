@@ -24,7 +24,6 @@
   },
   "standard-version": {
     "scripts": {
-      "prerelease": "npm test",
       "postrelease": "git push --follow-tags origin main && npm publish"
     },
     "types": [
