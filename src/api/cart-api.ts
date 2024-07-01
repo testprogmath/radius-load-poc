@@ -887,7 +887,7 @@ export class CartApi<SecurityDataType extends unknown> extends HttpClient<Securi
          */
         checkoutInStoreRequest: (id: string, Body: CheckoutInStoreRequestPayload, params: RequestParams = {}) =>
             this.request<CheckoutInStoreResponse, ErrorResponseDetail>({
-                path: `/v3/cart/${id}/checkout-in-store`,
+                path: `/v1/cart/${id}/checkout-in-store`,
                 method: "POST",
                 body: Body,
                 type: ContentType.Json,

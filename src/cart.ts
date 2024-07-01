@@ -14,8 +14,7 @@ require('dotenv').config();
 
 const config = getConfigPath();
 const inStoreLogin = config.get('instoreLogin');
-const password = config.get('genericPassword');
-
+const inStorePassword = config.get('instorePassword');
 const cartToken = {
     "amount": {
         "currency": "EUR",
@@ -91,7 +90,7 @@ async function getToken() {
     const apiKey = config.get("firebaseApiKey");
     try {
         const response = await axios.post(url, {
-            email: "qa@goflink.com",
+            email: "lucas+kiosk@goflink.com",
             password: "123456",
             returnSecureToken: true
         }, {
@@ -141,7 +140,7 @@ export async function checkoutCart(customerDomainApi: CartApi<any>, cartId: stri
 }
 
 export async function checkoutCartInStore(customerDomainApi: CartApi<any>, cartId: string, totalPrice: number) {
-    const tokenResponse = await authorizeInStore(inStoreLogin, password);
+    const tokenResponse = await authorizeInStore(inStoreLogin, inStorePassword);
     const response = await customerDomainApi.v3.checkoutInStoreRequest(cartId, {
             "amount": {
                 currency: "EUR",
