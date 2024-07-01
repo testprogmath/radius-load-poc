@@ -231,40 +231,38 @@ export async function getOrderId(orderIdentifier: string) {
 export async function deliverOrder(orderIdentifier: string): Promise<string> {
     let orderId = await getOrderId(orderIdentifier);
     let orderInfo = await getOrderInfoById(orderId);
+    console.log(`Initial order version: ${orderInfo.body.version}`);
+
     if (orderInfo.body.orderState === "Complete") {
         console.log("The order is complete! Exiting the command...");
         return "The order is complete! Exiting the command...";
     }
     console.log(`The version of the order ${orderInfo.body.id} is: ${orderInfo.body.version}`);
-    //complete the order
+
+    // Complete the order
     await updateOrder(orderId, orderInfo.body.version, {
         action: 'changeOrderState',
         orderState: "Complete"
     });
     await wait(200);
+
+    // Transition order state
     await updateOrder(orderId, orderInfo.body.version + 1, {
-        "action": "transitionState",
+        action: "transitionState",
         state: {
-            "typeId": "state",
-            "key": "order-delivered"
+            typeId: "state",
+            key: "order-delivered"
         }
     });
+
     await wait(200);
 
-    await updateOrder(orderId, orderInfo.body.version + 1, {
-        "action": "transitionState",
-        state: {
-            "typeId": "state",
-            "key": "order-delivered"
-        }
-    });
-    await wait(200);
-    //get last version
+    // Get last version
     orderInfo = await getOrderInfoById(orderId);
-    console.log(orderInfo.body.orderState);
-    console.log(orderInfo.body.state);
-    console.log(`The order ${orderId} is delivered!`)
-    return `The order ${orderId} is delivered!`
+    console.log(`Final order version: ${orderInfo.body.version}`);
+    console.log(`Order state: ${orderInfo.body.orderState}`);
+    console.log(`The order ${orderId} is delivered!`);
+    return `The order ${orderId} is delivered!`;
 }
 
 export function getReturnsFromTheOrder(orderInfo: ClientResponse<Order>) {

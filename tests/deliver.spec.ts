@@ -1,7 +1,7 @@
 import {describe, expect, test} from "@jest/globals";
 import {create, CreateOptions} from "../src/commands/create";
 import {CartOrder} from "../src/api/cart-api";
-import {deliver} from "../src/commands";
+import {deliver} from "../src";
 
 describe('Test deliver command', () => {
 

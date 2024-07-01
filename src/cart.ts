@@ -88,10 +88,12 @@ export async function getCart(customerDomainApi: CartApi<any>, cartId: string) {
 async function getToken() {
     const url = config.get("firebaseUrl");
     const apiKey = config.get("firebaseApiKey");
+    const email = config.get("instoreLogin");
+    const password = config.get("instorePassword");
     try {
         const response = await axios.post(url, {
-            email: "lucas+kiosk@goflink.com",
-            password: "123456",
+            email: email,
+            password: password,
             returnSecureToken: true
         }, {
             headers: {
@@ -108,6 +110,7 @@ async function getToken() {
         return null;
     }
 }
+
 export async function checkoutCart(customerDomainApi: CartApi<any>, cartId: string, totalPrice: number): Promise<CartOrder | undefined | null> {
 
     let token = await getToken() as string;
@@ -121,7 +124,7 @@ export async function checkoutCart(customerDomainApi: CartApi<any>, cartId: stri
             response = await customerDomainApi.v3.checkoutV3(cartId, {
                     "amount": totalPrice,
                     "token": JSON.stringify(cartToken)
-                },  token
+                }, token
             );
             if (response.status === 200) {
                 console.log(`${emojic.confettiBall} The order is created!`);
@@ -148,7 +151,12 @@ export async function checkoutCartInStore(customerDomainApi: CartApi<any>, cartI
             }
         },
         {
-            headers: {'Authorization': `Bearer ${tokenResponse.idToken}`}
+            headers: {
+                'Authorization': `Bearer ${tokenResponse.idToken}`,
+                'Anonymous-Id': '84622d81-81d4-4506-9edd-7f596ed4878d',
+                'optimizely-id': 'cjHD8lsxOybg',
+                'user-tracking-id': 'cjHD8lsxOybg'
+            }
         }
     );
     let orderInfo;
@@ -232,7 +240,7 @@ export async function addProductLines(cartRequest: CartRequest, hubSlug: string,
     console.log(`${emojic.grapes} Setting products available in the hub...\n`);
     try {
         if (Array.isArray(products))
-                addDefaultProductLines(cartRequest, products);
+            addDefaultProductLines(cartRequest, products);
         else {
 
             addCustomProductLines(cartRequest, products);

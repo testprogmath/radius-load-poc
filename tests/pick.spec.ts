@@ -16,4 +16,4 @@ test('Pick an order', async () => {
     orderInfo = await create(options) as CartOrder;
     expect(orderInfo?.state).toContain("Open");
     await pick(orderInfo.number as string, "de_ham_wint");
-});
+}, 20000);

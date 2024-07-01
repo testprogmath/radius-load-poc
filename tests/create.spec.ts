@@ -62,7 +62,7 @@ describe('Test create command', () => {
 
 
     test('CLI: Create an in-store order', async () => {
-        const output = execSync(`flinkord create --hub fr_par_lepe --instore`).toString();
+        const output = execSync(`flinkord create --hub nl_ame_cent --instore -p 13131245:2`).toString();
         console.log(output);
         expect(output).toContain('instore');
         expect(output).toContain('The order is created!');
@@ -73,7 +73,7 @@ describe('Test create command', () => {
     });
 
     test('CLI: Create an order with a deliveryTag "outdoor" ', async () => {
-        const output = execSync(`flinkord create --hub fr_par_lepe -d outdoor`).toString();
+        const output = execSync(`flinkord create --hub nl_ams_diem -d outdoor`).toString();
         const consoleSpy = jest.spyOn(console, 'log');
 
         console.log(output);
@@ -111,7 +111,7 @@ describe('Test create command', () => {
             email: 'flinkord@goflink.com',
             clickAndCollect: false,
             isCLI: true,
-            productsArray: '14007689:3,11019025:4'
+            productsArray: '11014049:3,11015923:4'
         };
         orderInfo = await create(options) as CartOrder;
         expect(orderInfo?.state).toContain("Open");
@@ -119,7 +119,7 @@ describe('Test create command', () => {
 
     afterAll(async () => {
         execSync(`flinkord free -h ${options.hub}`);
-        execSync(`flinkord free -h 'fr_par_lepe'`)
+        execSync(`flinkord free -h nl_ame_cent`)
     });
 
     function getOrderId(output: string) {
