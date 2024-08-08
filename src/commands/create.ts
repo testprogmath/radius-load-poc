@@ -5,9 +5,8 @@ import {getConfigPath} from "../utils";
 import {Colors} from "../shared/enums";
 import {initializeCartApi} from "../utils/api";
 import {getValidatedHubSlug} from "../utils/hub";
-import {getProductsForTheHub} from "../api/catalog-api";
-import {updateStockInTheHub} from "../api/inventory-service-api";
-import {DEFAULT_PRODUCTS_NUMBER, DEFAULT_QUANTITY_OF_PRODUCTS} from "../utils/constants";
+import {getInventoryChangesForTheHub, updateStockInTheHub} from "../api/inventory-service-api";
+import {DEFAULT_QUANTITY_OF_PRODUCTS} from "../utils/constants";
 import {parseProductsArray} from "../utils/cli-arguments";
 
 const chalk = require("chalk");
@@ -48,11 +47,14 @@ export async function create(options: CreateOptions) {
 
     if (!options.productsArray) {
         console.log(`${emojic.banana} Looking for the products available in the hub...\n`);
-      productsArray = await getProductsForTheHub(options.locale, hubSlug, DEFAULT_PRODUCTS_NUMBER);
-      productsArray.forEach(item => updateStockInTheHub(item.sku, options.hubSlug, DEFAULT_QUANTITY_OF_PRODUCTS));
+      productsArray = await getInventoryChangesForTheHub(hubSlug);
+      console.log(productsArray);
+        // @ts-ignore
+        productsArray.forEach(item => updateStockInTheHub(item, options.hubSlug, DEFAULT_QUANTITY_OF_PRODUCTS));
+        // @ts-ignore
         products = productsArray.reduce((record, item) => {
             // @ts-ignore
-            record[item.sku] = DEFAULT_QUANTITY_OF_PRODUCTS;
+            record[item] = DEFAULT_QUANTITY_OF_PRODUCTS;
             return record;
         }, {});
 
