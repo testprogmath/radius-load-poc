@@ -144,14 +144,14 @@ const MAX_RETRIES = 3;  // Maximum number of times to retry
 
 const CANCELLED_ORDER_STATE_ID = "58e94703-3324-45d2-bd7c-fa311f004f49";
 
-async function updateOrderState(orderId:string, version:number) {
+async function updateOrderState(orderId: string, version: number) {
     await updateOrder(orderId, version, {
         action: 'changeOrderState',
         orderState: "Cancelled"
     });
 }
 
-async function transitionOrderState(orderId:string, version:number) {
+async function transitionOrderState(orderId: string, version: number) {
     await updateOrder(orderId, version, {
         action: 'transitionState',
         state: {
@@ -219,8 +219,6 @@ export async function cancelOrder(orderId: string) {
 }
 
 
-
-
 export async function getOrderId(orderIdentifier: string) {
     if (!isUuid(orderIdentifier)) {
         const orderInfo = await api.orders().withOrderNumber({orderNumber: orderIdentifier}).get().execute();
@@ -238,50 +236,72 @@ export async function deliverOrder(orderIdentifier: string): Promise<string> {
         return "The order is complete! Exiting the command...";
     }
     console.log(`The version of the order ${orderInfo.body.id} is: ${orderInfo.body.version}`);
+    try {
+        // Complete the order
+        await updateOrder(orderId, orderInfo.body.version, {
+            action: 'changeOrderState',
+            orderState: "Complete"
+        });
+        await wait(200);
 
-    // Complete the order
-    await updateOrder(orderId, orderInfo.body.version, {
-        action: 'changeOrderState',
-        orderState: "Complete"
-    });
-    await wait(200);
-
-    // Transition order state
-    await updateOrder(orderId, orderInfo.body.version + 1, {
-        action: "transitionState",
-        state: {
-            typeId: "state",
-            key: "order-delivered"
-        }
-    });
-
-    await wait(200);
-
-    // Get last version
-    orderInfo = await getOrderInfoById(orderId);
-    console.log(`Final order version: ${orderInfo.body.version}`);
-    console.log(`Order state: ${orderInfo.body.orderState}`);
-    console.log(`The order ${orderId} is delivered!`);
-    return `The order ${orderId} is delivered!`;
-}
-
-export function getReturnsFromTheOrder(orderInfo: ClientResponse<Order>) {
-    if (orderInfo.body.returnInfo && orderInfo.body.returnInfo.length > 0) {
-        orderInfo.body.returnInfo.forEach((returnInfoItem) => {
-            if (returnInfoItem.items && returnInfoItem.items.length > 0) {
-                returnInfoItem.items.forEach((item, index) => {
-                    console.log(chalk.hex("#FF00FF")(`Item ${index + 1}:`));
-                    Object.entries(item).forEach(([key, value]) => {
-                        console.log(chalk.hex("#FFC0CB")(key.padEnd(15)) + chalk.hex("#FFFFFF")(value ? value : 'N/A'));
-                    });
-                    console.log('\n');
-                });
+        // Transition order state
+        await updateOrder(orderId, orderInfo.body.version + 1, {
+            action: "transitionState",
+            state: {
+                typeId: "state",
+                key: "order-delivered"
             }
         });
-        return orderInfo.body.returnInfo;
-    } else {
-        console.log("No return info or items found in the order.");
-        return null;
+    } catch (error) {
+        if (!(error instanceof Error)) {
+            console.log('Caught an exception of an unknown type:', error);
+        }
+        // @ts-ignore
+        if (!error.message.includes('ConcurrentModification')) {
+            console.log('An unexpected error occurred:', error);
+        }
+
+        try {
+
+            await wait(200);
+            await handleConcurrentModification(error);
+            await updateOrder(orderId, orderInfo.body.version + 1, {
+                action: "transitionState",
+                state: {
+                    typeId: "state",
+                    key: "order-delivered"
+                }
+            });
+        } catch (versionError) {
+        }
     }
-}
+        await wait(200);
+
+        // Get last version
+        orderInfo = await getOrderInfoById(orderId);
+        console.log(`Final order version: ${orderInfo.body.version}`);
+        console.log(`Order state: ${orderInfo.body.orderState}`);
+        console.log(`The order ${orderId} is delivered!`);
+        return `The order ${orderId} is delivered!`;
+    }
+
+    export function getReturnsFromTheOrder(orderInfo: ClientResponse<Order>) {
+        if (orderInfo.body.returnInfo && orderInfo.body.returnInfo.length > 0) {
+            orderInfo.body.returnInfo.forEach((returnInfoItem) => {
+                if (returnInfoItem.items && returnInfoItem.items.length > 0) {
+                    returnInfoItem.items.forEach((item, index) => {
+                        console.log(chalk.hex("#FF00FF")(`Item ${index + 1}:`));
+                        Object.entries(item).forEach(([key, value]) => {
+                            console.log(chalk.hex("#FFC0CB")(key.padEnd(15)) + chalk.hex("#FFFFFF")(value ? value : 'N/A'));
+                        });
+                        console.log('\n');
+                    });
+                }
+            });
+            return orderInfo.body.returnInfo;
+        } else {
+            console.log("No return info or items found in the order.");
+            return null;
+        }
+    }
 

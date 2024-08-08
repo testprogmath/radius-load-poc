@@ -11,7 +11,6 @@ test('Pick an order', async () => {
         email: 'flinkord@goflink.com',
         clickAndCollect: false,
         isCLI: true,
-        productsArray: '14007689:3,11019025:4'
     };
     orderInfo = await create(options) as CartOrder;
     expect(orderInfo?.state).toContain("Open");

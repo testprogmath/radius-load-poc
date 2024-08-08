@@ -5,7 +5,6 @@ import {deliver} from "../src";
 
 describe('Test deliver command', () => {
 
-
     test('CLI: Deliver an order by order id', async () => {
         let orderInfo;
         const options: CreateOptions = {
@@ -19,6 +18,7 @@ describe('Test deliver command', () => {
         const output = await deliver(orderInfo.id as string);
         expect(output).toContain(`The order ${orderInfo.id} is delivered!`)
     }, 10000);
+
     test('CLI: Deliver an order by order number', async () => {
         let orderInfo;
         const options: CreateOptions = {

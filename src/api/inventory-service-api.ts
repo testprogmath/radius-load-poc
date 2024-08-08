@@ -33,7 +33,6 @@ export async function getItemStockInHub(sku: string, hubSlug: string) {
 export async function updateStockInTheHub(sku: string, hubSlug: string, amount: number, reason = "INVENTORY_CHANGE_REASON_CORRECTION") {
     const token = await getAuthToken();
     const url = `${INVENTORY_SERVICE_URL}/v1/inventory/hub/${hubSlug}/sku/${sku}`;
-    console.log(url);
     const data = {
         actor: { id: "flinkord" },
         amount,
@@ -64,13 +63,13 @@ export async function updateStockInTheHub(sku: string, hubSlug: string, amount: 
 export async function getInventoryChangesForTheHub(hubSlug: string, numberOfItems: number = DEFAULT_PRODUCTS_NUMBER, dateFrom?: string, dateTo?: string) {
     const token = await getAuthToken();
     const currentDate = new Date();
-    const twoWeeksAgo = new Date(currentDate);
-    twoWeeksAgo.setDate(currentDate.getDate() - 14);
+    const twoMonthsAgo = new Date(currentDate);
+    twoMonthsAgo.setDate(currentDate.getDate() - 60);
 
     const formattedDateTo = dateTo || currentDate.toISOString();
-    const formattedDateFrom = dateFrom || twoWeeksAgo.toISOString();
+    const formattedDateFrom = dateFrom || twoMonthsAgo.toISOString();
 
-    const url = `${INVENTORY_SERVICE_URL}/v1/inventory/logs?hub_slugs=${hubSlug}&date_from=${encodeURIComponent(formattedDateFrom)}&date_to=${encodeURIComponent(formattedDateTo)}&limit=${numberOfItems}`;
+    const url = `${INVENTORY_SERVICE_URL}/v1/inventory/logs?hub_slugs=${hubSlug}&date_from=${encodeURIComponent(formattedDateFrom)}&date_to=${encodeURIComponent(formattedDateTo)}`;
 
     try {
         const response = await fetch(url, {
@@ -85,7 +84,9 @@ export async function getInventoryChangesForTheHub(hubSlug: string, numberOfItem
         }
 
         const data = await response.json();
-        return data.results.slice(0, numberOfItems).map((entry: any) => entry.sku);
+        const uniqueSkus = Array.from(new Set(data.results.map((entry: any) => entry.sku)));
+
+        return uniqueSkus.slice(0, numberOfItems);
     } catch (error) {
         console.error("Error fetching inventory changes:", error);
         return [];

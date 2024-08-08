@@ -32,41 +32,45 @@ export interface CreateOptions {
 
 export async function create(options: CreateOptions) {
     let hubSlug;
-    let productsArray;
-    let products;
+    let productsArray: string[] = [];
+    let products: { [key: string]: number } = {};
+
     try {
         hubSlug = await getValidatedHubSlug(options.hubSlug);
     } catch (error) {
         return "This hub does not exist!";
     }
-    const cartApi = initializeCartApi(options.locale, hubSlug);
 
+    const cartApi = initializeCartApi(options.locale, hubSlug);
     HubManagerConfig.BASE = config.get("hubManagerApiUrl") as string;
     updateSpinnerText(chalk.hex(Colors.MEXICAN_PINK_DARK)("Processing... \n"), options.isCLI);
 
-
     if (!options.productsArray) {
         console.log(`${emojic.banana} Looking for the products available in the hub...\n`);
-      productsArray = await getInventoryChangesForTheHub(hubSlug);
-      console.log(productsArray);
         // @ts-ignore
-        productsArray.forEach(item => updateStockInTheHub(item, options.hubSlug, DEFAULT_QUANTITY_OF_PRODUCTS));
-        // @ts-ignore
+        productsArray = await getInventoryChangesForTheHub(hubSlug);
+        console.log("Found in logs:" + productsArray);
+
+        for (const item of productsArray) {
+            await updateStockInTheHub(item, options.hubSlug, DEFAULT_QUANTITY_OF_PRODUCTS);
+        }
+
         products = productsArray.reduce((record, item) => {
             // @ts-ignore
-            record[item] = DEFAULT_QUANTITY_OF_PRODUCTS;
+            record[item] = (record[item] || 0) + DEFAULT_QUANTITY_OF_PRODUCTS;
             return record;
         }, {});
 
-    }
-    else {
+    } else {
         products = parseProductsArray(options.productsArray);
         for (const [sku, number] of Object.entries(products)) {
-            await updateStockInTheHub(sku, options.hubSlug, number)
+            await updateStockInTheHub(sku, options.hubSlug, number);
         }
     }
+
     const cartRequest = await buildCartRequest(options.email, hubSlug, options.locale, products, options.deliveryTag);
     let checkoutResult;
+
     if (options.inStore) {
         checkoutResult = await createAndCheckoutCartInStore(cartApi, cartRequest);
     } else {
@@ -74,7 +78,6 @@ export async function create(options: CreateOptions) {
     }
 
     return checkoutResult;
-
 }
 
 

@@ -246,7 +246,6 @@ export async function addProductLines(cartRequest: CartRequest, hubSlug: string,
             addCustomProductLines(cartRequest, products);
         }
 
-        console.log(cartRequest);
     } catch (e) {
         printErrorAndStopSpinner(e);
     }
