@@ -1,0 +1,16 @@
+version: 1.0.0
+
+_config: merge
+
+approve:
+  include:
+    branches:
+      dependabot:
+        prefix: "dependabot/npm_and_yarn"
+merge:
+  method: squash
+  include:
+    branches:
+      dependabot:
+        prefix: "dependabot/npm_and_yarns"
+        age: 5 days
