@@ -12,5 +12,5 @@ merge:
   include:
     branches:
       dependabot:
-        prefix: "dependabot/npm_and_yarns"
+        prefix: "dependabot/npm_and_yarn"
         age: 5 days
