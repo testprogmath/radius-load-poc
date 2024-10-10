@@ -185,7 +185,7 @@ To create the order in the chosen hub, please use -h (--hub option):
 
 ### Create an order in a particular hub
 ```shell
-flinkord create -h fr_par_lepe
+flinkord create -h de_ham_wint
 ```
 
 If you run command without specifying the hub, you'll need to provide the hub in the interactive mode or choose the
@@ -198,7 +198,7 @@ To receive notifications to your email, please use -m (--email option):
 ### Create an order with your email to receive a receipt
 
 ```shell
-flinkord create -h fr_par_lepe -m myemail@goflink.com
+flinkord create -h de_ham_wint -m myemail@goflink.com
 ```
 
 ### Create an in-store order
@@ -206,14 +206,15 @@ flinkord create -h fr_par_lepe -m myemail@goflink.com
 To create an in-store order, please use --instore flag:
 
 ```shell
-flinkord create -h fr_par_lepe --instore
+flinkord create -h nl_ame_cent --instore
 ```
+In-store orders are available only in a few hubs on staging. Please check with @Anna.Khvorostianova or with the checkout team before using this flag.
 
 ### Create an order with clickAndCollect option
 To switch on clickAndCollect option, please use -s (--shipping) flag:
 
 ```shell
-flinkord create -h fr_par_lepe -s true
+flinkord create -h de_ham_wint -s true
 ```
 
 ### Create an order with particular products in it

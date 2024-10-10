@@ -66,8 +66,8 @@ export async function getInventoryChangesForTheHub(hubSlug: string, numberOfItem
     const twoMonthsAgo = new Date(currentDate);
     twoMonthsAgo.setDate(currentDate.getDate() - 60);
 
-    const formattedDateTo = dateTo || currentDate.toISOString();
-    const formattedDateFrom = dateFrom || twoMonthsAgo.toISOString();
+    const formattedDateTo = dateTo ?? currentDate.toISOString();
+    const formattedDateFrom = dateFrom ?? twoMonthsAgo.toISOString();
 
     const url = `${INVENTORY_SERVICE_URL}/v1/inventory/logs?hub_slugs=${hubSlug}&date_from=${encodeURIComponent(formattedDateFrom)}&date_to=${encodeURIComponent(formattedDateTo)}`;
 

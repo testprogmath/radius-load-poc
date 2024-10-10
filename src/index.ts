@@ -37,7 +37,6 @@ export {cancel} from "./commands/cancel";
 export {setupEnv} from "./commands/setup";
 export {addShift} from "./commands/addShift"
 export {deleteShifts} from "./commands/deleteShifts"
-export {getProducts} from "./commands/getProducts"
 export {getOrderReturns} from "./commands/getOrderReturns"
 export {pick} from "./commands/pick"
 

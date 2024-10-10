@@ -4,7 +4,7 @@ const hubSlugRegex = /\b[a-z]{2}_[a-z]+_[a-z1-9]+\b/;
 
 export async function getValidatedHubSlug(hubSlug?: string) {
     if (!hubSlug) {
-        hubSlug = await promptForHub("fr_par_lepe");
+        hubSlug = await promptForHub("de_ham_wint");
     }
 
     if (!hubSlugRegex.test(hubSlug)) {
