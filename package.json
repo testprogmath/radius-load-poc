@@ -48,7 +48,7 @@
   "homepage": "https://github.com/goflink/flinkord-cli#readme",
   "dependencies": {
     "@apollo/client": "^3.11.5",
-    "@commercetools/platform-sdk": "^4.7.0",
+    "@commercetools/platform-sdk": "^7.14.0",
     "@commercetools/sdk-client-v2": "^2.5.0",
     "@commercetools/sdk-middleware-auth": "^7.0.1",
     "@commercetools/sdk-middleware-http": "^7.0.4",
