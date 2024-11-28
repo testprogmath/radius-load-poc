@@ -27,9 +27,18 @@
       "postrelease": "git push --follow-tags origin main && npm publish"
     },
     "types": [
-      {"type": "feat", "section": "Features"},
-      {"type": "fix", "section": "Bug Fixes"},
-      {"type": "chore", "hidden": true}
+      {
+        "type": "feat",
+        "section": "Features"
+      },
+      {
+        "type": "fix",
+        "section": "Bug Fixes"
+      },
+      {
+        "type": "chore",
+        "hidden": true
+      }
     ]
   },
   "repository": {
@@ -56,6 +65,7 @@
     "@flink/hub-manager": "^1.49.0",
     "axios": "^1.7.7",
     "chalk": "^4.1.2",
+    "cli-spinner": "^0.2.10",
     "commander": "^10.0.0",
     "config": "^3.3.12",
     "dotenv": "^16.4.5",
@@ -68,12 +78,12 @@
     "graphql-tag": "^2.12.6",
     "inquirer": "^8.2.5",
     "node-fetch": "^2.6.9",
-    "ora": "8.1.1",
     "typescript": "^5.6.3",
     "xml2js": "^0.6.2"
   },
   "devDependencies": {
     "@jest/globals": "^29.7.0",
+    "@types/cli-spinner": "^0.2.3",
     "@types/config": "^3.3.5",
     "@types/jest": "^29.5.14",
     "@types/lodash": "^4.17.13",

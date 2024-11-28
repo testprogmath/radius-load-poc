@@ -1,34 +1,29 @@
-import ora from 'ora';
+import { Spinner } from 'cli-spinner';
 
-const spinner = ora({
-    spinner: 'dots3',
-});
-
+const spinner = new Spinner('%s Processing...');
+spinner.setSpinnerString('|/-\\');
 
 export const updateSpinnerText = (message: string, isCLI: boolean) => {
     if (isCLI) {
-        spinnerText(message);
-        spinner.start(message);
+        spinner.setSpinnerTitle(message);
+        spinner.start();
     }
-}
+};
 
 export const stopSpinner = () => {
-    if (spinner.isSpinning) {
-        spinner.stop()
-    }
-}
+    spinner.stop(true);
+};
+
 export const spinnerError = (message?: string) => {
-    if (spinner.isSpinning) {
-        spinner.fail(message)
-    }
-}
+    spinner.stop(true);
+    console.error(message);
+};
+
 export const spinnerSuccess = (message?: string) => {
-    if (spinner.isSpinning) {
-        spinner.succeed(message)
-    }
-}
+    spinner.stop(true);
+    console.log(message);
+};
+
 export const spinnerText = (message: string) => {
-    if (spinner.isSpinning) {
-        spinner.text = message
-    }
-}
+    spinner.setSpinnerTitle(message);
+};
