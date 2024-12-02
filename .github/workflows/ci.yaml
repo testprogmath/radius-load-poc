@@ -2,7 +2,11 @@ name: Node.js CI
 
 on:
   push:
-    branches: [ '*' ]
+    branches: 
+      - main
+  pull_request:
+    branches:
+      - main
 
 env:
   GCP_AUTH_WORKLOAD_IDENTITY_PROVIDER: projects/592763168884/locations/global/workloadIdentityPools/goflink-github-actions/providers/github-actions
