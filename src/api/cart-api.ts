@@ -10,7 +10,8 @@
  * ---------------------------------------------------------------
  */
 
-import {CartRequest} from "./objects/cart-request";
+import {CartRequest} from "./objects/cart-request.js";
+import axios, {AxiosInstance, AxiosRequestConfig, AxiosResponse, HeadersDefaults, ResponseType} from "axios";
 
 /** Address represents the details of a shipping and/or billing address */
 export interface Address {
@@ -518,8 +519,6 @@ export interface RiderTip {
     /** Currency is alpha-3 codes from ISO 3166: https://en.wikipedia.org/wiki/ISO_3166-1_alpha-3 */
     currency?: string;
 }
-
-import axios, {AxiosInstance, AxiosRequestConfig, AxiosResponse, HeadersDefaults, ResponseType} from "axios";
 
 export type QueryParamsType = Record<string | number, any>;
 

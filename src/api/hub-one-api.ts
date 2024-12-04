@@ -1,10 +1,12 @@
-import {ApolloClient, InMemoryCache, HttpLink, NormalizedCacheObject, from} from '@apollo/client/core';
-import { setContext } from '@apollo/client/link/context';
-import {Auth0Api} from "./auth0-api";
-import {endPickingMutation, START_PICKING_ORDER_MUTATION} from "./graphql/mutations/order";
+import ApolloClientPkg, {NormalizedCacheObject} from '@apollo/client/core/core.cjs';
+import {setContext} from '@apollo/client/link/context/context.cjs';
+import {Auth0Api} from "./auth0-api.js";
+import {endPickingMutation, START_PICKING_ORDER_MUTATION} from "./graphql/mutations/order.js";
+
+const {ApolloClient, InMemoryCache, HttpLink, from} = ApolloClientPkg;
 
 export class HubOneApi {
-    private client: ApolloClient<NormalizedCacheObject>;
+    private client: InstanceType<typeof ApolloClient<NormalizedCacheObject>>;
     private hubSlug: string | undefined;
 
     constructor(private readonly auth0Api: Auth0Api) {
@@ -12,7 +14,7 @@ export class HubOneApi {
             uri: 'https://api.staging.goflink.com/hub-one-core/hub-one-core/graphql',
         });
 
-        const authLink = setContext(async (_, { headers }) => {
+        const authLink = setContext(async (_, {headers}) => {
             if (!this.hubSlug) {
                 throw new Error("Hub slug is not set. Please set the hub slug before making requests.");
             }
@@ -35,7 +37,7 @@ export class HubOneApi {
         this.hubSlug = hubSlug;
     }
 
-    public getClient(): ApolloClient<NormalizedCacheObject> {
+    public getClient(): InstanceType<typeof ApolloClient<NormalizedCacheObject>> {
         return this.client;
     }
 
@@ -43,12 +45,11 @@ export class HubOneApi {
         try {
             const response = await this.client.mutate({
                 mutation: START_PICKING_ORDER_MUTATION,
-                variables: { orderNumber },
+                variables: {orderNumber},
             });
 
             return response.data;
-        }
-        catch (error: any) {
+        } catch (error: any) {
             if (error.graphQLErrors) {
                 for (const graphQLError of error.graphQLErrors) {
                     if (graphQLError.message === 'Order state not eligible for picking') {

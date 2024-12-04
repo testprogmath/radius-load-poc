@@ -1,4 +1,4 @@
-const inquirer = require("inquirer");
+import inquirer from "inquirer"
 
 export async function promptForHub(defaultHub: string): Promise<string> {
     const response = await inquirer.prompt([

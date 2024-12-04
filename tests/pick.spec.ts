@@ -1,7 +1,7 @@
 import {expect, test} from "@jest/globals";
-import {create, CreateOptions} from "../src/commands/create";
-import {CartOrder} from "../src/api/cart-api";
-import {pick} from "../src"
+import {create, CreateOptions} from "../src/commands/create.js";
+import {CartOrder} from "../src/api/cart-api.js";
+import {pick} from "../src/index.js"
 
 test('Pick an order', async () => {
     let orderInfo;

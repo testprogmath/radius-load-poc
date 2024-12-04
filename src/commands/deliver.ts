@@ -1,5 +1,5 @@
-import {deliverOrder} from "../commercetools/ct-client";
+import {deliverOrder} from "../commercetools/index.js";
 
 export async function deliver(orderId: string): Promise<string> {
-       return deliverOrder(orderId);
+    return deliverOrder(orderId);
 }

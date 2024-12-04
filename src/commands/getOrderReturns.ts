@@ -1,4 +1,4 @@
-import {getOrderId, getOrderInfoById, getReturnsFromTheOrder} from "../commercetools/ct-client";
+import {getOrderInfoById, getReturnsFromTheOrder, getOrderId} from "../commercetools/index.js";
 
 export async function getOrderReturns(orderIdentifier: string) {
     let orderId = await getOrderId(orderIdentifier);

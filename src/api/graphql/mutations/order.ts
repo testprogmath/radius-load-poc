@@ -1,6 +1,6 @@
 import gql from 'graphql-tag';
 
-export const START_PICKING_ORDER_MUTATION = gql`
+export const START_PICKING_ORDER_MUTATION = gql.default`
     mutation startPicking($orderNumber: String!) {
         startPickingV2(orderNumber: $orderNumber) {
             order {
@@ -42,7 +42,8 @@ export const START_PICKING_ORDER_MUTATION = gql`
     }
 `;
 
-export const startManualPickingMutation = gql`
+
+export const startManualPickingMutation = gql.default`
   mutation startManualPicking($orderNumber: String!) {
     startManualPickingV2(orderNumber: $orderNumber) {
       order {
@@ -58,7 +59,7 @@ export const startManualPickingMutation = gql`
   }
 `;
 
-export const endPickingMutation = gql`
+export const endPickingMutation = gql.default`
   mutation endPicking(
     $orderNumber: String!
     $missingItems: [MissingItem!]!

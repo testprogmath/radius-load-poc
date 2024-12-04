@@ -1,23 +1,19 @@
-import {buildCartRequest, createAndCheckoutCart, createAndCheckoutCartInStore,} from "../cart";
-import {updateSpinnerText} from "../spinner";
+import {
+    buildCartRequest,
+    createAndCheckoutCart,
+    createAndCheckoutCartInStore,
+    prepareProductsForCreateRequest
+} from "../cart.js";
+import {updateSpinnerText} from "../spinner.js";
 import {OpenAPI as HubManagerConfig} from "@flink/hub-manager";
-import {getConfigPath} from "../utils";
-import {Colors} from "../shared/enums";
-import {initializeCartApi} from "../utils/api";
-import {getValidatedHubSlug} from "../utils/hub";
-import {getInventoryChangesForTheHub, updateStockInTheHub} from "../api/inventory-service-api";
-import {DEFAULT_QUANTITY_OF_PRODUCTS} from "../utils/constants";
-import {parseProductsArray} from "../utils/cli-arguments";
+import {getConfigPath} from "../utils.js";
+import {Colors} from "../shared/enums.js";
+import {initializeCartApi} from "../utils/api.js";
+import {getValidatedHubSlug} from "../utils/hub.js";
+import chalk from "chalk";
+import * as dotenv from "dotenv";
 
-const chalk = require("chalk");
-const emojic = require("emojic");
-
-require('dotenv').config();
-
-
-const config = getConfigPath();
-
-// a variable for the future option of adding a different number of products
+dotenv.config();
 
 export interface CreateOptions {
     locale: string;
@@ -26,58 +22,40 @@ export interface CreateOptions {
     clickAndCollect?: boolean;
     isCLI: boolean;
     inStore?: boolean;
-    deliveryTag?: string,
+    deliveryTag?: string;
     productsArray?: string;
 }
 
 export async function create(options: CreateOptions) {
-    let hubSlug;
-    let productsArray: string[] = [];
-    let products: { [key: string]: number } = {};
-
     try {
-        hubSlug = await getValidatedHubSlug(options.hubSlug);
+        const hubSlug = await getValidatedHubSlug(options.hubSlug);
+        const cartApi = await initializeCartApi(options.locale, hubSlug);
+
+        const config = await getConfigPath();
+        HubManagerConfig.BASE = config.hubManagerApiUrl as string;
+
+        updateSpinnerText(chalk.hex(Colors.MEXICAN_PINK_DARK)("Processing... \n"), options.isCLI);
+
+        const products = await prepareProductsForCreateRequest(hubSlug, options.productsArray);
+
+        const cartRequest = await buildCartRequest(
+            options.email,
+            hubSlug,
+            options.locale,
+            products,
+            options.deliveryTag
+        );
+        console.debug(`Cart request: ${JSON.stringify(cartRequest)}`);
+
+        return options.inStore
+            ? await createAndCheckoutCartInStore(cartApi, cartRequest)
+            : await createAndCheckoutCart(cartApi, cartRequest, options.clickAndCollect);
+
     } catch (error) {
-        return "This hub does not exist!";
-    }
-
-    const cartApi = initializeCartApi(options.locale, hubSlug);
-    HubManagerConfig.BASE = config.get("hubManagerApiUrl") as string;
-    updateSpinnerText(chalk.hex(Colors.MEXICAN_PINK_DARK)("Processing... \n"), options.isCLI);
-
-    if (!options.productsArray) {
-        console.log(`${emojic.banana} Looking for the products available in the hub...\n`);
-        // @ts-ignore
-        productsArray = await getInventoryChangesForTheHub(hubSlug);
-        console.log("Found in logs:" + productsArray);
-
-        for (const item of productsArray) {
-            await updateStockInTheHub(item, options.hubSlug, DEFAULT_QUANTITY_OF_PRODUCTS);
+        console.error("Error creating order:", error);
+        if (error instanceof Error && error.message.includes("Invalid hub slug")) {
+            return "This hub does not exist!";
         }
-
-        products = productsArray.reduce((record, item) => {
-            // @ts-ignore
-            record[item] = (record[item] || 0) + DEFAULT_QUANTITY_OF_PRODUCTS;
-            return record;
-        }, {});
-
-    } else {
-        products = parseProductsArray(options.productsArray);
-        for (const [sku, number] of Object.entries(products)) {
-            await updateStockInTheHub(sku, options.hubSlug, number);
-        }
+        return "An error occurred while processing the order.";
     }
-
-    const cartRequest = await buildCartRequest(options.email, hubSlug, options.locale, products, options.deliveryTag);
-    let checkoutResult;
-
-    if (options.inStore) {
-        checkoutResult = await createAndCheckoutCartInStore(cartApi, cartRequest);
-    } else {
-        checkoutResult = await createAndCheckoutCart(cartApi, cartRequest, options.clickAndCollect);
-    }
-
-    return checkoutResult;
 }
-
-

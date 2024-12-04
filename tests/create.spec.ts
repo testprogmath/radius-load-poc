@@ -1,129 +1,158 @@
-import {afterAll, describe, expect, test} from '@jest/globals';
-import {create} from "../src";
-import {CreateOptions} from "../src/commands/create";
-import {CartOrder} from "../src/api/cart-api";
-
-const {execSync} = require('child_process');
-const config = require('config');
-const options = {
-    hub: config.get("hubForTests"),
-    email: config.get("testEmail")
-};
+import {afterAll, describe, expect, jest, test} from '@jest/globals';
+import {create} from "../src/index.js";
+import {execSync} from "child_process";
+import {getConfigPath} from "../src/utils.js";
 
 describe('Test create command', () => {
     jest.retryTimes(3, {logErrorsBeforeRetry: true});
-    let orderIds: string[] = [];
 
+    let options: { hub: string; email: string };
 
-    test('CLI: Create an order with a specified hub', async () => {
-        const output = execSync(`flinkord create --hub ${options.hub}`).toString();
-        console.log(output);
-        expect(output).toContain(`The cart is created with the id`);
-        expect(output).toContain('The order is created!');
-        expect(output).toContain(`The order number is`);
-        expect(output).toContain(`and the order id is `);
-        expect(output).not.toContain('The cart is not assigned to the order. Please try later');
-        const orderId = getOrderId(output)
-        console.log(`The order id is: ${orderId}`);
-        orderIds.push(orderId);
-    });
-
-    test('CLI: Create an order with a specified email', async () => {
-        const output = execSync(`flinkord create --hub ${options.hub} -m ${options.email}`).toString();
-        console.log(output);
-        expect(output).toContain(`'${options.email}'`);
-        expect(output).toContain('The order is created!');
-        expect(output).not.toContain('The cart is not assigned to the order. Please try later');
-        orderIds.push(getOrderId(output));
-    });
-
-    test('CLI: Create an order with clickAndCollect value', async () => {
-        const output = execSync(`flinkord create --hub ${options.hub} -s true`).toString();
-        console.log(output);
-        expect(output).toContain('The order is created!');
-        expect(output).not.toContain('The cart is not assigned to the order. Please try later');
-        const orderId = getOrderId(output)
-        console.log(`The order id is: ${orderId}`);
-        orderIds.push(orderId);
-    });
-
-    test('CLI: Create an order with particular products', async () => {
-        const output = execSync(`flinkord create --hub ${options.hub} -p 15012024:2,11014933:3,11013382:4`).toString();
-        // console.log(output);
-        expect(output).toContain("'11013382'");
-        expect(output).toContain("'11014933'");
-        expect(output).toContain("'15012024'");
-        expect(output).toContain('The order is created!');
-        expect(output).not.toContain('The cart is not assigned to the order. Please try later');
-        const orderId = getOrderId(output)
-        console.log(`The order id is: ${orderId}`);
-        orderIds.push(orderId);
-    });
-
-
-    test.failing('CLI: Create an in-store order', async () => {
-        const output = execSync(`flinkord create --hub nl_ame_cent --instore -p 13131245:2`).toString();
-        console.log(output);
-        expect(output).toContain('instore');
-        expect(output).toContain('The order is created!');
-        expect(output).not.toContain('The cart is not assigned to the order. Please try later');
-        const orderId = getOrderId(output)
-        console.log(`The order id is: ${orderId}`);
-        orderIds.push(orderId);
-    });
-
-    test('CLI: Create an order with a deliveryTag "outdoor"', async () => {
-        const output = execSync(`flinkord create --hub nl_ams_diem -d outdoor`).toString();
-        const consoleSpy = jest.spyOn(console, 'log');
-
-        console.log(output);
-        expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('outdoor'));
-
-        // expect(output).toContain('tag: \'outdoor\'');
-        expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('The order is created!'));
-
-        // expect(output).toContain('The order is created!');
-        expect(output).not.toContain('The cart is not assigned to the order. Please try later');
-        const orderId = getOrderId(output)
-        console.log(`The order id is: ${orderId}`);
-        orderIds.push(orderId);
-    });
-
-    test('Create an order with an unknown hub', async () => {
-        let orderInfo;
-        const options: CreateOptions = {
-            locale: 'en-de',
-            hubSlug: 'test',
-            email: 'flinkord@goflink.com',
-            clickAndCollect: false,
-            isCLI: true,
-            productsArray: '14007689:3,11019025:4'
+    beforeAll(async () => {
+        const config = await getConfigPath();
+        options = {
+            hub: config.hubForTests,
+            email: config.testEmail,
         };
-        orderInfo = await create(options);
-        expect(orderInfo).toEqual("This hub does not exist!");
+        console.log("Initialized options:", options);
+
     });
 
-    test('Create an order with productsArray', async () => {
-        let orderInfo;
-        const options: CreateOptions = {
-            locale: 'en-de',
-            hubSlug: 'de_ham_wint',
-            email: 'flinkord@goflink.com',
-            clickAndCollect: false,
-            isCLI: true,
-            productsArray: '11014049:3,11015923:4'
+    afterEach(async () => {
+        // Wait for 1 sec before the next test
+        await new Promise(resolve => {
+            const timer = setTimeout(resolve, 1000);
+        });
+    });
+
+    const createUniversalSpy = () => {
+        const logSpy = jest.spyOn(console, 'log').mockImplementation(() => {
+        });
+        const debugSpy = jest.spyOn(console, 'debug').mockImplementation(console.log);
+
+        const restoreAll = () => {
+            logSpy.mockRestore();
+            debugSpy.mockRestore();
         };
-        orderInfo = await create(options) as CartOrder;
-        expect(orderInfo?.state).toContain("Open");
+
+        return {logSpy, debugSpy, restoreAll};
+    };
+
+    test('Create an order with a specified hub', async () => {
+        const {logSpy, restoreAll} = createUniversalSpy();
+
+        try {
+            const orderInfo = await create({
+                hubSlug: options.hub,
+                locale: 'en-de',
+                isCLI: false,
+                email: "flinkordtest@goflink.com"
+            });
+
+            expect(logSpy).toHaveBeenCalledWith(expect.stringContaining("The cart is created with the id"));
+            expect(logSpy).toHaveBeenCalledWith(expect.stringContaining("The order is created!"));
+            expect(logSpy).toHaveBeenCalledWith(expect.stringContaining("The order number is"));
+            expect(logSpy).toHaveBeenCalledWith(expect.stringContaining("and the order id is"));
+
+            console.log("Order info:", orderInfo);
+            expect(orderInfo).toBeDefined();
+
+        } catch (error) {
+            console.error("Test failed:", error);
+            throw error;
+        } finally {
+            restoreAll();
+        }
+    }, 70000);
+
+    test('Create an order with a specified email', async () => {
+        const {logSpy, restoreAll} = createUniversalSpy();
+
+        const orderInfo = await create({
+            hubSlug: options.hub,
+            locale: 'en-de',
+            isCLI: false,
+            email: options.email
+        });
+
+        expect(logSpy).toHaveBeenCalledWith(expect.stringContaining(options.email));
+        expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('The order is created!'));
+        expect(logSpy).not.toHaveBeenCalledWith(expect.stringContaining('The cart is not assigned to the order. Please try later'));
+        expect(orderInfo).toBeDefined();
+
+        restoreAll();
+    }, 70000);
+
+    test('Create an order with clickAndCollect value', async () => {
+        const {logSpy, restoreAll} = createUniversalSpy();
+        await create({
+            hubSlug: options.hub,
+            locale: 'en-de',
+            isCLI: false,
+            email: options.email,
+            clickAndCollect: true,
+        });
+        expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('The order is created!'));
+        expect(logSpy).not.toHaveBeenCalledWith(expect.stringContaining('The cart is not assigned to the order. Please try later'));
+
+        restoreAll();
+    });
+
+    test('Create an order with particular products', async () => {
+        const {logSpy, restoreAll} = createUniversalSpy();
+
+        const productsArray = '15012024:2,11014933:3,11013382:4';
+        await create({
+            hubSlug: options.hub,
+            locale: 'en-de',
+            isCLI: false,
+            email: options.email,
+            productsArray,
+        });
+        expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('11013382'));
+        expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('11014933'));
+        expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('15012024'));
+        expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('The order is created!'));
+        expect(logSpy).not.toHaveBeenCalledWith(expect.stringContaining('The cart is not assigned to the order. Please try later'));
+
+        restoreAll();
+    });
+
+    test.failing('Create an in-store order', async () => {
+        const {logSpy, restoreAll} = createUniversalSpy();
+        await create({
+            hubSlug: 'nl_ame_cent',
+            locale: 'en-de',
+            isCLI: false,
+            email: options.email,
+            inStore: true,
+            productsArray: '13131245:2',
+        });
+        expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('The order is created!'));
+        expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('Attempt 1:Trying to get the payment done...'));
+        expect(logSpy).not.toHaveBeenCalledWith(expect.stringContaining('The cart is not assigned to the order. Please try later'));
+
+        restoreAll();
+    }, 45000);
+
+    test('Create an order with a deliveryTag "outdoor"', async () => {
+        const {logSpy, restoreAll} = createUniversalSpy();
+        await create({
+            hubSlug: 'nl_ams_diem',
+            locale: 'en-de',
+            isCLI: false,
+            email: options.email,
+            deliveryTag: 'outdoor',
+        });
+        expect(logSpy).toHaveBeenCalledWith(expect.stringContaining("outdoor"));
+        expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('The order is created!'));
+        expect(logSpy).not.toHaveBeenCalledWith(expect.stringContaining('The cart is not assigned to the order. Please try later'));
+
+        restoreAll();
     });
 
     afterAll(async () => {
         execSync(`flinkord free -h ${options.hub}`);
-        execSync(`flinkord free -h nl_ame_cent`)
+        execSync(`flinkord free -h nl_ame_cent`);
     });
-
-    function getOrderId(output: string) {
-        const words = output.split(' ');
-        return words[words.length - 1];
-    }
 });

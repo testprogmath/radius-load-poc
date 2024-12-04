@@ -1,12 +1,13 @@
-import {Colors, QuinyxGroup} from "../shared/enums";
-import { QuinyxApi} from "../api/quinyx-api";
-import {hubMap} from "../utils/hub";
-import {spinnerError, spinnerSuccess, updateSpinnerText} from "../spinner";
+import {Colors, QuinyxGroup} from "../shared/enums.js";
+import {QuinyxApi} from "../api/quinyx-api.js";
+import {hubMap} from "../utils/hub.js";
+import {spinnerError, spinnerSuccess, updateSpinnerText} from "../spinner.js";
 import chalk from "chalk";
+// @ts-ignore
+import emojic from "emojic"
 
-const emojic = require("emojic");
 
-export async function deleteShifts(hubSlug: string, badgeNumber: string, username: string, password: string,  isCLI = true) {
+export async function deleteShifts(hubSlug: string, badgeNumber: string, username: string, password: string, isCLI = true) {
     const quinyxApi = new QuinyxApi();
     let quinyxGroupValue: number | undefined;
     if (hubSlug.toUpperCase() in QuinyxGroup) {
@@ -23,7 +24,7 @@ export async function deleteShifts(hubSlug: string, badgeNumber: string, usernam
 
 
     console.log("🚀 Starting to delete shifts...");
-    if (isCLI)  updateSpinnerText(chalk.hex(Colors.MEXICAN_PINK_DARK)("Processing.... \n"), true);
+    if (isCLI) updateSpinnerText(chalk.hex(Colors.MEXICAN_PINK_DARK)("Processing.... \n"), true);
     const hub = hubMap[hubSlug.toLowerCase()];
     if (!hub) {
         console.error("Invalid hub specified! If you're sure that the hub is correct, contact the author to add your hub to the list.");
@@ -34,14 +35,14 @@ export async function deleteShifts(hubSlug: string, badgeNumber: string, usernam
         console.log("Login successful!")
         // @ts-ignore
         const result = await quinyxApi.getAllShiftsByDateForUser(quinyxGroupValue, new Date());
-        await Promise.all(result.map((shiftId:number) => quinyxApi.deleteShift(shiftId, quinyxGroupValue!)));
+        await Promise.all(result.map((shiftId: number) => quinyxApi.deleteShift(shiftId, quinyxGroupValue!)));
 
 
         if (isCLI) spinnerSuccess(`All shifts for ${hubSlug} have been removed!`);
 
         console.log(`${emojic.calendar} ${chalk.hex(Colors.LAVENDER_PINK).bold("All shifts for " + hubSlug + " have been removed")} ${emojic.calendar}`);
 
-       } catch (error) {
+    } catch (error) {
         console.error("Oops, something went wrong:", error);
         if (isCLI) spinnerError("Your request failed. Please find the stacktrace above");
     }

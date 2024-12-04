@@ -1,29 +1,52 @@
-import {getConfigPath} from "../utils";
-import axios from 'axios';
-require('dotenv').config();
+import {getConfigPath} from "../utils.js";
+import axios from "axios";
+import * as dotenv from "dotenv";
 
+dotenv.config();
 
-const config = getConfigPath();
-const identityKey = process.env.IDENTITY_KEY;
-const identityUrl = config.get("identityToolkitUrl");
+let config: any;
+let identityUrl: string;
+let identityKey: string;
+
+let isInitialized = false;
+
+async function ensureInitialized() {
+    if (!isInitialized) {
+        config = await getConfigPath();
+        identityUrl = config.identityToolkitUrl;
+        identityKey = process.env.IDENTITY_KEY!;
+
+        if (!identityKey) {
+            throw new Error("IDENTITY_KEY is not set in the environment variables.");
+        }
+
+        isInitialized = true;
+    }
+}
 
 export async function authorizeInStore(email: string, password: string) {
+    await ensureInitialized();
+
     try {
-        const response = await axios.post(`${identityUrl}/v1/accounts:signInWithPassword`, {
-            returnSecureToken: true,
-            email: email,
-            password: password,
-        }, {
-            params: {
-                key: identityKey,
+        const response = await axios.post(
+            `${identityUrl}/v1/accounts:signInWithPassword`,
+            {
+                returnSecureToken: true,
+                email: email,
+                password: password,
             },
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
+            {
+                params: {
+                    key: identityKey,
+                },
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            }
+        );
         return response.data;
     } catch (error: any) {
-        console.error('Error signing in:', error.message);
+        console.error("Error signing in:", error.message);
         return null;
     }
 }

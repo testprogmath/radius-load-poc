@@ -1,9 +1,10 @@
-import {getConfigPath} from "../utils";
-import {CartApi} from "../api/cart-api";
+import {getConfigPath} from "../utils.js";
+import {CartApi} from "../api/cart-api.js";
 
-const config = getConfigPath();
-export function initializeCartApi(locale: string, hubSlug: string) {
-    const consumerApiUrl = config.get("consumerApiUrl") as string;
+
+export async function initializeCartApi(locale: string, hubSlug: string) {
+    const config = await getConfigPath();
+    const consumerApiUrl = config.consumerApiUrl as string;
 
     return new CartApi({
         baseURL: consumerApiUrl,

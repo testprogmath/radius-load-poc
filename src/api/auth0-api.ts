@@ -1,13 +1,13 @@
 import axios from "axios";
-import {Hubs} from "../shared/hubs";
+import {Hubs} from "../shared/hubs.js";
 
 export class Auth0Api {
     public async getToken(hubSlug: string) {
 
-            const hubInfo = Hubs[hubSlug];
-            if (!hubInfo) {
-                throw new Error(`Hub information for '${hubSlug}' not found. Please check the hubSlug. If it's correct, contact the author of this tool: https://goflink.slack.com/team/U04RCKMB6JK`);
-            }
+        const hubInfo = Hubs[hubSlug];
+        if (!hubInfo) {
+            throw new Error(`Hub information for '${hubSlug}' not found. Please check the hubSlug. If it's correct, contact the author of this tool: https://goflink.slack.com/team/U04RCKMB6JK`);
+        }
         try {
             const response = await axios.post('https://auth.staging.goflink.com/oauth/token', {
                 grant_type: "password",

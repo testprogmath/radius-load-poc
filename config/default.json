@@ -1,15 +1,20 @@
 {
   "consumerApiUrl": "https://api.staging.goflink.com/consumer-backend/cart",
   "hubManagerApiUrl": "https://api.staging.goflink.com/hub/hub-manager",
+  "hubApiUrl": "https://hub-api.staging.goflink.com",
   "CTAuthUrl": "https://auth.europe-west1.gcp.commercetools.com",
   "CTApiUrl": "https://api.europe-west1.gcp.commercetools.com",
+  "hubForTests": "de_ham_wint",
+  "testEmail": "test@goflink.com",
+  "hubApiKey": "a07e2812-4789-4916-8cf5-6577f7408174",
   "identityToolkitUrl": "https://identitytoolkit.googleapis.com",
-  "quinyxUrl": "https://web-rc.quinyx.com/extapi",
-  "inventoryServiceUrl": "https://api.staging.goflink.com/hub/inventory-service",
   "instoreLogin": "lucas+kiosk@goflink.com",
   "instorePassword": "123456",
+  "quinyxUrl": "https://web-rc.quinyx.com/extapi",
+  "inventoryServiceUrl": "https://api.staging.goflink.com/hub/inventory-service",
   "genericPassword": "password123&",
   "inventoryServiceToken": "3de4381e0f53411596c0aa8fde12bbdc8a37d3352dd9dc868a50643533ba8b17",
   "firebaseApiKey": "AIzaSyB9qXJLdHcG2jG4Syixq4GiY8sgYaE1H88",
   "firebaseUrl": "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword"
+
 }

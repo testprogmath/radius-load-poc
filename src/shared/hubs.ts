@@ -1,7 +1,9 @@
 import dotenv from 'dotenv';
+
 dotenv.config();
 
 const genericPassword = process.env.GENERIC_PASSWORD as string;
+
 interface Hub {
     latitude: number;
     longitude: number;

@@ -1,14 +1,33 @@
-import { getConfigPath } from "../utils";
-import {DEFAULT_PRODUCTS_NUMBER} from "../utils/constants";
+import {getConfigPath} from "../utils.js";
+import {DEFAULT_PRODUCTS_NUMBER} from "../utils/constants.js";
+import {AppConfig} from "../config.js";
 
-const config = getConfigPath();
-const INVENTORY_SERVICE_URL = config.get("inventoryServiceUrl");
+let config: AppConfig;
+let INVENTORY_SERVICE_URL: string;
 
-async function getAuthToken() {
-    return config.get("inventoryServiceToken");
+let isInitialized = false;
+
+async function ensureInitialized() {
+    if (!isInitialized) {
+        await initializeConfig();
+        isInitialized = true;
+    }
+}
+
+export async function initializeConfig() {
+    config = await getConfigPath();
+
+    INVENTORY_SERVICE_URL = config.inventoryServiceUrl;
+    console.log(`Initialized INVENTORY_SERVICE_URL: ${INVENTORY_SERVICE_URL}`);
+}
+
+async function getAuthToken(): Promise<string> {
+    return config.inventoryServiceToken;
 }
 
 export async function getItemStockInHub(sku: string, hubSlug: string) {
+    await ensureInitialized();
+
     const token = await getAuthToken();
     const url = `${INVENTORY_SERVICE_URL}/v1/inventory?skus=${sku}&hubSlugs=${hubSlug}`;
 
@@ -31,13 +50,16 @@ export async function getItemStockInHub(sku: string, hubSlug: string) {
 }
 
 export async function updateStockInTheHub(sku: string, hubSlug: string, amount: number, reason = "INVENTORY_CHANGE_REASON_CORRECTION") {
+    await ensureInitialized();
+
     const token = await getAuthToken();
     const url = `${INVENTORY_SERVICE_URL}/v1/inventory/hub/${hubSlug}/sku/${sku}`;
     const data = {
-        actor: { id: "flinkord" },
+        actor: {id: "flinkord"},
         amount,
         reason
     };
+
     try {
         const response = await fetch(url, {
             method: 'POST',
@@ -61,6 +83,8 @@ export async function updateStockInTheHub(sku: string, hubSlug: string, amount: 
 }
 
 export async function getInventoryChangesForTheHub(hubSlug: string, numberOfItems: number = DEFAULT_PRODUCTS_NUMBER, dateFrom?: string, dateTo?: string) {
+    await ensureInitialized();
+
     const token = await getAuthToken();
     const currentDate = new Date();
     const twoMonthsAgo = new Date(currentDate);

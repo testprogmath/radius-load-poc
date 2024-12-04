@@ -1,5 +1,4 @@
-import {cancelOrder, getOrders} from "../commercetools/ct-client";
-
+import {cancelOrder, getOrders} from "../commercetools/index.js";
 
 export async function free(hubSlug: string) {
     const response = await getOrders(hubSlug);

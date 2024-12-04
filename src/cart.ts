@@ -1,47 +1,65 @@
-import {CartApi, CartOrder, GetCartResponseV3} from "./api/cart-api";
+import {CartApi, CartOrder, GetCartResponseV3} from "./api/cart-api.js";
 import {LegacyHubDetailsService} from "@flink/hub-manager";
-import {spinnerError, spinnerSuccess, stopSpinner} from "./spinner";
-import {getConfigPath, wait} from "./utils";
+import {spinnerError, spinnerSuccess, stopSpinner} from "./spinner.js";
+import {getConfigPath, wait} from "./utils.js";
 import chalk from "chalk";
-import {Colors} from "./shared/enums";
-import {Hubs} from "./shared/hubs";
-import {authorizeInStore} from "./api/website-api";
+// @ts-ignore
+import emojic from "emojic";
+import {Colors} from "./shared/enums.js";
+import {Hubs} from "./shared/hubs.js";
+import {authorizeInStore} from "./api/website-api.js";
 import axios, {AxiosResponse} from "axios";
-import {CartLine, CartRequest} from "./api/objects/cart-request";
-import {printErrorAndStopSpinner} from "./utils/spinner";
+import {CartLine, CartRequest} from "./api/objects/cart-request.js";
+import {printErrorAndStopSpinner} from "./utils/spinner.js";
 
-require('dotenv').config();
+import * as dotenv from "dotenv";
+import {getInventoryChangesForTheHub, updateStockInTheHub} from "./api/inventory-service-api.js";
+import {DEFAULT_QUANTITY_OF_PRODUCTS} from "./utils/constants.js";
+import {parseProductsArray} from "./utils/cli-arguments.js";
 
-const config = getConfigPath();
-const inStoreLogin = config.get('instoreLogin');
-const inStorePassword = config.get('instorePassword');
+dotenv.config();
+
+let config: any;
+let inStoreLogin: string;
+let inStorePassword: string;
+let isInitialized = false;
+
 const cartToken = {
-    "amount": {
-        "currency": "EUR",
-        "value": 1000
+    amount: {
+        currency: "EUR",
+        value: 1000,
     },
-    "additionalData": {
-        "allow3DS2": true
+    additionalData: {
+        allow3DS2: true,
     },
-    "paymentMethod": {
-        "type": "scheme",
-        "encryptedCardNumber": "test_5555555555554444",
-        "encryptedExpiryMonth": "test_03",
-        "encryptedExpiryYear": "test_2030",
-        "encryptedSecurityCode": "test_737"
+    paymentMethod: {
+        type: "scheme",
+        encryptedCardNumber: "test_5555555555554444",
+        encryptedExpiryMonth: "test_03",
+        encryptedExpiryYear: "test_2030",
+        encryptedSecurityCode: "test_737",
     },
-    "channel": "Web",
-    "browserInfo": {
-        "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1",
-        "acceptHeader": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8"
+    channel: "Web",
+    browserInfo: {
+        userAgent:
+            "Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1",
+        acceptHeader:
+            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
     },
-    "returnUrl": "https://webhook.site/"
+    returnUrl: "https://webhook.site/",
+};
+
+async function ensureInitialized() {
+    if (!isInitialized) {
+        config = await getConfigPath();
+        inStoreLogin = config.instoreLogin;
+        inStorePassword = config.instorePassword;
+        isInitialized = true;
+    }
 }
 
-
-const emojic = require("emojic");
-
 export async function createCart(customerDomainApi: CartApi<any>, cartRequest: CartRequest) {
+    await ensureInitialized();
     let response: AxiosResponse<GetCartResponseV3> | undefined;
     try {
         response = await customerDomainApi.v3.createCartV3(cartRequest);
@@ -50,27 +68,28 @@ export async function createCart(customerDomainApi: CartApi<any>, cartRequest: C
             console.log(`${emojic.shoppingCart} The cart is created with the id ${chalk.hex(Colors.THULIAN_PINK)(cartId)}`);
         }
         console.log();
-    } catch
-        (e) {
+    } catch (e) {
         printErrorAndStopSpinner(e);
     }
     return response?.data ?? null;
 }
 
 export async function addShippingMethod(customerDomainApi: CartApi<any>, cartId: string, clickAndCollect: boolean = false) {
+    await ensureInitialized();
     try {
         const response = await customerDomainApi.v2.setShippingMethodV2(cartId, {clickAndCollect: clickAndCollect});
         if (response.status === 200) {
             console.log(`${emojic.rocket} The shipping method is assigned, clickAndCollect is ${chalk.hex(Colors.MEXICAN_PINK)(clickAndCollect)}`);
         }
         console.log();
-    } catch
-        (e) {
+    } catch (e) {
+        console.error("Error during addShippingMethod:", e);
         printErrorAndStopSpinner(e);
     }
 }
 
 export async function getCart(customerDomainApi: CartApi<any>, cartId: string) {
+    await ensureInitialized();
     let response: AxiosResponse<GetCartResponseV3> | undefined;
     try {
         response = await customerDomainApi.v3.getCartV3(cartId);
@@ -78,42 +97,49 @@ export async function getCart(customerDomainApi: CartApi<any>, cartId: string) {
             console.log(`The cart is created with the id ${chalk.hex(Colors.MEXICAN_PINK)(cartId)}`);
         }
         console.log();
-    } catch
-        (e) {
+    } catch (e) {
         printErrorAndStopSpinner(e);
     }
     return response?.data ?? null;
 }
 
 async function getToken() {
-    const url = config.get("firebaseUrl");
-    const apiKey = config.get("firebaseApiKey");
-    const email = config.get("instoreLogin");
-    const password = config.get("instorePassword");
+    await ensureInitialized();
+    const url = config.firebaseUrl;
+    const apiKey = config.firebaseApiKey;
     try {
-        const response = await axios.post(url, {
-            email: email,
-            password: password,
-            returnSecureToken: true
-        }, {
-            headers: {
-                'Content-Type': 'application/json'
+        const response = await axios.post(
+            url,
+            {
+                email: inStoreLogin,
+                password: inStorePassword,
+                returnSecureToken: true,
             },
-            params: {
-                key: apiKey
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                params: {
+                    key: apiKey,
+                },
             }
-        });
+        );
 
         return response.data.idToken as string;
     } catch (error) {
-        console.error('Error during sign in:', error);
+        console.error("Error during sign in:", error);
         return null;
     }
 }
 
 export async function checkoutCart(customerDomainApi: CartApi<any>, cartId: string, totalPrice: number): Promise<CartOrder | undefined | null> {
+    await ensureInitialized();
+    const token = await getToken();
 
-    let token = await getToken() as string;
+    if (!token) {
+        throw new Error("Failed to retrieve authentication token.");
+    }
+
     const MAX_RETRIES = 3;
     cartToken.amount.value = totalPrice;
     let orderInfo;
@@ -121,42 +147,47 @@ export async function checkoutCart(customerDomainApi: CartApi<any>, cartId: stri
     try {
         let retry = 0;
         while (retry < MAX_RETRIES) {
-            response = await customerDomainApi.v3.checkoutV3(cartId, {
-                    "amount": totalPrice,
-                    "token": JSON.stringify(cartToken)
-                }, token
+            response = await customerDomainApi.v3.checkoutV3(
+                cartId,
+                {
+                    amount: totalPrice,
+                    token: JSON.stringify(cartToken),
+                },
+                token
             );
             if (response.status === 200) {
                 console.log(`${emojic.confettiBall} The order is created!`);
                 orderInfo = await checkIfOrderIsCreated(customerDomainApi, cartId);
                 break;
             } else {
-                console.log("The order was not created.")
+                console.log("The order was not created.");
             }
             retry++;
         }
         return orderInfo;
-    } catch
-        (e) {
+    } catch (e) {
         printErrorAndStopSpinner(e);
     }
 }
 
 export async function checkoutCartInStore(customerDomainApi: CartApi<any>, cartId: string, totalPrice: number) {
+    await ensureInitialized();
     const tokenResponse = await authorizeInStore(inStoreLogin, inStorePassword);
-    const response = await customerDomainApi.v3.checkoutInStoreRequest(cartId, {
-            "amount": {
+    const response = await customerDomainApi.v3.checkoutInStoreRequest(
+        cartId,
+        {
+            amount: {
                 currency: "EUR",
-                value: totalPrice
-            }
+                value: totalPrice,
+            },
         },
         {
             headers: {
-                'Authorization': `Bearer ${tokenResponse.idToken}`,
-                'Anonymous-Id': '84622d81-81d4-4506-9edd-7f596ed4878d',
-                'optimizely-id': 'cjHD8lsxOybg',
-                'user-tracking-id': 'cjHD8lsxOybg'
-            }
+                Authorization: `Bearer ${tokenResponse.idToken}`,
+                "Anonymous-Id": "84622d81-81d4-4506-9edd-7f596ed4878d",
+                "optimizely-id": "cjHD8lsxOybg",
+                "user-tracking-id": "cjHD8lsxOybg",
+            },
         }
     );
     let orderInfo;
@@ -164,15 +195,15 @@ export async function checkoutCartInStore(customerDomainApi: CartApi<any>, cartI
         console.log(`${emojic.confettiBall} The order is created!`);
         await checkPaymentStatus(customerDomainApi, cartId);
         orderInfo = await checkIfOrderIsCreated(customerDomainApi, cartId);
-
     } else {
-        console.log("The order was not created.")
+        console.log("The order was not created.");
     }
     return orderInfo;
 }
 
 
 export async function checkPaymentStatus(customerDomainApi: CartApi<any>, cartId: string,) {
+    await ensureInitialized();
     let response = await customerDomainApi.v3.getPaymentStatusInStore(cartId);
     const MAX_RETRIES_COUNT = 40;
     let retries = 0;
@@ -190,13 +221,13 @@ export async function checkPaymentStatus(customerDomainApi: CartApi<any>, cartId
 }
 
 async function checkIfOrderIsCreated(customerDomainApi: CartApi<any>, cartId: string) {
+
     const MAX_RETRIES = 20;
     const RETRY_DELAY = 200;
     let order;
-
+    await ensureInitialized();
     try {
         const getCartResponse = await customerDomainApi.v3.getCartV3(cartId);
-
         if (getCartResponse.status === 200) {
             order = await waitForOrderAssignment(customerDomainApi, cartId, MAX_RETRIES, RETRY_DELAY);
 
@@ -219,24 +250,32 @@ async function checkIfOrderIsCreated(customerDomainApi: CartApi<any>, cartId: st
 }
 
 async function waitForOrderAssignment(customerDomainApi: CartApi<any>, cartId: string, maxRetries: number, retryDelay: number) {
+    await ensureInitialized();
     let retry = 0;
 
     while (retry < maxRetries) {
-        const getCartResponse = await customerDomainApi.v3.getCartV3(cartId);
+        try {
+            const getCartResponse = await customerDomainApi.v3.getCartV3(cartId);
 
-        if (getCartResponse.data.order) {
-            return getCartResponse.data.order;
+            if (getCartResponse.data.order) {
+                console.log('Order assigned:', getCartResponse.data.order);
+                return getCartResponse.data.order;
+            }
+
+            retry++;
+            await wait(retryDelay);
+        } catch (error) {
+            console.error(`Error on attempt ${retry + 1}:`, error);
         }
-
-        retry++;
-        await wait(retryDelay);
     }
 
+    console.log('Order assignment not found after max retries.');
     return null;
 }
 
 
 export async function addProductLines(cartRequest: CartRequest, hubSlug: string, locale: string, products: Record<string, number>) {
+    await ensureInitialized();
     console.log(`${emojic.grapes} Setting products available in the hub...\n`);
     try {
         if (Array.isArray(products))
@@ -321,6 +360,7 @@ export async function buildCartRequest(email: string, hubSlug: string, locale: s
 }
 
 export async function createCartWithAssignedData(cartApi: CartApi<any>, cartRequest: CartRequest) {
+    await ensureInitialized();
     const createCartResult = await createCart(cartApi, cartRequest);
     if (!createCartResult) {
         throw new Error("A cart cannot be created.");
@@ -329,6 +369,7 @@ export async function createCartWithAssignedData(cartApi: CartApi<any>, cartRequ
 }
 
 export async function getCreatedCart(cartApi: CartApi<any>, cartId: string) {
+    await ensureInitialized();
     const getCartResponse = await getCart(cartApi, cartId);
     if (!getCartResponse) {
         throw new Error("A cart does not exist.");
@@ -337,6 +378,7 @@ export async function getCreatedCart(cartApi: CartApi<any>, cartId: string) {
 }
 
 export async function createAndCheckoutCartInStore(cartApi: CartApi<any>, cartRequest: CartRequest) {
+    await ensureInitialized();
     cartRequest.shipping_method_id = "8fb7876a-4d17-49fb-ac6e-8f4971ccba4c";
     cartRequest.delivery_tier_id = "core";
 
@@ -353,6 +395,7 @@ export async function createAndCheckoutCartInStore(cartApi: CartApi<any>, cartRe
 }
 
 export async function createAndCheckoutCart(cartApi: CartApi<any>, cartRequest: CartRequest, clickAndCollect = false) {
+    await ensureInitialized();
     console.log(`${emojic.shoppingCart} The cart content is:`);
     console.log(cartRequest);
 
@@ -365,4 +408,27 @@ export async function createAndCheckoutCart(cartApi: CartApi<any>, cartRequest: 
     spinnerSuccess();
 
     return await checkoutCart(cartApi, cartId, totalPrice);
+}
+
+export async function prepareProductsForCreateRequest(hubSlug: string, productsArray: string | undefined): Promise<{ [key: string]: number }> {
+    if (!productsArray) {
+        console.log(`${emojic.banana} Looking for products available in the hub...\n`);
+        const inventoryItems: string[] = await getInventoryChangesForTheHub(hubSlug) as string[];
+        console.log("Found in logs:", inventoryItems);
+
+        await Promise.all(
+            inventoryItems.map(item => updateStockInTheHub(item, hubSlug, DEFAULT_QUANTITY_OF_PRODUCTS))
+        );
+
+        return inventoryItems.reduce((acc, item) => {
+            acc[item] = DEFAULT_QUANTITY_OF_PRODUCTS;
+            return acc;
+        }, {} as { [key: string]: number });
+    }
+
+    const parsedProducts = parseProductsArray(productsArray);
+    await Promise.all(
+        Object.entries(parsedProducts).map(([sku, qty]) => updateStockInTheHub(sku, hubSlug, qty))
+    );
+    return parsedProducts;
 }
