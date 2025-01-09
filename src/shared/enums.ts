@@ -7,7 +7,8 @@ export enum Colors {
 }
 
 export enum QuinyxShiftType {
-    OPS_ASSOCIATE = 838038
+    OPS_ASSOCIATE = 838038,
+    HQ_EMPLOYEE = 725554,
 }
 
 export enum QuinyxGroup {
@@ -15,5 +16,5 @@ export enum QuinyxGroup {
     DE_BER_MIT2 = 223927,
     DE_BER_TEMP = 223883,
     SETTINGS_UNIT = 223369,
-    DE_HAM_WINT = 223963
+    DE_HAM_WATE = 239172
 }

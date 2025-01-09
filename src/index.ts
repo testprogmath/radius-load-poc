@@ -1,4 +1,6 @@
 #! /usr/bin/env node
+import {resolveLocale} from "./utils/locale.js";
+
 process.env.NODE_NO_WARNINGS = '1';
 process.on('warning', (warning) => {
     if (warning.name === 'DeprecationWarning') {
@@ -53,7 +55,7 @@ const isCLI = true;
 function getInstalledVersion() {
     try {
         const result = execSync('npm list -g @flink/flinkord-cli --depth=0', {encoding: 'utf-8'});
-        const match = result.match(/@flink\/flinkord-cli@([\d.]+)/);
+        const match = /@flink\/flinkord-cli@([\d.]+)/.exec(result);
         if (match) {
             return match[1];
         } else {
@@ -68,17 +70,20 @@ function getInstalledVersion() {
 }
 
 createOrder
-    .option("-h, --hub <hub_slug>", "the hub for the order")
-    .option("-m, --email <email>", "the email to receive notifications about the order", "flinkordautotest@goflink.com")
-    .option("-s, --shipping <clickAndCollect>", "a flag for clickAndCollect orders", "false")
-    .option("-i, --instore", "a flag for in-store orders")
-    .option("-d, --deliveryTag <tagValue>", "a delivery tag, possible values: outdoor, work, home, other")
-    .option("-p, --products <products>", "products array in the format sku1:quantity1,sku2:quantity2")
+    .option("-h, --hub <hub_slug>", "The hub for the order")
+    .option("-m, --email <email>", "The email to receive notifications about the order", "flinkordautotest@goflink.com")
+    .option("-s, --shipping <clickAndCollect>", "A flag for clickAndCollect orders", "false")
+    .option("-i, --instore", "A flag for in-store orders")
+    .option("-d, --deliveryTag <tagValue>", "A delivery tag, possible values: outdoor, work, home, other")
+    .option("-p, --products <products>", "Products array in the format sku1:quantity1,sku2:quantity2")
+    .option("-l, --locale <locale>", "The locale for the order, e.g., en, de-DE, en-NL, fr-FR")
+    .option("-c, --country <country>", "The country for the order, possible values: de, at, nl, fr")
     .action((commandAndOptions) => {
         console.log("Create command invoked with:", commandAndOptions);
-        console.log(commandAndOptions);
+
         const options: CreateOptions = {
-            locale: 'en-de',
+            locale: commandAndOptions.locale,
+            country: commandAndOptions.country,
             hubSlug: commandAndOptions.hub,
             email: commandAndOptions.email,
             clickAndCollect: commandAndOptions.shipping,
@@ -87,7 +92,12 @@ createOrder
             deliveryTag: commandAndOptions.deliveryTag,
             productsArray: commandAndOptions.products
         };
-        create(options).catch(e => console.log(e));
+
+        create(options)
+            .catch(e => {
+                console.error(e.message);
+                process.exit(1);
+            });
     });
 
 freeHub
@@ -156,7 +166,7 @@ addQuinyxShift
             return;
         }
 
-        addShift(hub, badge, QuinyxShiftType.OPS_ASSOCIATE, username, password, begin, end)
+        addShift(hub, badge, QuinyxShiftType.HQ_EMPLOYEE, username, password, begin, end)
             .catch(e => console.log(e));
     });
 

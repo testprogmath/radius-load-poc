@@ -12,11 +12,13 @@ import {initializeCartApi} from "../utils/api.js";
 import {getValidatedHubSlug} from "../utils/hub.js";
 import chalk from "chalk";
 import * as dotenv from "dotenv";
+import {resolveLocale} from "../utils/locale.js";
 
 dotenv.config();
 
 export interface CreateOptions {
-    locale: string;
+    locale?: string;
+    country?: string;
     hubSlug: string;
     email: string;
     clickAndCollect?: boolean;
@@ -27,12 +29,19 @@ export interface CreateOptions {
 }
 
 export async function create(options: CreateOptions) {
+    if (options.locale && options.country) {
+        throw new Error("You cannot specify both --locale and --country.");
+    }
+
     try {
+        const locale = resolveLocale(options.locale, options.country);
+        console.log(`Using locale: ${locale}`);
+
         const hubSlug = await getValidatedHubSlug(options.hubSlug);
-        const cartApi = await initializeCartApi(options.locale, hubSlug);
+        const cartApi = await initializeCartApi(locale, hubSlug);
 
         const config = await getConfigPath();
-        HubManagerConfig.BASE = config.hubManagerApiUrl as string;
+        HubManagerConfig.BASE = config.hubManagerApiUrl;
 
         updateSpinnerText(chalk.hex(Colors.MEXICAN_PINK_DARK)("Processing... \n"), options.isCLI);
 
@@ -41,7 +50,7 @@ export async function create(options: CreateOptions) {
         const cartRequest = await buildCartRequest(
             options.email,
             hubSlug,
-            options.locale,
+            locale,
             products,
             options.deliveryTag
         );

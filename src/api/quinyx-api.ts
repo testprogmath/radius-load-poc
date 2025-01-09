@@ -96,6 +96,7 @@ export class QuinyxApi {
 
         try {
             console.log(`Sending POST request to ${url}`);
+            console.log(`with data ${JSON.stringify(data)}`);
             const response = await axios.post(url, data, {headers});
             return response.data;
         } catch (error: any) {

@@ -4,7 +4,7 @@ import {deleteShifts} from "../src/index.js";
 describe('Test deleteShifts command', () => {
 
     test('DeleteShift command when sessions are scheduled', async () => {
-        await deleteShifts("de_ham_wint",
+        await deleteShifts("de_ham_winw",
             "10133422",
             "autotest-hubone@goflink.com",
             "password123&",

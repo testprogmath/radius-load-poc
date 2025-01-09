@@ -21,7 +21,7 @@ describe('Test create command', () => {
     afterEach(async () => {
         // Wait for 1 sec before the next test
         await new Promise(resolve => {
-            const timer = setTimeout(resolve, 1000);
+            setTimeout(resolve, 1000);
         });
     });
 
@@ -101,7 +101,7 @@ describe('Test create command', () => {
     test('Create an order with particular products', async () => {
         const {logSpy, restoreAll} = createUniversalSpy();
 
-        const productsArray = '15012024:2,11014933:3,11013382:4';
+        const productsArray = '11017866:2,11017890:3,11018066:4';
         await create({
             hubSlug: options.hub,
             locale: 'en-de',
@@ -109,9 +109,9 @@ describe('Test create command', () => {
             email: options.email,
             productsArray,
         });
-        expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('11013382'));
-        expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('11014933'));
-        expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('15012024'));
+        expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('11017866'));
+        expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('11017890'));
+        expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('11018066'));
         expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('The order is created!'));
         expect(logSpy).not.toHaveBeenCalledWith(expect.stringContaining('The cart is not assigned to the order. Please try later'));
 
@@ -139,7 +139,7 @@ describe('Test create command', () => {
         const {logSpy, restoreAll} = createUniversalSpy();
         await create({
             hubSlug: 'nl_ams_diem',
-            locale: 'en-de',
+            locale: 'en-nl',
             isCLI: false,
             email: options.email,
             deliveryTag: 'outdoor',
@@ -150,6 +150,44 @@ describe('Test create command', () => {
 
         restoreAll();
     });
+
+
+    test('Create an order with a specified country', async () => {
+        const {logSpy, restoreAll} = createUniversalSpy();
+
+        const orderInfo = await create({
+            hubSlug: 'nl_ams_diem',
+            country: 'nl',
+            isCLI: false,
+            email: options.email,
+        });
+
+        expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('en-nl'));
+        expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('The order is created!'));
+        expect(orderInfo).toBeDefined();
+
+        restoreAll();
+    }, 70000);
+
+    test('Error when both locale and country are specified', async () => {
+        const {restoreAll} = createUniversalSpy();
+
+        try {
+            await create({
+                hubSlug: 'nl_ams_diem',
+                locale: 'en-nl',
+                country: 'nl',
+                isCLI: false,
+                email: options.email,
+            });
+            throw new Error("Expected error was not thrown");
+        } catch (error) {
+            const err = error as Error;
+            expect(err.message).toMatch(/You cannot specify both --locale and --country/);
+        }
+
+        restoreAll();
+    }, 70000);
 
     afterAll(async () => {
         execSync(`flinkord free -h ${options.hub}`);

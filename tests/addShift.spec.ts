@@ -5,7 +5,7 @@ import { jest } from '@jest/globals';
 describe('Test addShift command', () => {
     jest.retryTimes(3, {logErrorsBeforeRetry: true});
     beforeEach(async () => {
-        await deleteShifts("de_ham_wint",
+        await deleteShifts("de_ber_mit2",
             "10133422",
             "autotest-hubone@goflink.com",
             "password123&",
@@ -13,7 +13,7 @@ describe('Test addShift command', () => {
     })
     test('AddShift command', async () => {
 
-        let shiftDetails = await addShift("de_ham_wint",
+        let shiftDetails = await addShift("de_ber_mit2",
             "10133422",
             QuinyxShiftType.OPS_ASSOCIATE,
             "autotest-hubone@goflink.com",

@@ -7,12 +7,12 @@ test('Pick an order', async () => {
     let orderInfo;
     const options: CreateOptions = {
         locale: 'en-de',
-        hubSlug: 'de_ham_wint',
+        hubSlug: 'de_ham_winw',
         email: 'flinkord@goflink.com',
         clickAndCollect: false,
         isCLI: true,
     };
     orderInfo = await create(options) as CartOrder;
     expect(orderInfo?.state).toContain("Open");
-    await pick(orderInfo.number as string, "de_ham_wint");
+    await pick(orderInfo.number as string, "de_ham_winw");
 }, 20000);

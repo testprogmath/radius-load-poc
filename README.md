@@ -185,7 +185,7 @@ To create the order in the chosen hub, please use -h (--hub option):
 
 ### Create an order in a particular hub
 ```shell
-flinkord create -h de_ham_wint
+flinkord create -h de_ham_winw
 ```
 
 If you run command without specifying the hub, you'll need to provide the hub in the interactive mode or choose the
@@ -198,8 +198,29 @@ To receive notifications to your email, please use -m (--email option):
 ### Create an order with your email to receive a receipt
 
 ```shell
-flinkord create -h de_ham_wint -m myemail@goflink.com
+flinkord create -h de_ham_winw -m myemail@goflink.com
 ```
+
+### Setting locale for the `create` command
+You can specify the locale for your order in two ways:
+1. 	Using the **-l** or **--locale** flag
+Directly set the desired locale in the format <language>-<region>:
+```shell
+flinkord create -h de_ham_winw -l en-DE
+```
+2. Using the **-c** or **--country** flag
+   Define the country, and the system will automatically resolve the corresponding locale:
+```shell
+flinkord create -h de_ham_winw -c de
+```
+
+
+💡 Pro Tip:
+Use the --help flag to explore all available options for locale and country values:
+```
+flinkord create --help
+```
+This command provides a detailed list of supported locales (e.g., en-DE, nl-NL) and countries (de, nl, fr), helping you configure your orders easily.
 
 ### Create an in-store order
 
@@ -214,14 +235,14 @@ In-store orders are available only in a few hubs on staging. Please check with @
 To switch on clickAndCollect option, please use -s (--shipping) flag:
 
 ```shell
-flinkord create -h de_ham_wint -s true
+flinkord create -h de_ham_winw -s true
 ```
 
 ### Create an order with particular products in it
 To add your items to the cart, use -p flag with the following format:
 sku1:quantity1,sku2:quantity2. For example:
 ```shell
-flinkord create -h de_ham_wint -p  15012024:2,11014933:3,11013382:4 
+flinkord create -h de_ham_winw -p  11011614:2,11017866:3,11017932:4 
 ```
 
 ### Create an order with a deliveryTag
@@ -232,7 +253,7 @@ the following values:
 - work
 - other
 ```shell
-flinkord create -h de_ham_wint -d outdoor
+flinkord create -h de_ham_winw -d outdoor
 ```
 
 ### Help
@@ -273,7 +294,7 @@ flinkord pick -o <order-number> -h <hub-slug>
 ```
 For example,
 ```shell
-flinkord pick -o de-ham-fjpq-q9su -h de_ham_wint
+flinkord pick -o de-ham-fjpq-q9su -h de_ham_winw
 ```
 Please make sure that your order is eligible for picking, and nobody has started picking it yet!
 
@@ -370,7 +391,7 @@ flinkord add_shift -u <username> -p <password> -h <hubSlug> [-b <beginDateTime>]
 #### Example:
 
 ```shell
-flinkord add_shift -u my_username -p my_password -h de_ham_wint -b 2023-09-29T04:00:00 -e 2023-09-29T23:59:00 -n 101961
+flinkord add_shift -u my_username -p my_password -h de_ber_mit2 -b 2023-09-29T04:00:00 -e 2023-09-29T23:59:00 -n 101961
 ```
 
 #### Output:
