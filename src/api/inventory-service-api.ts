@@ -69,6 +69,7 @@ export async function updateStockInTheHub(sku: string, hubSlug: string, amount: 
             },
             body: JSON.stringify(data)
         });
+        console.log(response.status);
 
         if (!response.ok) {
             const errorBody = await response.json();

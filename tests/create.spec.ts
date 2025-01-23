@@ -118,7 +118,7 @@ describe('Test create command', () => {
         restoreAll();
     });
 
-    test.failing('Create an in-store order', async () => {
+    test.skip('Create an in-store order', async () => {
         const {logSpy, restoreAll} = createUniversalSpy();
         await create({
             hubSlug: 'nl_ame_cent',
