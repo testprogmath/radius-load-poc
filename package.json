@@ -58,7 +58,7 @@
   "dependencies": {
     "@apollo/client": "^3.12.6",
     "@commercetools/platform-sdk": "^7.23.0",
-    "@commercetools/sdk-client-v2": "^2.5.0",
+    "@commercetools/sdk-client-v2": "^3.0.0",
     "@commercetools/sdk-middleware-auth": "^7.0.1",
     "@commercetools/sdk-middleware-http": "^7.0.4",
     "@flink/hub-manager": "^1.52.2",
