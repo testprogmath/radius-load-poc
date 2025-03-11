@@ -1,6 +1,4 @@
 #! /usr/bin/env node
-import {resolveLocale} from "./utils/locale.js";
-
 process.env.NODE_NO_WARNINGS = '1';
 process.on('warning', (warning) => {
     if (warning.name === 'DeprecationWarning') {
@@ -9,58 +7,27 @@ process.on('warning', (warning) => {
     console.warn(warning);
 });
 
-import {Command} from "commander";
-import {addShift, create, deleteShifts, deliver, free, getOrderReturns, pick, setupEnv} from "./commands/index.js";
-import {CreateOptions} from "./commands/create.js";
-import {cancel} from "./commands/cancel.js";
-import {QuinyxShiftType} from "./shared/enums.js";
+import { Command } from "commander";
+import { addShift, create, deleteShifts, deliver, free, getOrderReturns, pick, setupEnv } from "./commands/index.js";
+import { cancel } from "./commands/cancel.js";
+import { QuinyxShiftType } from "./shared/enums.js";
 
+// External libraries for styling
 // @ts-ignore
 import figlet from "figlet";
 import gradient from "gradient-string";
-import {execSync} from "child_process";
+import { execSync } from "child_process";
 
+// Print a fancy banner
 console.log(gradient.rainbow(figlet.textSync("Flinkord")));
 
 const program = new Command();
 
-
-const createOrder = new Command("create");
-const freeHub = new Command("free");
-const deliverOrder = new Command("deliver");
-const cancelOrder = new Command("cancel");
-
-const setup = new Command("setup");
-
-const addQuinyxShift = new Command("add_shift");
-
-const deleteAllQuinyxShifts = new Command("delete_shifts");
-
-const getReturns = new Command("get_returns");
-
-const pickOrder = new Command("pick")
-
-export {create} from "./commands/create.js";
-export {free} from "./commands/free.js";
-export {deliver} from "./commands/deliver.js";
-export {cancel} from "./commands/cancel.js";
-export {setupEnv} from "./commands/setup.js";
-export {addShift} from "./commands/addShift.js"
-export {deleteShifts} from "./commands/deleteShifts.js"
-export {getOrderReturns} from "./commands/getOrderReturns.js"
-export {pick} from "./commands/pick.js"
-
-const isCLI = true;
-
-function getInstalledVersion() {
+function getInstalledVersion(): string {
     try {
-        const result = execSync('npm list -g @flink/flinkord-cli --depth=0', {encoding: 'utf-8'});
+        const result = execSync('npm list -g @flink/flinkord-cli --depth=0', { encoding: 'utf-8' });
         const match = /@flink\/flinkord-cli@([\d.]+)/.exec(result);
-        if (match) {
-            return match[1];
-        } else {
-            return 'Version not found';
-        }
+        return match ? match[1] : 'Version not found';
     } catch (error) {
         if (error instanceof Error) {
             return `Error fetching version: ${error.message}`;
@@ -69,7 +36,15 @@ function getInstalledVersion() {
     }
 }
 
-createOrder
+const isCLI = true;
+
+// --------------------
+// CLI Commands
+// --------------------
+
+// "create" command – create an order
+const createOrder = new Command("create")
+    .description("Create an order with parameters or default values")
     .option("-h, --hub <hub_slug>", "The hub for the order")
     .option("-m, --email <email>", "The email to receive notifications about the order", "flinkordautotest@goflink.com")
     .option("-s, --shipping <clickAndCollect>", "A flag for clickAndCollect orders", "false")
@@ -81,7 +56,7 @@ createOrder
     .action((commandAndOptions) => {
         console.log("Create command invoked with:", commandAndOptions);
 
-        const options: CreateOptions = {
+        const options = {
             locale: commandAndOptions.locale,
             country: commandAndOptions.country,
             hubSlug: commandAndOptions.hub,
@@ -100,34 +75,49 @@ createOrder
             });
     });
 
-freeHub
-    .requiredOption("-h, --hub <hub_slug>", "the hub to open")
+// "free" command – free the hub for new operations
+const freeHub = new Command("free")
+    .description("Free the hub for new operations")
+    .requiredOption("-h, --hub <hub_slug>", "The hub to open")
     .action((commandAndOptions) => {
-        console.log(commandAndOptions);
-        free(commandAndOptions.hub).catch(e => console.log(e));
+        console.log("Free command invoked with:", commandAndOptions);
+        free(commandAndOptions.hub).catch(e => console.error(e));
     });
 
-deliverOrder.argument("orderId").action((orderId) => {
-    console.log(orderId);
-    deliver(orderId).catch(e => console.log(e));
-});
+// "deliver" command – deliver an order by its ID
+const deliverOrder = new Command("deliver")
+    .description("Deliver an order by specifying its ID")
+    .argument("<orderId>", "ID of the order to deliver")
+    .action((orderId) => {
+        console.log("Deliver command invoked with order ID:", orderId);
+        deliver(orderId).catch(e => console.error(e));
+    });
 
-cancelOrder.argument("order").action(order => {
-    console.log(order);
-    cancel(order).catch(e => console.log(e));
-})
-setup
+// "cancel" command – cancel an order by its ID
+const cancelOrder = new Command("cancel")
+    .description("Cancel an order by specifying its ID")
+    .argument("<order>", "ID of the order to cancel")
+    .action((order) => {
+        console.log("Cancel command invoked with order:", order);
+        cancel(order).catch(e => console.error(e));
+    });
+
+// "setup" command – setup environment variables and configurations
+const setup = new Command("setup")
+    .description("Setup environment variables and configurations")
     .action(() => {
-        setupEnv().catch(e => console.log(e));
+        console.log("Setup command invoked");
+        setupEnv().catch(e => console.error(e));
     });
 
-deleteAllQuinyxShifts
+// "delete_shifts" command – delete all scheduled shifts from Quinyx
+const deleteAllQuinyxShifts = new Command("delete_shifts")
+    .description("Delete all scheduled shifts from Quinyx")
     .option("-u, --username <username>", "Username for Quinyx")
     .option("-p, --password <password>", "Password for Quinyx")
-    .option("-h, --hub <hubSlug>", "the hub with shifts")
+    .option("-h, --hub <hubSlug>", "The hub with shifts")
     .action((commandAndOptions) => {
-        const {username, password, hub, badge} = commandAndOptions;
-
+        const { username, password, hub } = commandAndOptions;
 
         if (!username || !password) {
             console.error("Username and password are required!");
@@ -139,22 +129,21 @@ deleteAllQuinyxShifts
             return;
         }
 
-        deleteShifts(hub, badge, username, password, true)
-            .catch(e => console.log(e));
+        deleteShifts(hub, commandAndOptions.badge, username, password, true)
+            .catch(e => console.error(e));
     });
 
-
-addQuinyxShift
+// "add_shift" command – add a shift for Quinyx with a specific user and time range
+const addQuinyxShift = new Command("add_shift")
+    .description("Add a shift for Quinyx with a specific user and time range")
     .option("-u, --username <username>", "Username for Quinyx")
     .option("-p, --password <password>", "Password for Quinyx")
     .option("-b, --begin <beginDateTime>", "Begin date and time for the shift (format: YYYY-MM-DDTHH:mm:ss)")
     .option("-e, --end <endDateTime>", "End date and time for the shift (format: YYYY-MM-DDTHH:mm:ss)")
-    .option("-h, --hub <hubSlug>", "the hub for the shift (please make sure that your user has all required permissions)")
+    .option("-h, --hub <hubSlug>", "The hub for the shift (ensure that your user has all required permissions)")
     .option("-n, --badge <badgeNumber>", "Badge number for another user you want to schedule the shift for")
-
     .action((commandAndOptions) => {
-        const {username, password, begin, end, hub, badge} = commandAndOptions;
-
+        const { username, password, begin, end, hub, badge } = commandAndOptions;
 
         if (!username || !password) {
             console.error("Username and password are required!");
@@ -167,54 +156,49 @@ addQuinyxShift
         }
 
         addShift(hub, badge, QuinyxShiftType.HQ_EMPLOYEE, username, password, begin, end)
-            .catch(e => console.log(e));
+            .catch(e => console.error(e));
     });
 
-getReturns.argument("orderId").action((orderId) => {
-    console.log(orderId);
-    getOrderReturns(orderId).catch(e => console.log(e));
-});
+// "get_returns" command – retrieve order returns by order ID
+const getReturns = new Command("get_returns")
+    .description("Retrieve order returns by specifying order ID")
+    .argument("<orderId>", "ID of the order to get returns for")
+    .action((orderId) => {
+        console.log("Get returns command invoked with order ID:", orderId);
+        getOrderReturns(orderId).catch(e => console.error(e));
+    });
 
-pickOrder
-    .requiredOption("-h, --hub <hub_slug>", "the hub for the order")
-    .requiredOption("-o, --order <order_number>", "order number for picking")
+// "pick" command – pick an order from a specific hub by order number
+const pickOrder = new Command("pick")
+    .description("Pick an order from a specific hub by order number")
+    .requiredOption("-h, --hub <hub_slug>", "The hub for the order")
+    .requiredOption("-o, --order <order_number>", "Order number for picking")
     .action((commandAndOptions) => {
-        console.log(`Order number: ${commandAndOptions.order}`);
-        pick(commandAndOptions.order, commandAndOptions.hub).catch(e => console.log(e));
+        console.log("Pick command invoked with:", commandAndOptions);
+        pick(commandAndOptions.order, commandAndOptions.hub).catch(e => console.error(e));
     });
 
+// --------------------
+// Main CLI configuration
+// --------------------
 program
     .description("A CLI tool for order management")
-    .version(getInstalledVersion(), '-v, --version', 'Output the current version')
+    .version(getInstalledVersion(), "-v, --version", "Output the current version")
     .showSuggestionAfterError(true)
-    .allowUnknownOption()
-    .option("create <arguments>", "Create an order with parameters or with default values")
-    .addCommand(createOrder)
-    .option("free <arguments>", "Cancel all orders in the hub to deal with 'Something went wrong: hub is closed right now' error")
-    .addCommand(freeHub)
-    .option("setup", "This command creates .env file with given or default CommerceTools credentials")
-    .addCommand(setup)
-    .option("cancel <value>", "Cancel by order name")
-    .addCommand(cancelOrder)
-    .option("defaults", "list defaults")
-    .addCommand(deliverOrder)
-    .option("deliver <orderId>", "Deliver the order")
-    .option("add_shift", "Add a shift in Quinyx")
-    .addCommand(addQuinyxShift)
-    .option("delete_shifts", "Remove all shifts in the hub for the user in Quinyx")
-    .addCommand(deleteAllQuinyxShifts)
-    .option("get_returns <orderId>", "Get order refunds info from CT by order ID or name")
-    .addCommand(getReturns)
-    .option("pick", "Pick order id by order number and hub slug")
-    .addCommand(pickOrder)
-    .configureOutput({
-        outputError: (str, write) => {
-            console.error("Commander error:", str);
-            write(str);
-        },
-    });
+    .allowUnknownOption();
 
-// parse args if it's not a test
+// Add commands to the program
+program.addCommand(createOrder);
+program.addCommand(freeHub);
+program.addCommand(deliverOrder);
+program.addCommand(cancelOrder);
+program.addCommand(setup);
+program.addCommand(addQuinyxShift);
+program.addCommand(deleteAllQuinyxShifts);
+program.addCommand(getReturns);
+program.addCommand(pickOrder);
+
+// Parse arguments if not running tests
 if (!process.env.JEST_WORKER_ID) {
     program.parse(process.argv);
 }
@@ -223,3 +207,5 @@ program.exitOverride((err) => {
     console.error("CLI exited unexpectedly:", err.message);
     throw err;
 });
+
+export { addShift, create, deleteShifts, deliver, free, getOrderReturns, pick, setupEnv, cancel };
