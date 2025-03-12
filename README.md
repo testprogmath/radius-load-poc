@@ -92,9 +92,10 @@ need to set it up. Please
 see [internal documentation](https://goflink.atlassian.net/wiki/spaces/PLATFORM/pages/343343497/Configuring+yarn+npm+registry+to+download+and+publish+packages#Yarn-1-%26-NPM-Usage%3A)
 or follow the steps below:
 
-1. Install npm 18:
+1. Install latest lts version of npm:
    ```shell
-   npm install npm@18 -g
+   nvm install --lts
+   nvm use --lts
    ```
 2. Use the npx command to refresh the access token by first installing
     ```shell
@@ -149,28 +150,25 @@ You should see the following output:
  |  _| | | | | | |   < (_) | | | (_| |
  |_|   |_|_|_| |_|_|\_\___/|_|  \__,_|
                                       
-Usage: flinkord [options] [command]
+Usage: index [options] [command]
 
 A CLI tool for order management
 
 Options:
-  create <arguments>   Create an order with parameters or with default values
-  free <arguments>     Cancel all orders in the hub to deal with 'Something went wrong: hub is closed right now' error
-  setup                This command creates .env file with given or default CommerceTools credentials
-  cancel <value>       Cancel by order name
-  defaults             list defaults
-  deliver <orderId>    Deliver the order
-  add_shift            Add a shift in Quinyx
-  -h, --help           display help for command
+  -v, --version            Output the current version
+  -h, --help               display help for command
 
 Commands:
-  create [options]
-  free [options]
-  setup
-  cancel <order>
-  deliver <orderId>
-  add_shift [options]
-  help [command]       display help for command
+  create [options]         Create an order with parameters or default values
+  free [options]           Free the hub for new operations
+  deliver <orderId>        Deliver an order by specifying its ID
+  cancel <order>           Cancel an order by specifying its ID
+  setup                    Setup environment variables and configurations
+  add_shift [options]      Add a shift for Quinyx with a specific user and time range
+  delete_shifts [options]  Delete all scheduled shifts from Quinyx
+  get_returns <orderId>    Retrieve order returns by specifying order ID
+  pick [options]           Pick an order from a specific hub by order number
+  help [command]           display help for command
 ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -305,6 +303,34 @@ In case of success, you'll see
 Container id: 1UO1MIXX
 Shelf number: 6
 ```
+
+If you see an error 
+```shell
+Error while picking the order. Please see the problem description below
+Hub information for 'de_ber_pren' not found. Please check the hubSlug.
+```
+you can add your hub on your own. Follow these steps:
+1. Find coordinates of your hub:
+````shell
+curl --location 'https://consumer-api.staging.goflink.com/v1/hubs/slug/<hub_slug>'
+````
+2. Add this data to [./src/shared/hubs.ts](./src/shared/hubs.ts)
+3. Go to [Auth0 --> Staging --> User Management --> Users](https://manage.auth0.com/dashboard/eu/flink-staging/users)
+4. Check if the user for your hub exists. If there's no user with your hub slug found, create a new one:
+   1. Click `"+Create User"` button
+   2. Enter the email according to the pattern: `hub_slug@goflink.<country_code>`. For example, for de_ber_temp it will be `de_ber_temp@goflink.de`
+   3. Enter the password, it should be the same for all hubs: `password123&`
+   4. Once the user is created, you need to link it to the hub. Go to App Metadata section and add this piece of JSON:
+   ```json
+    {
+      "hub_slug": "<your_hub_slug>"
+    }
+    ```
+   ![img.png](resources/auth0_app_metadata.png)
+   5. Click "Save"
+5. Check that the email you saved in Auth0 is the same for this hub in [./src/shared/hubs.ts](./src/shared/hubs.ts).
+6. Push changes, ask for review from developer-experience in [#ask-platform](https://goflink.slack.com/archives/C01M4MM051A).
+
 ### To deliver an order, use "deliver" command with an orderId:
 
 ```shell

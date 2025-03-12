@@ -57,12 +57,6 @@ export const Hubs: HubsType = {
         email: "nl_ame_cent_instore@goflink.nl",
         password: genericPassword
     },
-    "de_ham_wint": {
-        latitude: 53.57687,
-        longitude: 10.01968,
-        email: "de_ham_wint@goflink.de",
-        password: genericPassword
-    },
     "de_ber_fran": {
         latitude: 52.513962,
         longitude: 13.469216,
@@ -85,6 +79,24 @@ export const Hubs: HubsType = {
         latitude: 53.571147,
         longitude: 10.026537,
         email: "de_ham_winw@goflink.de",
+        password: genericPassword
+    },
+    "de_ber_pren": {
+        latitude: 52.5483165,
+        longitude: 13.4130471,
+        email: "de_ber_pren@goflink.de",
+        password: genericPassword
+    },
+    "de_qaa_test": {
+        latitude: 54.273626,
+        longitude: 11.0586705,
+        email: "de_qaa_test@goflink.de",
+        password: genericPassword
+    },
+    "nl_alm_cent": {
+        latitude: 52.369119,
+        longitude: 5.215824,
+        email: "nl_alm_cent@goflink.nl",
         password: genericPassword
     },
     // Add more hubs as needed

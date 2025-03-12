@@ -15,12 +15,11 @@ export default {
     reporters: [
         "default",
         [
-            "jest-html-reporter",
+            "jest-html-reporters",
             {
-                pageTitle: "Test Report",
-                outputPath: "./test-report.html",
-                includeFailureMsg: true,
-                includeConsoleLog: true,
+                publicPath: "./html-report",
+                filename: "report.html",
+                expand: true,
             },
         ],
     ],
