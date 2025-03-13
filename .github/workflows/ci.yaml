@@ -16,6 +16,7 @@ permissions:
   id-token: write
   contents: write # This is required for actions/checkout@v4
   pages: write
+  pull-requests: write
 
 jobs:
   build:

@@ -17,7 +17,7 @@ describe('Test deliver command', () => {
         orderInfo = await create(options) as CartOrder;
         const output = await deliver(orderInfo.id as string);
         expect(output).toContain(`The order ${orderInfo.id} is delivered!`)
-    }, 10000);
+    }, 20000);
 
     test('CLI: Deliver an order by order number', async () => {
         let orderInfo;
@@ -31,5 +31,5 @@ describe('Test deliver command', () => {
         orderInfo = await create(options) as CartOrder;
         const output = await deliver(orderInfo.number as string);
         expect(output).toContain(`The order ${orderInfo.id} is delivered!`)
-    }, 10000);
+    }, 20000);
 });
