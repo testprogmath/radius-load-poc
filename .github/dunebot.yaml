@@ -13,4 +13,5 @@ merge:
     branches:
       dependabot:
         prefix: "dependabot/npm_and_yarn"
-        age: 5 days
+        ageByRepoTier:
+          unset: 5 days
