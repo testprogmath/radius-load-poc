@@ -318,7 +318,7 @@ curl --location 'https://consumer-api.staging.goflink.com/v1/hubs/slug/<hub_slug
 3. Go to [Auth0 --> Staging --> User Management --> Users](https://manage.auth0.com/dashboard/eu/flink-staging/users)
 4. Check if the user for your hub exists. If there's no user with your hub slug found, create a new one:
    1. Click `"+Create User"` button
-   2. Enter the email according to the pattern: `hub_slug@goflink.<country_code>`. For example, for de_ber_temp it will be `de_ber_temp@goflink.de`
+   2. Enter the email according to the pattern: `hub_slug@goflink.<country_code>`. For example, for de_ber_fran it will be `de_ber_fran@goflink.de`
    3. Enter the password, it should be the same for all hubs: `password123&`
    4. Once the user is created, you need to link it to the hub. Go to App Metadata section and add this piece of JSON:
    ```json

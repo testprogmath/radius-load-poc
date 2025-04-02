@@ -16,6 +16,7 @@ import * as dotenv from "dotenv";
 import {getInventoryChangesForTheHub, updateStockInTheHub} from "./api/inventory-service-api.js";
 import {DEFAULT_QUANTITY_OF_PRODUCTS} from "./utils/constants.js";
 import {parseProductsArray} from "./utils/cli-arguments.js";
+import {DeliveryDetails} from "./shared/deliveryAddress.js";
 
 dotenv.config();
 
@@ -306,35 +307,27 @@ function addCustomProductLines(cartRequest: CartRequest, products: Record<string
     }
 }
 
-
 export async function setDeliveryAddress(cartRequest: CartRequest, hubSlug: string, deliveryTag?: string): Promise<any> {
     try {
-        const hubInfo = await LegacyHubDetailsService.getHubDetailsWithSlugRequest({hubSlug: hubSlug});
-
-        let hubCoordinates = Hubs[hubSlug];
-
-        if (!hubCoordinates) {
-            // @ts-ignore
-            hubCoordinates = hubInfo.turfs[0][2];
-        }
-
-        if (!hubCoordinates?.latitude || !hubCoordinates?.longitude) {
-            return 'Unable to find hub coordinates';
-        }
+        let deliveryDetail = DeliveryDetails[hubSlug]
+        if (!deliveryDetail || Object.keys(deliveryDetail).length === 0) {
+            console.log("Delivery detail is empty or doesn't exist.");
+            return
+          } 
 
         cartRequest.delivery_coordinates = {
-            latitude: hubCoordinates.latitude,
-            longitude: hubCoordinates.longitude
+            latitude: deliveryDetail.coordinates.latitude,
+            longitude: deliveryDetail.coordinates.longitude
         }
 
         cartRequest.shipping_address = {
             first_name: "Test",
             last_name: "Flinkord",
-            street_address_1: hubInfo.address,
-            phone: "+31644677890",
-            city: hubInfo.city,
-            country: hubInfo.country,
-            postal_code: "1111",
+            street_address_1: deliveryDetail.address.street,
+            phone: deliveryDetail.contact.phone,
+            city: deliveryDetail.address.city,
+            country: deliveryDetail.address.country,
+            postal_code: deliveryDetail.address.postalCode,
             tag: deliveryTag
         }
     } catch (e) {

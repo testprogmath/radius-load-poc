@@ -1,7 +1,7 @@
 import {describe, test} from "@jest/globals";
 import {deleteShifts} from "../src/index.js";
 
-describe.skip('Test deleteShifts command', () => {
+describe('Test deleteShifts command', () => {
 
     test('DeleteShift command when sessions are scheduled', async () => {
         await deleteShifts("de_ham_winw",
