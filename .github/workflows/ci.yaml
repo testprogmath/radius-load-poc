@@ -85,7 +85,7 @@ jobs:
             
             Your merged e2e test report is available here:
             
-            🔗 [Jest Report](https://goflink.github.io/flinkord-cli/)
+            🔗 [Jest Report](https://goflink.github.io/flinkord-cli/report.html)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
