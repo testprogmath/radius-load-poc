@@ -56,14 +56,14 @@
   },
   "homepage": "https://github.com/goflink/flinkord-cli#readme",
   "dependencies": {
-    "@apollo/client": "^3.13.5",
+    "@apollo/client": "^3.13.6",
     "@commercetools/platform-sdk": "^8.7.0",
     "@commercetools/sdk-client-v2": "^3.0.0",
     "@commercetools/sdk-middleware-auth": "^8.0.0",
     "@commercetools/sdk-middleware-http": "^8.0.0",
     "@flink/hub-manager": "^1.52.2",
-    "@typescript-eslint/eslint-plugin": "^8.28.0",
-    "@typescript-eslint/parser": "^8.28.0",
+    "@typescript-eslint/eslint-plugin": "^8.29.0",
+    "@typescript-eslint/parser": "^8.29.0",
     "axios": "^1.8.4",
     "chalk": "^5.4.1",
     "cli-spinner": "^0.2.10",
@@ -77,7 +77,7 @@
     "gradient-string": "^3.0.0",
     "graphql": "^16.10.0",
     "graphql-tag": "^2.12.6",
-    "inquirer": "^12.5.0",
+    "inquirer": "^12.5.2",
     "jsonfile": "^6.1.0",
     "node-fetch": "^3.3.2"
   },
@@ -91,12 +91,12 @@
     "@types/inquirer": "^9.0.7",
     "@types/jest": "^29.5.14",
     "@types/jsonfile": "^6.1.4",
-    "@types/node": "^22.13.14",
-    "eslint": "^9.23.0",
+    "@types/node": "^22.14.0",
+    "eslint": "^9.24.0",
     "jest": "^29.7.0",
     "jest-html-reporters": "^3.1.7",
     "standard-version": "^9.5.0",
-    "ts-jest": "^29.3.0",
-    "typescript": "^5.8.2"
+    "ts-jest": "^29.3.1",
+    "typescript": "^5.8.3"
   }
 }
