@@ -68,7 +68,7 @@ jobs:
         if: always()
         uses: actions/upload-pages-artifact@v3
         with:
-          path: html-report/
+          path: html/
 
       - name: Deploy to GitHub Pages
         if: always()
@@ -85,7 +85,7 @@ jobs:
             
             Your merged e2e test report is available here:
             
-            🔗 [Jest Report](https://goflink.github.io/flinkord-cli/report.html)
+            🔗 [Jest Report](https://goflink.github.io/flinkord-cli)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

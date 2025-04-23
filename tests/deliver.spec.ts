@@ -1,35 +1,28 @@
-import {describe, expect, test} from "@jest/globals";
-import {create, CreateOptions} from "../src/commands/create.js";
-import {CartOrder} from "../src/api/cart-api.js";
-import {deliver} from "../src/index.js";
+import { describe, expect, test } from 'vitest';
+import { create, CreateOptions } from '../src/commands/create.js';
+import { CartOrder } from '../src/api/cart-api.js';
+import { deliver } from '../src/index.js';
+
+const TEST_OPTIONS: CreateOptions = {
+    locale: 'en-de',
+    hubSlug: 'nl_ams_diem',
+    email: 'flinkord@goflink.com',
+    clickAndCollect: false,
+    isCLI: true,
+};
 
 describe('Test deliver command', () => {
-
     test('CLI: Deliver an order by order id', async () => {
-        let orderInfo;
-        const options: CreateOptions = {
-            locale: 'en-de',
-            hubSlug: "nl_ams_diem",
-            email: 'flinkord@goflink.com',
-            clickAndCollect: false,
-            isCLI: true,
-        };
-        orderInfo = await create(options) as CartOrder;
+        const orderInfo = await create(TEST_OPTIONS) as CartOrder;
         const output = await deliver(orderInfo.id as string);
-        expect(output).toContain(`The order ${orderInfo.id} is delivered!`)
-    }, 20000);
+
+        expect(output).toContain(`The order ${orderInfo.id} is delivered!`);
+    });
 
     test('CLI: Deliver an order by order number', async () => {
-        let orderInfo;
-        const options: CreateOptions = {
-            locale: 'en-de',
-            hubSlug: "nl_ams_diem",
-            email: 'flinkord@goflink.com',
-            clickAndCollect: false,
-            isCLI: true,
-        };
-        orderInfo = await create(options) as CartOrder;
+        const orderInfo = await create(TEST_OPTIONS) as CartOrder;
         const output = await deliver(orderInfo.number as string);
-        expect(output).toContain(`The order ${orderInfo.id} is delivered!`)
-    }, 20000);
+
+        expect(output).toContain(`The order ${orderInfo.id} is delivered!`);
+    });
 });

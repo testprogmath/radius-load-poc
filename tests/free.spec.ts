@@ -1,14 +1,11 @@
-import {describe, expect, test} from '@jest/globals';
-import { jest } from '@jest/globals';
+import { beforeAll, describe, expect, test, vi } from 'vitest';
+import { execSync } from 'node:child_process';
+import { getConfigPath } from '../src/utils.js';
+import { free } from '../src/index.js';
 
-import {execSync} from "child_process";
-import {getConfigPath} from "../src/utils.js";
-import {free} from "../src/index.js";
-
-let options : {hub: string, email: string};
+let options: { hub: string, email: string };
 
 describe('Test free command', () => {
-    jest.retryTimes(3, {logErrorsBeforeRetry: true});
     beforeAll(async () => {
         const config = await getConfigPath();
         options = {
@@ -17,8 +14,9 @@ describe('Test free command', () => {
         };
         console.log("Initialized options:", options);
     });
+
     test('Free a specified hub', async () => {
-        const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+        const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
 
         if (!options.hub) {
             throw new Error("Hub is not specified in the configuration");

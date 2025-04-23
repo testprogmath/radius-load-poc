@@ -1,30 +1,33 @@
-import {describe, expect, test, beforeEach} from "@jest/globals";
-import {create, CreateOptions} from "../src/commands/create.js";
-import {cancel} from "../src/index.js";
-import {CartOrder} from "../src/api/cart-api.js";
-import { jest } from '@jest/globals';
+import { describe, expect, test, beforeEach } from 'vitest';
+import { cancel } from '../src/index.js';
+import { CartOrder } from '../src/api/cart-api.js';
+import { createOrder } from './helpers/createOrder.js';
+import { createConsoleSpy } from './utils/console-spy.js';
+
+let orderInfo: CartOrder;
 
 describe('Test cancel command', () => {
-    jest.retryTimes(3, {logErrorsBeforeRetry: true});
-
-    let orderInfo: CartOrder;
-
     beforeEach(async () => {
-        const options: CreateOptions = {
-            locale: 'en-de',
-            hubSlug: "nl_ams_diem",
+        const result = await createOrder({
+            hubSlug: 'nl_ams_diem',
             email: 'flinkord@goflink.com',
             clickAndCollect: false,
             isCLI: true,
-        };
-        orderInfo = await create(options) as CartOrder;
+        });
+
+        if (!result || typeof result !== 'object' || !('id' in result)) {
+            throw new Error('Order creation failed: ' + String(result));
+        }
+
+        orderInfo = result;
+
         if (!orderInfo.id || !orderInfo.number) {
             throw new Error("Failed to create order: ID or Number is undefined");
         }
     });
 
     test('Cancel order by ID', async () => {
-        const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+        const spy = createConsoleSpy();
 
         if (!orderInfo.id) {
             throw new Error("Order ID is undefined");
@@ -32,13 +35,13 @@ describe('Test cancel command', () => {
 
         await cancel(orderInfo.id);
 
-        expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining(`The order ${orderInfo.id} is cancelled!`));
+        expect(spy.logSpy).toHaveBeenCalledWith(expect.stringContaining(`The order ${orderInfo.id} is cancelled!`));
 
-        consoleSpy.mockRestore();
-    }, 15000);
+        spy.restoreAll();
+    });
 
     test('Cancel order by number', async () => {
-        const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+        const spy = createConsoleSpy();
 
         if (!orderInfo.number) {
             throw new Error("Order Number is undefined");
@@ -46,8 +49,8 @@ describe('Test cancel command', () => {
 
         await cancel(orderInfo.number);
 
-        expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining(`The order ${orderInfo.id} is cancelled!`));
+        expect(spy.logSpy).toHaveBeenCalledWith(expect.stringContaining(`The order ${orderInfo.id} is cancelled!`));
 
-        consoleSpy.mockRestore();
-    }, 15000);
+        spy.restoreAll();
+    });
 });

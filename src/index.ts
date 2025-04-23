@@ -199,7 +199,7 @@ program.addCommand(getReturns);
 program.addCommand(pickOrder);
 
 // Parse arguments if not running tests
-if (!process.env.JEST_WORKER_ID) {
+if (!process.env.VITEST) {
     program.parse(process.argv);
 }
 
