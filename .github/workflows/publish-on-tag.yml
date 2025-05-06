@@ -1,0 +1,69 @@
+
+
+name: Publish on tag
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+env:
+  GCP_AUTH_WORKLOAD_IDENTITY_PROVIDER: projects/592763168884/locations/global/workloadIdentityPools/goflink-github-actions/providers/github-actions
+  GCP_AUTH_SERVICE_ACCOUNT: flinkord-cli@flink-core-shared.iam.gserviceaccount.com
+  NODE_VERSION: 18.x
+  IDENTITY_SECRET: ${{ secrets.IDENTITY_SECRET }}
+  GENERIC_PASSWORD: ${{ secrets.GENERIC_PASSWORD }}
+
+permissions:
+  id-token: write
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      CT_CLIENT_ID: ${{ secrets.CT_CLIENT_ID }}
+      CT_CLIENT_SECRET: ${{ secrets.CT_CLIENT_SECRET }}
+      IDENTITY_KEY: ${{ secrets.IDENTITY_KEY }}
+      GENERIC_PASSWORD: ${{ secrets.GENERIC_PASSWORD }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          token_format: access_token
+          workload_identity_provider: ${{ env.GCP_AUTH_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ env.GCP_AUTH_SERVICE_ACCOUNT }}
+
+      - name: Install dependencies
+        run: |
+          npx google-artifactregistry-auth
+          npm ci --cache .npm
+
+      - name: Build application
+        run: npm run build --if-present
+
+      - name: Create .env file
+        run: |
+          echo 'CT_PROJECT_KEY="flink-staging"' > .env
+          echo "CT_CLIENT_ID=\"$CT_CLIENT_ID\"" >> .env
+          echo "CT_CLIENT_SECRET=\"$CT_CLIENT_SECRET\"" >> .env
+          echo "IDENTITY_KEY=\"$IDENTITY_KEY\"" >> .env
+          echo "GENERIC_PASSWORD=\"$GENERIC_PASSWORD\"" >> .env
+
+      - name: Publish module
+        run: |
+          npm publish --tag latest --no-git-checks
+
+      - name: Remove .env file
+        run: rm -f .env dist/.env

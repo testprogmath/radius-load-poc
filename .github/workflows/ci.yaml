@@ -21,6 +21,11 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      CT_CLIENT_ID: ${{ secrets.CT_CLIENT_ID }}
+      CT_CLIENT_SECRET: ${{ secrets.CT_CLIENT_SECRET }}
+      IDENTITY_KEY: ${{ secrets.IDENTITY_KEY }}
+      GENERIC_PASSWORD: ${{ secrets.GENERIC_PASSWORD }}
 
     steps:
       - uses: actions/checkout@v4
@@ -40,9 +45,13 @@ jobs:
       # get a new auth token and set it to a temp npm configuration
       - name: Get auth for artifact registry
         run: npx google-artifactregistry-auth
-      - name: 'Create env file'
+      - name: Create .env file
         run: |
-          echo "${{ secrets.CT_ENV_FILE }}" > .env
+          echo 'CT_PROJECT_KEY="flink-staging"' > .env
+          echo "CT_CLIENT_ID=\"$CT_CLIENT_ID\"" >> .env
+          echo "CT_CLIENT_SECRET=\"$CT_CLIENT_SECRET\"" >> .env
+          echo "IDENTITY_KEY=\"$IDENTITY_KEY\"" >> .env
+          echo "GENERIC_PASSWORD=\"$GENERIC_PASSWORD\"" >> .env
       - name: Install dependencies
         run: |
           npx google-artifactregistry-auth
@@ -85,7 +94,7 @@ jobs:
             
             Your merged e2e test report is available here:
             
-            🔗 [Jest Report](https://goflink.github.io/flinkord-cli)
+            🔗 [Test Report](https://goflink.github.io/flinkord-cli)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

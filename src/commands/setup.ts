@@ -1,3 +1,6 @@
+import * as dotenv from "dotenv";
+dotenv.config();
+
 import * as fs from "fs";
 import * as path from "path";
 import * as readline from "readline";
@@ -8,8 +11,12 @@ async function askQuestion(question: string, defaultValue?: string): Promise<str
         output: process.stdout,
     });
 
+    const promptText = defaultValue
+        ? `${question} (default: ${defaultValue}): `
+        : `${question}: `;
+
     return new Promise((resolve) => {
-        rl.question(`${question}${defaultValue ? ` (default: ${defaultValue}): ` : ": "}`, (answer) => {
+        rl.question(promptText, (answer) => {
             rl.close();
             resolve(answer || defaultValue || "");
         });
@@ -33,10 +40,10 @@ function writeEnvFile(filePath: string, content: string): void {
 export async function setupEnv(): Promise<void> {
     const envFilePath = path.join(process.cwd(), ".env");
 
-    const defaultClientId = "wxgadKVe9YfVkHWUDhgpIIJ6";
-    const defaultClientSecret = "0WFvnrfs44KGFKLMwfCB7uXvFyq8Fyoi";
-    const identityKey = "AIzaSyB9qXJLdHcG2jG4Syixq4GiY8sgYaE1H88";
-    const genericPassword = "password123&";
+    const defaultClientId = process.env.CT_CLIENT_ID ?? "";
+    const defaultClientSecret = process.env.CT_CLIENT_SECRET ?? "";
+    const identityKey = process.env.IDENTITY_KEY ?? "";
+    const genericPassword = process.env.GENERIC_PASSWORD ?? "";
 
     try {
         const clientId = await askQuestion("Enter CT_CLIENT_ID", defaultClientId);

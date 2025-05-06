@@ -55,36 +55,18 @@ jobs:
           git config --global user.name "flinkord-cli-helper"
           git fetch --tags
           LAST_TAG=$(git describe --tags $(git rev-list --tags --max-count=1) || echo "v0.0.0")
-          echo "Last tag: $LAST_TAG"
           IFS='.' read -ra ADDR <<< "${LAST_TAG:1}" # Remove 'v' and split into array
           PATCH_VERSION=$((ADDR[2]+1))  # Increment patch version
           NEW_TAG="v${ADDR[0]}.${ADDR[1]}.$PATCH_VERSION"  # Construct new tag
           UNIQUE_VERSION_FOUND="false"
           while [ "$UNIQUE_VERSION_FOUND" = "false" ]; do
-          if ! git rev-parse "$NEW_TAG" >/dev/null 2>&1; then
-            UNIQUE_VERSION_FOUND="true"
-            echo "New unique version found: $NEW_TAG"
-            git tag $NEW_TAG
-            git push origin --tags
-            echo "NEW_TAG=$NEW_TAG" >> $GITHUB_ENV  # Set NEW_TAG for subsequent steps
-            RELEASE_NAME="${NEW_TAG:1}" # Remove 'v' for release name
-            echo "RELEASE_NAME=$RELEASE_NAME" >> $GITHUB_ENV  # Set RELEASE_NAME for subsequent steps
-          else
-            echo "Tag $NEW_TAG already exists, incrementing further"
-            PATCH_VERSION=$((PATCH_VERSION+1))  # Increment patch version
-            NEW_TAG="v${ADDR[0]}.${ADDR[1]}.$PATCH_VERSION"  # Construct new tag
-          fi
+            if ! git rev-parse "$NEW_TAG" >/dev/null 2>&1; then
+              UNIQUE_VERSION_FOUND="true"
+              git tag $NEW_TAG
+              git push origin $NEW_TAG
+              echo "NEW_TAG=$NEW_TAG" >> $GITHUB_ENV
+            else
+              PATCH_VERSION=$((PATCH_VERSION+1))
+              NEW_TAG="v${ADDR[0]}.${ADDR[1]}.$PATCH_VERSION"
+            fi
           done
-
-      - name: Create a GitHub release
-        uses: ncipollo/release-action@v1
-        with:
-          tag: ${{ env.NEW_TAG }}
-          name: ${{ env.RELEASE_NAME }}  # Use RELEASE_NAME from env
-          body: "New release ${{ env.RELEASE_NAME }}"  # Use RELEASE_NAME for body
-          prerelease: true
-
-      - name: Publish module
-        run: |
-          npm version ${NEW_TAG:1} --no-git-tag-version  # Update package.json version
-          npm publish --tag latest --no-git-checks
