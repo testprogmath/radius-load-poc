@@ -70,8 +70,8 @@ jobs:
 
       - name: Update package.json version
         run: |
-          echo "Publishing version $VERSION from tag $TAG"
-          VERSION=${{ github.ref_name }}
+          VERSION=${{ github.ref_type == 'tag' && github.ref_name || inputs.tag }}
+          echo "Using version $VERSION"
           npm version ${VERSION#v} --no-git-tag-version
 
       - name: Publish module
