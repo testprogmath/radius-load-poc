@@ -1,3 +1,6 @@
+import * as dotenv from "dotenv";
+dotenv.config();
+
 import {getConfigPath} from "../utils.js";
 import {DEFAULT_PRODUCTS_NUMBER} from "../utils/constants.js";
 import {AppConfig} from "../config.js";
@@ -17,12 +20,15 @@ async function ensureInitialized() {
 export async function initializeConfig() {
     config = await getConfigPath();
 
-    INVENTORY_SERVICE_URL = config.inventoryServiceUrl;
-    console.log(`Initialized INVENTORY_SERVICE_URL: ${INVENTORY_SERVICE_URL}`);
+    INVENTORY_SERVICE_URL = config.inventoryServiceUrl ?? "";
 }
 
 async function getAuthToken(): Promise<string> {
-    return config.inventoryServiceToken;
+    const token = process.env.INVENTORY_SERVICE_TOKEN;
+    if (!token) {
+        throw new Error("Missing INVENTORY_SERVICE_TOKEN in environment variables");
+    }
+    return token;
 }
 
 export async function getItemStockInHub(sku: string, hubSlug: string) {
@@ -69,7 +75,6 @@ export async function updateStockInTheHub(sku: string, hubSlug: string, amount: 
             },
             body: JSON.stringify(data)
         });
-        console.log(response.status);
 
         if (!response.ok) {
             const errorBody = await response.json();

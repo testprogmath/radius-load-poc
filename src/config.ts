@@ -13,8 +13,6 @@ export interface AppConfig {
     quinyxUrl: string;
     inventoryServiceUrl: string;
     genericPassword: string;
-    inventoryServiceToken: string;
-    firebaseApiKey: string;
     firebaseUrl: string;
 
 }

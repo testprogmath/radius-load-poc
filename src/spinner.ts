@@ -1,29 +1,48 @@
-import { Spinner } from 'cli-spinner';
+import chalk from "chalk";
+import cliSpinners from 'cli-spinners';
+import {Colors} from "./shared/enums.js";
 
-const spinner = new Spinner('%s Processing...');
-spinner.setSpinnerString('|/-\\');
+const spinnerFrames = cliSpinners.dots.frames;
+let spinnerIndex = 0;
+let spinnerInterval: NodeJS.Timeout | null = null;
+let currentText = "";
 
-export const updateSpinnerText = (message: string, isCLI: boolean) => {
+export const startSpinner = (text: string) => {
+    currentText = text;
+    if (spinnerInterval) clearInterval(spinnerInterval);
+    spinnerInterval = setInterval(() => {
+        const frame = spinnerFrames[spinnerIndex = (spinnerIndex + 1) % spinnerFrames.length];
+        process.stdout.write(`\r${frame} ${currentText}`);
+    }, cliSpinners.dots.interval);
+};
+
+export const updateSpinnerText = (text: string, isCLI = false) => {
     if (isCLI) {
-        spinner.setSpinnerTitle(message);
-        spinner.start();
+        currentText = chalk.hex(Colors.MEXICAN_PINK_DARK)(`${text}`);
     }
 };
 
 export const stopSpinner = () => {
-    spinner.stop(true);
-};
-
-export const spinnerError = (message?: string) => {
-    spinner.stop(true);
-    console.error(message);
+    if (spinnerInterval) {
+        clearInterval(spinnerInterval);
+        spinnerInterval = null;
+        process.stdout.write('\r');
+    }
 };
 
 export const spinnerSuccess = (message?: string) => {
-    spinner.stop(true);
-    console.log(message);
+    stopSpinner();
+    console.log(`✅ ${message || "Done"}`);
 };
 
-export const spinnerText = (message: string) => {
-    spinner.setSpinnerTitle(message);
+export const spinnerError = (message?: string) => {
+    stopSpinner();
+    console.error(`❌ ${message || "Error"}`);
 };
+
+export function printErrorAndStopSpinner(e: any) {
+    console.error(e);
+    spinnerError("Your request failed. Please find the stacktrace above");
+    stopSpinner();
+    throw new Error(e.message || "An unknown error occurred");
+}

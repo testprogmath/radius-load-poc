@@ -4,6 +4,7 @@ import {api, ensureClientAndApi} from "./client.js";
 import {isUuid} from "../../utils/types.js";
 import {updateOrderState, transitionOrderState} from "../utils/orderStateUtils.js";
 import chalk from "chalk";
+import { startSpinner, spinnerSuccess, spinnerError } from "../../spinner.js";
 
 const MAX_RETRIES = 3;
 const CANCELLED_ORDER_STATE_ID = "58e94703-3324-45d2-bd7c-fa311f004f49";
@@ -80,6 +81,8 @@ export async function updateOrder(orderId: string, orderVersion: number, body: O
 export async function completeOrder(orderId: string) {
     await ensureClientAndApi();
 
+    startSpinner(`Completing order ${orderId}...`);
+
     let orderInfo = await getOrderInfoById(orderId);
     await updateOrder(orderId, orderInfo.body.version, {
         action: "changeOrderState",
@@ -101,11 +104,13 @@ export async function completeOrder(orderId: string) {
         shipmentState: "Delivered",
     });
 
-    console.log(`The order ${orderId} is completed!`);
+    spinnerSuccess(`The order ${orderId} is completed!`);
 }
 
 export async function cancelOrder(orderId: string) {
     await ensureClientAndApi();
+
+    startSpinner(`Cancelling order ${orderId}...`);
 
     let retries = 0;
 
@@ -123,7 +128,7 @@ export async function cancelOrder(orderId: string) {
                 await transitionOrderState(orderId, orderInfo.body.version);
             }
 
-            console.log(`The order ${orderId} is cancelled!`);
+            spinnerSuccess(`The order ${orderId} is cancelled!`);
             return;
         } catch (error) {
             retries++;
@@ -151,7 +156,7 @@ export async function cancelOrder(orderId: string) {
         }
     }
 
-    console.error(`Failed to cancel the order ${orderId} after ${MAX_RETRIES} attempts.`);
+    spinnerError(`Failed to cancel the order ${orderId} after ${MAX_RETRIES} attempts.`);
 }
 
 export async function getOrderId(orderIdentifier: string) {
@@ -163,6 +168,8 @@ export async function getOrderId(orderIdentifier: string) {
 }
 
 export async function deliverOrder(orderIdentifier: string): Promise<string> {
+    startSpinner(`Delivering order ${orderIdentifier}...`);
+
     const orderId = await getOrderId(orderIdentifier);
     let orderInfo = await getOrderInfoById(orderId);
     console.log(`Initial order version: ${orderInfo.body.version}`);
@@ -194,6 +201,7 @@ export async function deliverOrder(orderIdentifier: string): Promise<string> {
     orderInfo = await getOrderInfoById(orderId);
     console.log(`Final order version: ${orderInfo.body.version}`);
     console.log(`Order state: ${orderInfo.body.orderState}`);
+    spinnerSuccess(`The order ${orderId} is delivered!`);
     return `The order ${orderId} is delivered!`;
 }
 

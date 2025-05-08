@@ -4,13 +4,11 @@ import {
     createAndCheckoutCartInStore,
     prepareProductsForCreateRequest
 } from "../cart.js";
-import {updateSpinnerText} from "../spinner.js";
+import {spinnerError, spinnerSuccess, startSpinner, updateSpinnerText} from "../spinner.js";
 import {OpenAPI as HubManagerConfig} from "@flink/hub-manager";
 import {getConfigPath} from "../utils.js";
-import {Colors} from "../shared/enums.js";
 import {initializeCartApi} from "../utils/api.js";
 import {getValidatedHubSlug} from "../utils/hub.js";
-import chalk from "chalk";
 import * as dotenv from "dotenv";
 import {resolveLocale} from "../utils/locale.js";
 
@@ -35,7 +33,6 @@ export async function create(options: CreateOptions) {
 
     try {
         const locale = resolveLocale(options.locale, options.country);
-        console.log(`Using locale: ${locale}`);
 
         const hubSlug = await getValidatedHubSlug(options.hubSlug);
         const cartApi = await initializeCartApi(locale, hubSlug);
@@ -43,7 +40,11 @@ export async function create(options: CreateOptions) {
         const config = await getConfigPath();
         HubManagerConfig.BASE = config.hubManagerApiUrl;
 
-        updateSpinnerText(chalk.hex(Colors.MEXICAN_PINK_DARK)("Processing... \n"), options.isCLI);
+        if (options.isCLI) {
+            startSpinner("Creating cart and placing order...");
+        }
+
+        updateSpinnerText("Processing....", options.isCLI);
 
         const products = await prepareProductsForCreateRequest(hubSlug, options.productsArray);
 
@@ -54,14 +55,22 @@ export async function create(options: CreateOptions) {
             products,
             options.deliveryTag
         );
-        console.debug(`Cart request: ${JSON.stringify(cartRequest)}`);
+        console.log(products);
+        if (options.deliveryTag) console.log(`Delivery tag: ${options.deliveryTag}`);
 
-        return options.inStore
+        const result = options.inStore
             ? await createAndCheckoutCartInStore(cartApi, cartRequest)
             : await createAndCheckoutCart(cartApi, cartRequest, options.clickAndCollect);
 
+        if (options.isCLI) {
+            spinnerSuccess("Order successfully created!");
+        }
+
+        return result;
+
     } catch (error) {
         console.error("Error creating order:", error);
+        spinnerError("Failed to create the order.");
         if (error instanceof Error && error.message.includes("Invalid hub slug")) {
             return "This hub does not exist!";
         }

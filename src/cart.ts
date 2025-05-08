@@ -1,16 +1,14 @@
 import {CartApi, CartOrder, GetCartResponseV3} from "./api/cart-api.js";
-import {LegacyHubDetailsService} from "@flink/hub-manager";
 import {spinnerError, spinnerSuccess, stopSpinner} from "./spinner.js";
 import {getConfigPath, wait} from "./utils.js";
 import chalk from "chalk";
 // @ts-ignore
 import emojic from "emojic";
 import {Colors} from "./shared/enums.js";
-import {Hubs} from "./shared/hubs.js";
 import {authorizeInStore} from "./api/website-api.js";
 import axios, {AxiosResponse} from "axios";
 import {CartLine, CartRequest} from "./api/objects/cart-request.js";
-import {printErrorAndStopSpinner} from "./utils/spinner.js";
+import {printErrorAndStopSpinner} from "./spinner.js";
 
 import * as dotenv from "dotenv";
 import {getInventoryChangesForTheHub, updateStockInTheHub} from "./api/inventory-service-api.js";
@@ -66,7 +64,7 @@ export async function createCart(customerDomainApi: CartApi<any>, cartRequest: C
         response = await customerDomainApi.v3.createCartV3(cartRequest);
         if (response.status === 200) {
             const cartId = response.data.id as string;
-            console.log(`${emojic.shoppingCart} The cart is created with the id ${chalk.hex(Colors.THULIAN_PINK)(cartId)}`);
+            console.log(`\n${emojic.shoppingCart} The cart is created with the id ${chalk.hex(Colors.THULIAN_PINK)(cartId)}`);
         }
         console.log();
     } catch (e) {
@@ -80,7 +78,7 @@ export async function addShippingMethod(customerDomainApi: CartApi<any>, cartId:
     try {
         const response = await customerDomainApi.v2.setShippingMethodV2(cartId, {clickAndCollect: clickAndCollect});
         if (response.status === 200) {
-            console.log(`${emojic.rocket} The shipping method is assigned, clickAndCollect is ${chalk.hex(Colors.MEXICAN_PINK)(clickAndCollect)}`);
+            console.log(`\n${emojic.rocket} The shipping method is assigned, clickAndCollect is ${chalk.hex(Colors.MEXICAN_PINK)(clickAndCollect)}`);
         }
         console.log();
     } catch (e) {
@@ -107,7 +105,10 @@ export async function getCart(customerDomainApi: CartApi<any>, cartId: string) {
 async function getToken() {
     await ensureInitialized();
     const url = config.firebaseUrl;
-    const apiKey = config.firebaseApiKey;
+    const apiKey = process.env.FIREBASE_API_KEY;
+    if (!apiKey) {
+        throw new Error("Missing FIREBASE_API_KEY in environment variables");
+    }
     try {
         const response = await axios.post(
             url,
@@ -259,7 +260,6 @@ async function waitForOrderAssignment(customerDomainApi: CartApi<any>, cartId: s
             const getCartResponse = await customerDomainApi.v3.getCartV3(cartId);
 
             if (getCartResponse.data.order) {
-                console.log('Order assigned:', getCartResponse.data.order);
                 return getCartResponse.data.order;
             }
 
@@ -279,25 +279,11 @@ export async function addProductLines(cartRequest: CartRequest, hubSlug: string,
     await ensureInitialized();
     console.log(`${emojic.grapes} Setting products available in the hub...\n`);
     try {
-        if (Array.isArray(products))
-            addDefaultProductLines(cartRequest, products);
-        else {
-
             addCustomProductLines(cartRequest, products);
-        }
-
     } catch (e) {
         printErrorAndStopSpinner(e);
     }
     return cartRequest;
-}
-
-function addDefaultProductLines(cartRequest: CartRequest, products: Record<string, number>) {
-    for (const [sku, number] of Object.entries(products)) {
-        const lineItem = new CartLine(sku, sku, number as number);
-        cartRequest.lines.push(lineItem);
-
-    }
 }
 
 function addCustomProductLines(cartRequest: CartRequest, products: Record<string, number>) {
@@ -407,7 +393,7 @@ export async function prepareProductsForCreateRequest(hubSlug: string, productsA
     if (!productsArray) {
         console.log(`${emojic.banana} Looking for products available in the hub...\n`);
         const inventoryItems: string[] = await getInventoryChangesForTheHub(hubSlug) as string[];
-        console.log("Found in logs:", inventoryItems);
+        console.log("\nFound in logs:", inventoryItems);
 
         await Promise.all(
             inventoryItems.map(item => updateStockInTheHub(item, hubSlug, DEFAULT_QUANTITY_OF_PRODUCTS))

@@ -26,7 +26,6 @@ export async function getConfigPath(): Promise<AppConfig> {
         throw new Error("No configuration file found");
     }
 
-    console.log(`Using resolved config: ${resolvedConfigPath}`);
     return await jsonfile.readFile(resolvedConfigPath) as Promise<AppConfig>;
 }
 

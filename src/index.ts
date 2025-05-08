@@ -1,14 +1,17 @@
 #! /usr/bin/env node
-process.env.NODE_NO_WARNINGS = '1';
-process.on('warning', (warning) => {
-    if (warning.name === 'DeprecationWarning') {
-        return;
-    }
-    console.warn(warning);
-});
 
 import { Command } from "commander";
-import { addShift, create, deleteShifts, deliver, free, getOrderReturns, pick, setupEnv } from "./commands/index.js";
+import {
+    addShift,
+    create,
+    deleteShifts,
+    deliver,
+    free,
+    getOrderReturns,
+    pick,
+    printConfig,
+    setupEnv
+} from "./commands/index.js";
 import { cancel } from "./commands/cancel.js";
 import { QuinyxShiftType } from "./shared/enums.js";
 
@@ -54,7 +57,7 @@ const createOrder = new Command("create")
     .option("-l, --locale <locale>", "The locale for the order, e.g., en, de-DE, en-NL, fr-FR")
     .option("-c, --country <country>", "The country for the order, possible values: de, at, nl, fr")
     .action((commandAndOptions) => {
-        console.log("Create command invoked with:", commandAndOptions);
+        console.debug("Create command invoked with:", commandAndOptions);
 
         const options = {
             locale: commandAndOptions.locale,
@@ -109,6 +112,10 @@ const setup = new Command("setup")
         console.log("Setup command invoked");
         setupEnv().catch(e => console.error(e));
     });
+
+const configCommand = new Command("config")
+    .description("Print the current configuration used by flinkord-cli")
+    .action(printConfig);
 
 // "delete_shifts" command – delete all scheduled shifts from Quinyx
 const deleteAllQuinyxShifts = new Command("delete_shifts")
@@ -197,6 +204,7 @@ program.addCommand(addQuinyxShift);
 program.addCommand(deleteAllQuinyxShifts);
 program.addCommand(getReturns);
 program.addCommand(pickOrder);
+program.addCommand(configCommand);
 
 // Parse arguments if not running tests
 if (!process.env.VITEST) {

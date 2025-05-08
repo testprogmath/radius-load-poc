@@ -49,7 +49,9 @@ describe('Test create command', () => {
 
         const orderInfo = await createOrder({ email: options.email });
 
-        expect(spy.logSpy).toHaveBeenCalledWith(expect.stringContaining(options.email));
+        expect(spy.logSpy).toHaveBeenCalledWith(expect.objectContaining({
+            email: options.email,
+        }));
         expect(spy.logSpy).toHaveBeenCalledWith(expect.stringContaining('The order is created!'));
         expect(spy.logSpy).not.toHaveBeenCalledWith(expect.stringContaining('The cart is not assigned to the order. Please try later'));
         expect(orderInfo).toBeDefined();
@@ -74,7 +76,9 @@ describe('Test create command', () => {
         const productsArray = '11010068:2,11013569:3,11013592:4';
         await createOrder({ productsArray, email: options.email, hubSlug: 'de_ber_mit2' });
         ['11010068', '11013569', '11013592'].forEach(product =>
-            expect(spy.logSpy).toHaveBeenCalledWith(expect.stringContaining(product))
+            expect(spy.logSpy).toHaveBeenCalledWith(expect.objectContaining({
+                [product]: expect.any(Number)
+            }))
         );
         expect(spy.logSpy).toHaveBeenCalledWith(expect.stringContaining('The order is created!'));
         expect(spy.logSpy).not.toHaveBeenCalledWith(expect.stringContaining('The cart is not assigned to the order. Please try later'));
@@ -126,7 +130,6 @@ describe('Test create command', () => {
             locale: '',
         });
 
-        expect(spy.logSpy).toHaveBeenCalledWith(expect.stringContaining('en-nl'));
         expect(spy.logSpy).toHaveBeenCalledWith(expect.stringContaining('The order is created!'));
         expect(orderInfo).toBeDefined();
 

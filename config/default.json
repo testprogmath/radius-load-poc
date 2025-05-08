@@ -13,8 +13,5 @@
   "quinyxUrl": "https://web-rc.quinyx.com/extapi",
   "inventoryServiceUrl": "https://api.staging.goflink.com/hub/inventory-service",
   "genericPassword": "password123&",
-  "inventoryServiceToken": "3de4381e0f53411596c0aa8fde12bbdc8a37d3352dd9dc868a50643533ba8b17",
-  "firebaseApiKey": "AIzaSyB9qXJLdHcG2jG4Syixq4GiY8sgYaE1H88",
   "firebaseUrl": "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword"
-
 }

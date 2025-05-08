@@ -60,7 +60,7 @@ export async function addShift(
     const quinyxApi = new QuinyxApi();
 
     console.log("🚀 Starting to create a new shift...");
-    if (isCLI) updateSpinnerText(chalk.hex(Colors.MEXICAN_PINK_DARK)("Processing.... \n"), true);
+    if (isCLI) updateSpinnerText("Processing....", true);
 
     const hub = hubMap[hubSlug.toLowerCase()];
     if (!hub) {

@@ -26,6 +26,8 @@ jobs:
       CT_CLIENT_SECRET: ${{ secrets.CT_CLIENT_SECRET }}
       IDENTITY_KEY: ${{ secrets.IDENTITY_KEY }}
       GENERIC_PASSWORD: ${{ secrets.GENERIC_PASSWORD }}
+      INVENTORY_SERVICE_TOKEN: ${{ secrets.INVENTORY_SERVICE_TOKEN }}
+      FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
 
     steps:
       - uses: actions/checkout@v4
@@ -52,6 +54,8 @@ jobs:
           echo "CT_CLIENT_SECRET=\"$CT_CLIENT_SECRET\"" >> .env
           echo "IDENTITY_KEY=\"$IDENTITY_KEY\"" >> .env
           echo "GENERIC_PASSWORD=\"$GENERIC_PASSWORD\"" >> .env
+          echo "INVENTORY_SERVICE_TOKEN=\"$INVENTORY_SERVICE_TOKEN\"" >> .env
+          echo "FIREBASE_API_KEY=\"$FIREBASE_API_KEY\"" >> .env
       - name: Install dependencies
         run: |
           npx google-artifactregistry-auth

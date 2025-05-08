@@ -24,7 +24,7 @@ export async function deleteShifts(hubSlug: string, badgeNumber: string, usernam
 
 
     console.log("🚀 Starting to delete shifts...");
-    if (isCLI) updateSpinnerText(chalk.hex(Colors.MEXICAN_PINK_DARK)("Processing.... \n"), true);
+    if (isCLI) updateSpinnerText("Processing....", true);
     const hub = hubMap[hubSlug.toLowerCase()];
     if (!hub) {
         console.error("Invalid hub specified! If you're sure that the hub is correct, contact the author to add your hub to the list.");

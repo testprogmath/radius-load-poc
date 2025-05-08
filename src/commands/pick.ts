@@ -24,7 +24,7 @@ export async function pick(orderId: string, hubSlug: string): Promise<void> {
     const containerId = getContainerId(hubSlug);
     const shelfId = generateShelfId();
 
-    updateSpinnerText(chalk.hex(Colors.MEXICAN_PINK_DARK)("Processing... \n"), true);
+    updateSpinnerText("Processing... \n", true);
 
     try {
         const hubOneApi = new HubOneApi(new Auth0Api());
