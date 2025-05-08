@@ -4,6 +4,7 @@ dotenv.config();
 import * as fs from "fs";
 import * as path from "path";
 import * as readline from "readline";
+import { Storage } from "@google-cloud/storage";
 
 async function askQuestion(question: string, defaultValue?: string): Promise<string> {
     const rl = readline.createInterface({
@@ -25,39 +26,101 @@ async function askQuestion(question: string, defaultValue?: string): Promise<str
 
 function writeEnvFile(filePath: string, content: string): void {
     try {
-        if (fs.existsSync(filePath)) {
-            fs.appendFileSync(filePath, content);
-            console.log(".env file successfully updated");
-        } else {
-            fs.writeFileSync(filePath, content);
-            console.log(".env file successfully created");
-        }
+        fs.writeFileSync(filePath, content);
+        console.log(".env file successfully written");
     } catch (err) {
         console.error("Failed to write to .env file:", err);
     }
 }
 
+async function downloadConfigFromGCS(bucketName: string, srcFilename: string, destPath: string): Promise<void> {
+    const storage = new Storage();
+    const bucket = storage.bucket(bucketName);
+    const file = bucket.file(srcFilename);
+
+    try {
+        await file.download({ destination: destPath });
+        console.log(`✅ Downloaded ${srcFilename} from GCS to ${destPath}`);
+    } catch (error) {
+        console.error(`❌ Failed to download ${srcFilename} from GCS:`, error);
+    }
+}
+
 export async function setupEnv(): Promise<void> {
     const envFilePath = path.join(process.cwd(), ".env");
+    const jsonTempPath = path.join(process.cwd(), "env.json");
+    let existingEnv: Record<string, string> = {};
 
+    // Keys managed by flinkord setup
+    const managedKeys = [
+        "CT_PROJECT_KEY",
+        "CT_CLIENT_ID",
+        "CT_CLIENT_SECRET",
+        "IDENTITY_KEY",
+        "GENERIC_PASSWORD",
+        "INVENTORY_SERVICE_TOKEN",
+        "FIREBASE_API_KEY"
+    ];
+
+    // Step 1: Load existing .env values if present
+    if (fs.existsSync(envFilePath)) {
+        const raw = fs.readFileSync(envFilePath, "utf-8");
+        for (const line of raw.split("\n")) {
+            const [key, val] = line.split("=");
+            if (key && val) {
+                existingEnv[key.trim()] = val.trim().replace(/^"|"$/g, ""); // remove surrounding quotes
+            }
+        }
+    }
+
+    // Step 2: Download from GCS and merge managed keys
+    await downloadConfigFromGCS("flinkord-cli-configs", "env.json", jsonTempPath);
+
+    if (fs.existsSync(jsonTempPath)) {
+        const raw = fs.readFileSync(jsonTempPath, "utf-8");
+        const config = JSON.parse(raw);
+        fs.unlinkSync(jsonTempPath); // cleanup
+
+        for (const key of managedKeys) {
+            if (key in config) {
+                existingEnv[key] = config[key];
+            }
+        }
+
+        const content = Object.entries(existingEnv)
+            .map(([key, value]) => `${key}="${value}"`)
+            .join("\n");
+
+        writeEnvFile(envFilePath, content + "\n");
+        return;
+    }
+
+    // Step 3: Prompt if download failed or incomplete
     const defaultClientId = process.env.CT_CLIENT_ID ?? "";
     const defaultClientSecret = process.env.CT_CLIENT_SECRET ?? "";
     const identityKey = process.env.IDENTITY_KEY ?? "";
     const genericPassword = process.env.GENERIC_PASSWORD ?? "";
+    const inventoryServiceToken = process.env.INVENTORY_SERVICE_TOKEN ?? "";
+    const firebaseApiKey = process.env.FIREBASE_API_KEY ?? "";
 
     try {
         const clientId = await askQuestion("Enter CT_CLIENT_ID", defaultClientId);
         const clientSecret = await askQuestion("Enter CT_CLIENT_SECRET (press enter to use default)", defaultClientSecret);
         const identityKeySecret = await askQuestion("Enter IDENTITY_KEY (press enter to use default)", identityKey);
 
-        const envFileContent = `CT_PROJECT_KEY="flink-staging"
-CT_CLIENT_ID="${clientId}"
-CT_CLIENT_SECRET="${clientSecret}"
-IDENTITY_KEY="${identityKeySecret}"
-GENERIC_PASSWORD="${genericPassword}"
-`;
+        existingEnv["CT_PROJECT_KEY"] = "flink-staging";
+        existingEnv["CT_CLIENT_ID"] = clientId;
+        existingEnv["CT_CLIENT_SECRET"] = clientSecret;
+        existingEnv["IDENTITY_KEY"] = identityKeySecret;
+        existingEnv["GENERIC_PASSWORD"] = genericPassword;
+        existingEnv["INVENTORY_SERVICE_TOKEN"] = inventoryServiceToken;
+        existingEnv["FIREBASE_API_KEY"] = firebaseApiKey;
 
-        writeEnvFile(envFilePath, envFileContent);
+        const content = Object.entries(existingEnv)
+            .map(([key, value]) => `${key}="${value}"`)
+            .join("\n");
+
+        writeEnvFile(envFilePath, content + "\n");
     } catch (error) {
         console.error("An error occurred during setup:", error);
     }
