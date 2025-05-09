@@ -3,6 +3,7 @@ import { stackOrders } from "../src/commands/index.js";
 import * as fproxy from "../src/utils/fproxy.js";
 import * as api from "../src/api/dispatching-api.js";
 import {AxiosHeaders} from "axios";
+import * as ctOrder from "../src/commercetools/index.js";
 
 const sampleResponse = {
     data: {
@@ -33,6 +34,7 @@ describe("stackOrders", () => {
 
     beforeEach(() => {
         vi.restoreAllMocks();
+        vi.spyOn(ctOrder, "getOrderId").mockImplementation(async (id: string) => `uuid-for-${id}`);
     });
 
     it("calls portForward and stacks orders correctly", async () => {
@@ -67,7 +69,7 @@ describe("stackOrders", () => {
         expect(api.sendStackingProposal).toHaveBeenCalledWith(
             "http://dispatching-hub-state-updater-staging.consumer-backend:8080",
             "de_ber_fran",
-            ["1", "2"]
+            ["uuid-for-1", "uuid-for-2"]
         );
         expect(api.fetchStackState).toHaveBeenCalled();
         expect(stopMock).toHaveBeenCalled();

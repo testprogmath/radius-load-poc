@@ -370,7 +370,7 @@ First, create some orders:
 flinkord create -h de_ber_fran
 ```
 
-Copy the returned order IDs and use them in:
+Copy the returned order IDs or order numbers and use them in:
 ```sh
 flinkord stack_orders -h de_ber_fran -o <orderId1> <orderId2> <orderId3>
 ```
