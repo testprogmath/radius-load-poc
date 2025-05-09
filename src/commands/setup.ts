@@ -4,7 +4,13 @@ dotenv.config();
 import * as fs from "fs";
 import * as path from "path";
 import * as readline from "readline";
+import * as os from "os";
 import { Storage } from "@google-cloud/storage";
+import { dirname, join } from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 async function askQuestion(question: string, defaultValue?: string): Promise<string> {
     const rl = readline.createInterface({
@@ -46,12 +52,35 @@ async function downloadConfigFromGCS(bucketName: string, srcFilename: string, de
     }
 }
 
+export function writeFproxyConfig(): void {
+    const projectRoot = join(__dirname, "..", "..", "..");
+    const templatePath = join(projectRoot, "templates", "fproxy.yaml");
+    const fproxyYamlPath = join(os.homedir(), "fproxy.yaml");
+
+    try {
+        if (!fs.existsSync(templatePath)) {
+            console.error("❌ fproxy.yaml template not found in templates directory.");
+            return;
+        }
+
+        const yamlContent = fs.readFileSync(templatePath, "utf-8");
+
+        if (!fs.existsSync(fproxyYamlPath)) {
+            fs.writeFileSync(fproxyYamlPath, yamlContent);
+            console.log("✅ Created fproxy.yaml in home directory");
+        } else {
+            console.log("ℹ️ fproxy.yaml already exists, skipping creation");
+        }
+    } catch (err) {
+        console.error("❌ Failed to write fproxy.yaml:", err);
+    }
+}
+
 export async function setupEnv(): Promise<void> {
     const envFilePath = path.join(process.cwd(), ".env");
     const jsonTempPath = path.join(process.cwd(), "env.json");
     let existingEnv: Record<string, string> = {};
 
-    // Keys managed by flinkord setup
     const managedKeys = [
         "CT_PROJECT_KEY",
         "CT_CLIENT_ID",
@@ -105,8 +134,8 @@ export async function setupEnv(): Promise<void> {
 
     try {
         const clientId = await askQuestion("Enter CT_CLIENT_ID", defaultClientId);
-        const clientSecret = await askQuestion("Enter CT_CLIENT_SECRET (press enter to use default)", defaultClientSecret);
-        const identityKeySecret = await askQuestion("Enter IDENTITY_KEY (press enter to use default)", identityKey);
+        const clientSecret = await askQuestion("Enter CT_CLIENT_SECRET", defaultClientSecret);
+        const identityKeySecret = await askQuestion("Enter IDENTITY_KEY", identityKey);
 
         existingEnv["CT_PROJECT_KEY"] = "flink-staging";
         existingEnv["CT_CLIENT_ID"] = clientId;
@@ -121,6 +150,7 @@ export async function setupEnv(): Promise<void> {
             .join("\n");
 
         writeEnvFile(envFilePath, content + "\n");
+        writeFproxyConfig();
     } catch (error) {
         console.error("An error occurred during setup:", error);
     }

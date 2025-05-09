@@ -313,7 +313,7 @@ you can add your hub on your own. Follow these steps:
 1. Find coordinates of your hub:
 ````shell
 curl --location 'https://consumer-api.staging.goflink.com/v1/hubs/slug/<hub_slug>'
-````
+```` 
 2. Add this data to [./src/shared/hubs.ts](./src/shared/hubs.ts)
 3. Go to [Auth0 --> Staging --> User Management --> Users](https://manage.auth0.com/dashboard/eu/flink-staging/users)
 4. Check if the user for your hub exists. If there's no user with your hub slug found, create a new one:
@@ -330,6 +330,77 @@ curl --location 'https://consumer-api.staging.goflink.com/v1/hubs/slug/<hub_slug
    5. Click "Save"
 5. Check that the email you saved in Auth0 is the same for this hub in [./src/shared/hubs.ts](./src/shared/hubs.ts).
 6. Push changes, ask for review from developer-experience in [#ask-platform](https://goflink.slack.com/archives/C01M4MM051A).
+
+### To stack multiple orders into a delivery proposal
+
+You can now stack multiple orders **before delivery**!
+
+#### Prerequisites
+
+There are two ways to reach the internal service:
+
+**a. Use port forwarding**
+
+1. Run:
+```sh
+kubectl -n consumer-backend port-forward "service/dispatching-hub-state-updater-staging" 40082:80
+```
+2. Then call the command with `--url`:
+```sh
+flinkord stack_orders -h de_ber_fran -o cc89585c-e06d-4e6c-9f1c-53e634ac45b4 1f3ac236-8c41-4dda-8851-c9d9d14879c2 4a2bee92-685b-40fd-a1e6-a7466e5c128b --url http://localhost:40082
+```
+
+**b. Use `fproxy`**
+
+1. Install the latest version from [fproxy releases](https://github.com/goflink/fproxy/releases). If you face issues, check the [fproxy setup guide](https://goflink.atlassian.net/wiki/spaces/PLATFORM/pages/1293549606/Getting+Started+With+FProxy#Requirements)
+2. Run:
+```sh
+kubectl config use-context gke_flink-core-staging_europe-west3_k8s-main-staging
+```
+3. Then:
+```sh
+sudo fproxy dns set
+flinkord setup
+```
+
+#### Example:
+
+First, create some orders:
+```sh
+flinkord create -h de_ber_fran
+```
+
+Copy the returned order IDs and use them in:
+```sh
+flinkord stack_orders -h de_ber_fran -o <orderId1> <orderId2> <orderId3>
+```
+
+#### Output
+If everything works correctly, you'll see the following output:
+
+```shell
+✅ Proposal sent: 200
+🔍 Fetching stack state...
+🧱 Stack ID: b3a9914a-a555-4868-a563-373f5a72a9a1
+📍 Hub: de_ber_fran
+📅 Revision: 1
+╔══════════════════════════════════════╤═════╤═══════╤════════════╗
+║ Order ID                             │ PDT │ ETA   │ Type       ║
+╟──────────────────────────────────────┼─────┼───────┼────────────╢
+║ 311c1af3-bbd0-4aef-adff-1c00c8451ad2 │ 10  │ 9.58  │ Main       ║
+║ 1416c83c-d42b-47e9-bcaa-34fc06658c19 │ 16  │ 15.27 │ Main       ║
+║ a7d8558d-9a0c-45a9-a895-c3e6b01a29f1 │ 25  │ 23.56 │ Main       ║
+║ 61530637-6e41-4b32-9eb2-a617a78fc391 │ 30  │ 29.41 │ Main       ║
+║ cd0092e2-6a47-4a4c-9b01-7662268dd6cc │ 40  │ 35.17 │ Main       ║
+║ 4093f2ce-11be-41f4-8257-100e432c0387 │ 45  │ 40.44 │ Main       ║
+║ 6c6b6f06-30ae-4e13-85ba-806c595f9434 │ 50  │ 46.18 │ Main       ║
+║ 030b599f-9e91-43f5-9c3d-37b5201b8fe3 │ 60  │ 57.03 │ Main       ║
+║ 7c2f1a89-a50e-4947-a89c-af76c99d0966 │ 70  │ 62.88 │ Main       ║
+║ cc89585c-e06d-4e6c-9f1c-53e634ac45b4 │ 70  │ 60.85 │ Main       ║
+║ 1f3ac236-8c41-4dda-8851-c9d9d14879c2 │ 70  │ 66.55 │ ↳ Indirect ║
+║ 4a2bee92-685b-40fd-a1e6-a7466e5c128b │ 80  │ 72.25 │ ↳ Indirect ║
+╚══════════════════════════════════════╧═════╧═══════╧════════════╝
+```
 
 ### To deliver an order, use "deliver" command with an orderId:
 

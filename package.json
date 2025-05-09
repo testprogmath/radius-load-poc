@@ -1,6 +1,6 @@
 {
   "name": "@flink/flinkord-cli",
-  "version": "1.1.47",
+  "version": "1.1.67",
   "description": "CLI tool for easy order generation and management",
   "type": "module",
   "main": "dist/src/index.js",
@@ -11,7 +11,8 @@
   "files": [
     "config",
     "dist",
-    "resources"
+    "resources",
+    "templates"
   ],
   "scripts": {
     "build": "npx tsc && chmod +x ./dist/src/index.js",
@@ -74,12 +75,15 @@
     "eslint-plugin-promise": "^7.2.1",
     "figlet": "^1.8.1",
     "find-up": "^7.0.0",
+    "fix-esm": "^1.0.1",
+    "get-port": "^7.1.0",
     "gradient-string": "^3.0.0",
     "graphql": "^16.11.0",
     "graphql-tag": "^2.12.6",
     "inquirer": "^12.6.0",
     "jsonfile": "^6.1.0",
-    "node-fetch": "^3.3.2"
+    "node-fetch": "^3.3.2",
+    "table": "^6.9.0"
   },
   "devDependencies": {
     "@types/figlet": "^1.7.0",

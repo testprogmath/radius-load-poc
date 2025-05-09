@@ -6,4 +6,6 @@ export {addShift} from "./addShift.js";
 export {deleteShifts} from "./deleteShifts.js"
 export {getOrderReturns} from "./getOrderReturns.js"
 export {pick} from "./pick.js"
+export {stackOrders} from "./stackOrders.js"
+export {cancel} from "./cancel.js"
 export {printConfig} from "./config.js";

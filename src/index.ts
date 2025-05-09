@@ -4,15 +4,16 @@ import { Command } from "commander";
 import {
     addShift,
     create,
+    cancel,
     deleteShifts,
     deliver,
     free,
     getOrderReturns,
     pick,
     printConfig,
-    setupEnv
+    setupEnv,
+    stackOrders
 } from "./commands/index.js";
-import { cancel } from "./commands/cancel.js";
 import { QuinyxShiftType } from "./shared/enums.js";
 
 // External libraries for styling
@@ -185,6 +186,16 @@ const pickOrder = new Command("pick")
         pick(commandAndOptions.order, commandAndOptions.hub).catch(e => console.error(e));
     });
 
+const stackOrdersCommand = new Command("stack_orders")
+    .description("Stack orders for a given hub")
+    .requiredOption("-h, --hub <hub_slug>", "The hub for the order")
+    .requiredOption("-o, --orders <orderIds...>", "List of order IDs to stack")
+    .option("--url <url>", "Optional custom service URL")
+    .action((commandAndOptions) => {
+        const { hub, orders, url } = commandAndOptions;
+        stackOrders({ hub, orderIds: orders, url });
+    });
+
 // --------------------
 // Main CLI configuration
 // --------------------
@@ -204,6 +215,7 @@ program.addCommand(addQuinyxShift);
 program.addCommand(deleteAllQuinyxShifts);
 program.addCommand(getReturns);
 program.addCommand(pickOrder);
+program.addCommand(stackOrdersCommand);
 program.addCommand(configCommand);
 
 // Parse arguments if not running tests
