@@ -48,8 +48,12 @@ async function downloadConfigFromGCS(bucketName: string, srcFilename: string, de
         await file.download({ destination: destPath });
         console.log(`✅ Downloaded ${srcFilename} from GCS to ${destPath}`);
     } catch (error) {
-        console.error(`❌ Failed to download ${srcFilename} from GCS:`, error);
-    }
+        if ((error as any)?.response?.data?.error === 'invalid_grant') {
+            console.error(`❌ Failed to authenticate with Google Cloud: invalid_grant.
+➡ Try running: gcloud auth application-default login`);
+        } else {
+            console.error(`❌ Failed to download ${srcFilename} from GCS:`, error);
+        }    }
 }
 
 export function writeFproxyConfig(): void {

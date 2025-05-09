@@ -3,6 +3,8 @@ import { sendStackingProposal, fetchStackState } from "../api/dispatching-api.js
 import {portForward} from "../utils/fproxy.js";
 import { table } from "table";
 
+import { getOrderId } from "../commercetools/index.js";
+
 interface Options {
     hub: string;
     orderIds: string[];
@@ -54,7 +56,18 @@ export async function stackOrders({ hub, orderIds, url }: Options) {
             forward = await portForward();
             baseUrl = `http://dispatching-hub-state-updater-staging.consumer-backend:${forward.port}`;
         }
-        await sendRequests(baseUrl, hub, orderIds);
+        const resolvedOrderIds: string[] = [];
+
+        for (const rawId of orderIds) {
+            try {
+                const resolved = await getOrderId(rawId);
+                resolvedOrderIds.push(resolved);
+            } catch (e) {
+                console.error(`❌ Failed to resolve order identifier "${rawId}":`, e);
+                process.exit(1);
+            }
+        }
+        await sendRequests(baseUrl, hub, resolvedOrderIds);
 
     } catch (e: any) {
         if (axios.isAxiosError(e)) {
