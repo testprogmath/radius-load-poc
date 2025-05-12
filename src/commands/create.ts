@@ -6,11 +6,11 @@ import {
 } from "../cart.js";
 import {spinnerError, spinnerSuccess, startSpinner, updateSpinnerText} from "../spinner.js";
 import {OpenAPI as HubManagerConfig} from "@flink/hub-manager";
-import {getConfigPath} from "../utils.js";
 import {initializeCartApi} from "../utils/api.js";
 import {getValidatedHubSlug} from "../utils/hub.js";
 import * as dotenv from "dotenv";
 import {resolveLocale} from "../utils/locale.js";
+import {readAppConfig} from "../utils.js";
 
 dotenv.config();
 
@@ -37,7 +37,7 @@ export async function create(options: CreateOptions) {
         const hubSlug = await getValidatedHubSlug(options.hubSlug);
         const cartApi = await initializeCartApi(locale, hubSlug);
 
-        const config = await getConfigPath();
+        const config = await readAppConfig();
         HubManagerConfig.BASE = config.hubManagerApiUrl;
 
         if (options.isCLI) {

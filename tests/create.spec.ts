@@ -7,7 +7,7 @@ import {
     test,
 } from 'vitest';
 import { execSync } from 'node:child_process';
-import { getConfigPath } from '../src/utils.js';
+import { readAppConfig} from '../src/utils.js';
 import { createOrder } from './helpers/createOrder.js';
 import { createConsoleSpy } from './utils/console-spy.js';
 
@@ -15,7 +15,7 @@ let options: { hub: string; email: string };
 
 describe('Test create command', () => {
     beforeAll(async () => {
-        const config = await getConfigPath();
+        const config = await readAppConfig();
         options = {
             hub: config.hubForTests,
             email: config.testEmail,

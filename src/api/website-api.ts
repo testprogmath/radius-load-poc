@@ -1,4 +1,4 @@
-import {getConfigPath} from "../utils.js";
+import {readAppConfig} from "../utils.js";
 import axios from "axios";
 import * as dotenv from "dotenv";
 
@@ -12,7 +12,7 @@ let isInitialized = false;
 
 async function ensureInitialized() {
     if (!isInitialized) {
-        config = await getConfigPath();
+        config = await readAppConfig();
         identityUrl = config.identityToolkitUrl;
         identityKey = process.env.IDENTITY_KEY!;
 

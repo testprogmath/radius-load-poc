@@ -1,7 +1,7 @@
 import * as dotenv from "dotenv";
 dotenv.config();
 
-import {getConfigPath} from "../utils.js";
+import { readAppConfig} from "../utils.js";
 import {DEFAULT_PRODUCTS_NUMBER} from "../utils/constants.js";
 import {AppConfig} from "../config.js";
 
@@ -18,7 +18,7 @@ async function ensureInitialized() {
 }
 
 export async function initializeConfig() {
-    config = await getConfigPath();
+    config = await readAppConfig();
 
     INVENTORY_SERVICE_URL = config.inventoryServiceUrl ?? "";
 }

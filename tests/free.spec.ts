@@ -1,13 +1,13 @@
 import { beforeAll, describe, expect, test, vi } from 'vitest';
 import { execSync } from 'node:child_process';
-import { getConfigPath } from '../src/utils.js';
+import {readAppConfig} from '../src/utils.js';
 import { free } from '../src/index.js';
 
 let options: { hub: string, email: string };
 
 describe('Test free command', () => {
     beforeAll(async () => {
-        const config = await getConfigPath();
+        const config = await readAppConfig();
         options = {
             hub: config.hubForTests,
             email: config.testEmail,

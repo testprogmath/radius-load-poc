@@ -2,13 +2,13 @@ import { beforeAll, describe, expect, test } from 'vitest';
 import { create, CreateOptions } from '../src/commands/create.js';
 import { CartOrder } from '../src/api/cart-api.js';
 import { pick } from '../src/index.js';
-import { getConfigPath } from '../src/utils.js';
+import {readAppConfig} from '../src/utils.js';
 
 describe('Test create command', () => {
     let options: { hub: string; email: string };
 
     beforeAll(async () => {
-        const config = await getConfigPath();
+        const config = await readAppConfig();
         options = {
             hub: config.hubForTests,
             email: config.testEmail,

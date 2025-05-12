@@ -24,7 +24,7 @@ function formatDateTime(dateTime?: string, defaultHour?: number, defaultMinute?:
         return new Date(dateTime);
     }
     const date = new Date();
-    date.setHours(defaultHour || 0, defaultMinute || 0, 0);
+    date.setHours(defaultHour ?? 0, defaultMinute ?? 0, 0);
     return date;
 }
 
@@ -48,42 +48,64 @@ function handleAxiosError(error: AxiosError): void {
 }
 
 export async function addShift(
-    hubSlug: string,
-    badgeNumber: string,
-    shiftType: QuinyxShiftType,
-    username: string,
-    password: string,
+    hubSlug?: string,
+    shiftType?: QuinyxShiftType,
+    username?: string,
+    password?: string,
     isCLI = true,
     beginDateTime?: string,
     endDateTime?: string
 ): Promise<ShiftDetails | undefined> {
+    // fallback to ENV if any param is missing
+    hubSlug ??= process.env.quinyxHub ?? process.env.QUINYX_HUB;
+    username ??= process.env.quinyxEmail ?? process.env.QUINYX_EMAIL;
+    password ??= process.env.quinyxPassword ?? process.env.QUINYX_PASSWORD;
+    const rawShiftType = process.env.quinyxShiftType ?? process.env.QUINYX_SHIFT_TYPE;
+    console.log(shiftType);
+    if (!shiftType && rawShiftType) {
+        const resolved = QuinyxShiftType[rawShiftType as keyof typeof QuinyxShiftType];
+        if (resolved !== undefined) {
+            shiftType = resolved;
+            console.log("Shift TYPE = " + shiftType)
+        } else {
+            console.warn(`⚠️ Unknown shift type: "${rawShiftType}", falling back to HQ_EMPLOYEE`);
+            shiftType = QuinyxShiftType.HQ_EMPLOYEE;
+        }
+    }
+
+    const rawIsCli = process.env.quinyxIsCli ?? process.env.QUINYX_IS_CLI;
+    if (typeof isCLI === "undefined" && rawIsCli !== undefined) {
+        isCLI = rawIsCli === "true";
+    }
+
     const quinyxApi = new QuinyxApi();
 
     console.log("🚀 Starting to create a new shift...");
     if (isCLI) updateSpinnerText("Processing....", true);
 
-    const hub = hubMap[hubSlug.toLowerCase()];
+    const hub = hubMap[hubSlug?.toLowerCase() ?? ""];
     if (!hub) {
-        console.error("Invalid hub specified! If you're sure that the hub is correct, contact the author to add your hub to the list.");
+        console.error("❌ Invalid hub specified! If you're sure the hub is correct, contact the author.");
         return;
     }
 
     try {
-        await quinyxApi.userLogin(username, password);
+        await quinyxApi.userLogin(username!, password!);
         await quinyxApi.getGroups();
 
         const beginDate = formatDateTime(beginDateTime, 8, 0);
         const endDate = formatDateTime(endDateTime, 23, 59);
 
-        const result = await quinyxApi.createShift(hub.id, beginDate, endDate, shiftType);
+        const result = await quinyxApi.createShift(hub.id, beginDate, endDate, shiftType!);
 
         if (isCLI) spinnerSuccess("🚀 The shift successfully created!");
         const { begin, end } = result;
+
         console.log(`${emojic.calendar} ${chalk.hex(Colors.LAVENDER_PINK).bold("Shift Details")} ${emojic.calendar}`);
         console.log(`Begin Time: ${chalk.hex(Colors.THULIAN_PINK).bold(begin)}`);
         console.log(`End Time: ${chalk.hex(Colors.THULIAN_PINK).bold(end)}`);
 
-        const employee = await quinyxApi.findEmployee(username, hub.id);
+        const employee = await quinyxApi.findEmployee(username!, hub.id);
         printEmployeeDetails(employee);
 
         return { begin, end };
@@ -93,6 +115,6 @@ export async function addShift(
         } else {
             console.error("Oops, something went wrong:", error);
         }
-        spinnerError("Your request failed. Please find the stacktrace above");
+        spinnerError("❌ Your request failed. Please find the stacktrace above");
     }
 }

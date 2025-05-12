@@ -2,11 +2,14 @@
 import * as fs from "fs";
 import * as path from "path";
 import * as os from "os";
-import { getConfigPath } from "../utils.js";
+import { getConfigFilePath } from "../utils.js";
+import { loadMergedConfig } from "../loadMergedConfig.js";
 
 export async function printConfig(): Promise<void> {
     try {
-        const config = await getConfigPath();
+        const configPath = await getConfigFilePath();
+        const mergedConfig = loadMergedConfig(configPath);
+        const userConfigPath = path.join(os.homedir(), ".flinkord", "config.json");
 
         const homeDir = os.homedir();
         const envPath = path.join(homeDir, ".env");
@@ -42,7 +45,9 @@ export async function printConfig(): Promise<void> {
         );
 
         console.log("Current configuration:");
-        console.dir({ configJson: config, env: maskedEnv }, { depth: null, colors: true });
+        console.log("Default config path:", configPath);
+        console.log("User config path:", userConfigPath);
+        console.dir({ mergedConfig, env: maskedEnv }, { depth: null, colors: true });
     } catch (error) {
         if (error instanceof Error) {
             console.error("Failed to load configuration:", error.message);

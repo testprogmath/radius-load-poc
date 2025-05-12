@@ -82,6 +82,8 @@
     "graphql-tag": "^2.12.6",
     "inquirer": "^12.6.0",
     "jsonfile": "^6.1.0",
+    "lodash.camelcase": "^4.3.0",
+    "lodash.merge": "^4.6.2",
     "node-fetch": "^3.3.2",
     "table": "^6.9.0"
   },
@@ -91,9 +93,11 @@
     "@types/gradient-string": "^1.1.6",
     "@types/inquirer": "^9.0.7",
     "@types/jsonfile": "^6.1.4",
+    "@types/lodash.camelcase": "^4.3.9",
+    "@types/lodash.merge": "^4.6.9",
     "@types/node": "^22.15.2",
     "@vitest/ui": "^3.1.2",
-    "eslint": "^9.25.1",
+    "eslint": "^9.26.0",
     "standard-version": "^9.5.0",
     "typescript": "^5.8.3",
     "vitest": "^3.1.2"

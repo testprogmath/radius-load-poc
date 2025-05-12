@@ -15,4 +15,17 @@ export interface AppConfig {
     genericPassword: string;
     firebaseUrl: string;
 
+    quinyxHub?: string;
+    quinyxBadge?: string;
+    quinyxEmail?: string;
+    quinyxPassword?: string;
+    quinyxShiftType?: string;
+    quinyxIsCli?: boolean;
+
+    CT_PROJECT_KEY?: string;
+    CT_CLIENT_ID?: string;
+    CT_CLIENT_SECRET?: string;
+    IDENTITY_KEY?: string;
+    FIREBASE_API_KEY?: string;
+    INVENTORY_SERVICE_TOKEN?: string;
 }

@@ -15,6 +15,8 @@ import {
     stackOrders
 } from "./commands/index.js";
 import { QuinyxShiftType } from "./shared/enums.js";
+import { loadMergedConfig } from "./loadMergedConfig.js";
+
 
 // External libraries for styling
 // @ts-ignore
@@ -59,6 +61,7 @@ const createOrder = new Command("create")
     .option("-c, --country <country>", "The country for the order, possible values: de, at, nl, fr")
     .action((commandAndOptions) => {
         console.debug("Create command invoked with:", commandAndOptions);
+        loadMergedConfig();
 
         const options = {
             locale: commandAndOptions.locale,
@@ -85,6 +88,7 @@ const freeHub = new Command("free")
     .requiredOption("-h, --hub <hub_slug>", "The hub to open")
     .action((commandAndOptions) => {
         console.log("Free command invoked with:", commandAndOptions);
+        loadMergedConfig();
         free(commandAndOptions.hub).catch(e => console.error(e));
     });
 
@@ -94,6 +98,7 @@ const deliverOrder = new Command("deliver")
     .argument("<orderId>", "ID of the order to deliver")
     .action((orderId) => {
         console.log("Deliver command invoked with order ID:", orderId);
+        loadMergedConfig();
         deliver(orderId).catch(e => console.error(e));
     });
 
@@ -103,6 +108,7 @@ const cancelOrder = new Command("cancel")
     .argument("<order>", "ID of the order to cancel")
     .action((order) => {
         console.log("Cancel command invoked with order:", order);
+        loadMergedConfig();
         cancel(order).catch(e => console.error(e));
     });
 
@@ -116,7 +122,10 @@ const setup = new Command("setup")
 
 const configCommand = new Command("config")
     .description("Print the current configuration used by flinkord-cli")
-    .action(printConfig);
+    .action(() => {
+        loadMergedConfig();
+        printConfig().catch(e => console.error(e));
+    });
 
 // "delete_shifts" command – delete all scheduled shifts from Quinyx
 const deleteAllQuinyxShifts = new Command("delete_shifts")
@@ -126,16 +135,6 @@ const deleteAllQuinyxShifts = new Command("delete_shifts")
     .option("-h, --hub <hubSlug>", "The hub with shifts")
     .action((commandAndOptions) => {
         const { username, password, hub } = commandAndOptions;
-
-        if (!username || !password) {
-            console.error("Username and password are required!");
-            return;
-        }
-
-        if (!hub) {
-            console.error("Please pass hubSlug with -h option");
-            return;
-        }
 
         deleteShifts(hub, commandAndOptions.badge, username, password, true)
             .catch(e => console.error(e));
@@ -148,23 +147,38 @@ const addQuinyxShift = new Command("add_shift")
     .option("-p, --password <password>", "Password for Quinyx")
     .option("-b, --begin <beginDateTime>", "Begin date and time for the shift (format: YYYY-MM-DDTHH:mm:ss)")
     .option("-e, --end <endDateTime>", "End date and time for the shift (format: YYYY-MM-DDTHH:mm:ss)")
-    .option("-h, --hub <hubSlug>", "The hub for the shift (ensure that your user has all required permissions)")
-    .option("-n, --badge <badgeNumber>", "Badge number for another user you want to schedule the shift for")
-    .action((commandAndOptions) => {
-        const { username, password, begin, end, hub, badge } = commandAndOptions;
+    .option("-h, --hub <hubSlug>", "The hub for the shift")
+    .option("-n, --badge <badgeNumber>", "Badge number for another user")
+    .action(async (options) => {
+        const config = loadMergedConfig();
 
-        if (!username || !password) {
-            console.error("Username and password are required!");
-            return;
+        const username = options.username ?? config.quinyxEmail;
+        const password = options.password ?? config.quinyxPassword;
+        const hub = options.hub ?? config.quinyxHub;
+        const badge = options.badge ?? config.quinyxBadge;
+        const shiftType = config.quinyxShiftType || QuinyxShiftType.HQ_EMPLOYEE;
+        const isCli = config.quinyxIsCli !== false;
+        const begin = options.begin;
+        const end = options.end;
+
+        const missing = [];
+        if (!username) missing.push("username");
+        if (!password) missing.push("password");
+        if (!hub) missing.push("hub");
+        if (!badge) missing.push("badge");
+
+        if (missing.length > 0) {
+            console.error(`❌ Missing required options: ${missing.join(", ")}`);
+            console.error("You can provide them via CLI or set them in your config/ENV.");
+            process.exit(1);
         }
 
-        if (!hub) {
-            console.error("Please pass hubSlug with -h option");
-            return;
+        try {
+            await addShift(hub, shiftType, username, password, isCli, begin, end);
+        } catch (e) {
+            console.error("❌ Shift creation failed:", e);
+            process.exit(1);
         }
-
-        addShift(hub, badge, QuinyxShiftType.HQ_EMPLOYEE, username, password, begin, end)
-            .catch(e => console.error(e));
     });
 
 // "get_returns" command – retrieve order returns by order ID
@@ -173,6 +187,7 @@ const getReturns = new Command("get_returns")
     .argument("<orderId>", "ID of the order to get returns for")
     .action((orderId) => {
         console.log("Get returns command invoked with order ID:", orderId);
+        loadMergedConfig();
         getOrderReturns(orderId).catch(e => console.error(e));
     });
 
@@ -183,6 +198,7 @@ const pickOrder = new Command("pick")
     .requiredOption("-o, --order <order_number>", "Order number for picking")
     .action((commandAndOptions) => {
         console.log("Pick command invoked with:", commandAndOptions);
+        loadMergedConfig();
         pick(commandAndOptions.order, commandAndOptions.hub).catch(e => console.error(e));
     });
 
@@ -193,6 +209,7 @@ const stackOrdersCommand = new Command("stack_orders")
     .option("--url <url>", "Optional custom service URL")
     .action((commandAndOptions) => {
         const { hub, orders, url } = commandAndOptions;
+        loadMergedConfig();
         stackOrders({ hub, orderIds: orders, url });
     });
 

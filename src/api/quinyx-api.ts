@@ -1,6 +1,6 @@
 import axios from "axios";
 import {Buffer} from "buffer";
-import {getConfigPath} from "../utils.js";
+import { readAppConfig} from "../utils.js";
 import {QuinyxGroup, QuinyxShiftType} from "../shared/enums.js";
 import {formatDate} from "../utils/types.js";
 import * as fs from "fs/promises";
@@ -18,7 +18,7 @@ let isInitialized = false;
 
 async function ensureInitialized() {
     if (!isInitialized) {
-        baseConfig = await getConfigPath();
+        baseConfig = await readAppConfig();
         QUINYX_URL = baseConfig.quinyxUrl;
         isInitialized = true;
     }
@@ -90,7 +90,7 @@ export class QuinyxApi {
             employeeId: this.getUserId(),
             begin: beginDateTime,
             end: endDateTime,
-            shiftTypeId: shiftType.valueOf(),
+            shiftTypeId: shiftType,
             groupId: groupId.valueOf(),
         };
 
@@ -138,8 +138,6 @@ export class QuinyxApi {
         };
 
         console.log(`Sending request to URL: ${url}`);
-        console.log(`Headers: ${JSON.stringify(headers, null, 2)}`);
-        console.log(`Params: ${JSON.stringify(params, null, 2)}`);
         try {
 
             const response = await axios.get(url, {

@@ -52,6 +52,11 @@
       "message": "error.schedule.shift.validation.missingSkills",
       "userMessage": "Employee missing skill(s): {{missingSkills}}",
       "severity": "OVERRIDABLE"
+    },
+    {
+      "message": "error.schedule.shift.validation.minLength",
+      "userMessage": "Shift length does not fulfil the minimum duration of 6 hours (2.98 hours).",
+      "severity": "OVERRIDABLE"
     }
   ],
   "overrideOnOverlappingShiftsAction": null

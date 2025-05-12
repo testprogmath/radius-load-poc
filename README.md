@@ -179,6 +179,25 @@ Commands:
 
 Usage: flinkord [options]
 
+### Setup
+
+Before using Flinkord for the first time, you need to set up your credentials and configuration. Run:
+```shell
+flinkord setup
+```
+During setup, you can optionally provide your Quinyx credentials to enable shift creation and deletion.
+
+You may also choose to skip this or go forward and use default credentials:
+
+```shell
+Do you want to add Quinyx credentials to manage shifts? (yes/no) (default: no): 
+```
+It will create/update a config file in `~/.flinkord/config.json` and fproxy.yml in your home directory.
+
+Flinkord will automatically merge default and user configuration files at runtime.
+
+Feel free to manually update `~/.flinkord/config.json` if needed.
+
 To create the order in the chosen hub, please use -h (--hub option):
 
 ### Create an order in a particular hub
@@ -275,17 +294,6 @@ This error often appears when there are too many orders in the hub queue. To fre
 flinkord free -h de_ber_mit2
 ```
 
-For the first time, you need to enter your CommerceTools client creds. You can also use default ones. Run
-
-```shell
-flinkord setup
-```
-
-```shell
-Enter CT_CLIENT_ID (default: wxgadKVe9YfVkHWUDhgpIIJ6): 
-Enter CT_CLIENT_SECRET (to use the default value, press enter):
-.env file successfully created 
-```
 ### To pick the order via HubOne API, use "pick" command with your order number and hubSlug:
 ```shell
 flinkord pick -o <order-number> -h <hub-slug>

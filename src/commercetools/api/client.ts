@@ -1,6 +1,6 @@
 import {Client, createClient} from "@commercetools/sdk-client-v2";
 import {ByProjectKeyRequestBuilder, createApiBuilderFromCtpClient} from "@commercetools/platform-sdk";
-import {getConfigPath} from "../../utils.js";
+import { readAppConfig} from "../../utils.js";
 import fetch from "node-fetch";
 
 let config: any;
@@ -14,7 +14,7 @@ let ctpClient: Client | null = null;
 
 export async function ensureInitialized() {
     if (!isInitialized) {
-        config = await getConfigPath();
+        config = await readAppConfig();
         CT_AUTH_URL = config.CTAuthUrl;
         CT_API_URL = config.CTApiUrl;
         projectKey = process.env.CT_PROJECT_KEY as string;

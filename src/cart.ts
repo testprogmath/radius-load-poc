@@ -1,6 +1,6 @@
 import {CartApi, CartOrder, GetCartResponseV3} from "./api/cart-api.js";
-import {spinnerError, spinnerSuccess, stopSpinner} from "./spinner.js";
-import {getConfigPath, wait} from "./utils.js";
+import {spinnerError, spinnerSuccess, stopSpinner,printErrorAndStopSpinner } from "./spinner.js";
+import { readAppConfig, wait} from "./utils.js";
 import chalk from "chalk";
 // @ts-ignore
 import emojic from "emojic";
@@ -8,7 +8,6 @@ import {Colors} from "./shared/enums.js";
 import {authorizeInStore} from "./api/website-api.js";
 import axios, {AxiosResponse} from "axios";
 import {CartLine, CartRequest} from "./api/objects/cart-request.js";
-import {printErrorAndStopSpinner} from "./spinner.js";
 
 import * as dotenv from "dotenv";
 import {getInventoryChangesForTheHub, updateStockInTheHub} from "./api/inventory-service-api.js";
@@ -50,7 +49,7 @@ const cartToken = {
 
 async function ensureInitialized() {
     if (!isInitialized) {
-        config = await getConfigPath();
+        config = await readAppConfig();
         inStoreLogin = config.instoreLogin;
         inStorePassword = config.instorePassword;
         isInitialized = true;

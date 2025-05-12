@@ -81,9 +81,9 @@ export function writeFproxyConfig(): void {
 }
 
 export async function setupEnv(): Promise<void> {
+    const jsonConfigPath = path.join(os.homedir(), ".flinkord", "config.json");
     const envFilePath = path.join(process.cwd(), ".env");
     const jsonTempPath = path.join(process.cwd(), "env.json");
-    let existingEnv: Record<string, string> = {};
 
     const managedKeys = [
         "CT_PROJECT_KEY",
@@ -95,67 +95,79 @@ export async function setupEnv(): Promise<void> {
         "FIREBASE_API_KEY"
     ];
 
-    // Step 1: Load existing .env values if present
+    let finalConfig: Record<string, any> = {};
+
+    // 1. Load existing ~/.flinkord/config.json if it exists
+    if (fs.existsSync(jsonConfigPath)) {
+        try {
+            const raw = fs.readFileSync(jsonConfigPath, "utf-8");
+            finalConfig = JSON.parse(raw);
+            console.log(`🛠 Loaded existing config from ${jsonConfigPath}`);
+        } catch (e) {
+            console.warn("⚠️ Could not parse existing config. Starting fresh.");
+        }
+    }
+
+    // 2. Load .env file for backward compatibility
     if (fs.existsSync(envFilePath)) {
         const raw = fs.readFileSync(envFilePath, "utf-8");
         for (const line of raw.split("\n")) {
             const [key, val] = line.split("=");
             if (key && val) {
-                existingEnv[key.trim()] = val.trim().replace(/^"|"$/g, ""); // remove surrounding quotes
+                finalConfig[key.trim()] = val.trim().replace(/^"|"$/g, "");
             }
         }
+        console.log("✅ Loaded config from .env");
     }
 
-    // Step 2: Download from GCS and merge managed keys
+    // 3. Try to load config from GCS
     await downloadConfigFromGCS("flinkord-cli-configs", "env.json", jsonTempPath);
-
     if (fs.existsSync(jsonTempPath)) {
         const raw = fs.readFileSync(jsonTempPath, "utf-8");
-        const config = JSON.parse(raw);
-        fs.unlinkSync(jsonTempPath); // cleanup
+        const remote = JSON.parse(raw);
+        fs.unlinkSync(jsonTempPath);
 
         for (const key of managedKeys) {
-            if (key in config) {
-                existingEnv[key] = config[key];
+            if (remote[key]) {
+                finalConfig[key] = remote[key];
             }
         }
 
-        const content = Object.entries(existingEnv)
-            .map(([key, value]) => `${key}="${value}"`)
-            .join("\n");
-
-        writeEnvFile(envFilePath, content + "\n");
-        return;
+        console.log("✅ Loaded config from GCS");
     }
 
-    // Step 3: Prompt if download failed or incomplete
-    const defaultClientId = process.env.CT_CLIENT_ID ?? "";
-    const defaultClientSecret = process.env.CT_CLIENT_SECRET ?? "";
-    const identityKey = process.env.IDENTITY_KEY ?? "";
-    const genericPassword = process.env.GENERIC_PASSWORD ?? "";
-    const inventoryServiceToken = process.env.INVENTORY_SERVICE_TOKEN ?? "";
-    const firebaseApiKey = process.env.FIREBASE_API_KEY ?? "";
-
-    try {
-        const clientId = await askQuestion("Enter CT_CLIENT_ID", defaultClientId);
-        const clientSecret = await askQuestion("Enter CT_CLIENT_SECRET", defaultClientSecret);
-        const identityKeySecret = await askQuestion("Enter IDENTITY_KEY", identityKey);
-
-        existingEnv["CT_PROJECT_KEY"] = "flink-staging";
-        existingEnv["CT_CLIENT_ID"] = clientId;
-        existingEnv["CT_CLIENT_SECRET"] = clientSecret;
-        existingEnv["IDENTITY_KEY"] = identityKeySecret;
-        existingEnv["GENERIC_PASSWORD"] = genericPassword;
-        existingEnv["INVENTORY_SERVICE_TOKEN"] = inventoryServiceToken;
-        existingEnv["FIREBASE_API_KEY"] = firebaseApiKey;
-
-        const content = Object.entries(existingEnv)
-            .map(([key, value]) => `${key}="${value}"`)
-            .join("\n");
-
-        writeEnvFile(envFilePath, content + "\n");
-        writeFproxyConfig();
-    } catch (error) {
-        console.error("An error occurred during setup:", error);
+    // 4. Prompt for any missing values
+    for (const key of managedKeys) {
+        if (!finalConfig[key]) {
+            const defaultValue = process.env[key] ?? "";
+            const answer = await askQuestion(`Enter ${key}`, defaultValue);
+            finalConfig[key] = answer;
+        }
     }
+
+    // 5. Ask user if they want to add Quinyx credentials
+    const wantsQuinyx = await askQuestion("Do you want to add Quinyx credentials to manage shifts? (yes/no)", "no");
+
+    if (wantsQuinyx.toLowerCase().startsWith("y")) {
+        finalConfig["quinyxHub"] = await askQuestion("Enter Quinyx hub", finalConfig["quinyxHub"] ?? "de_ber_mit2");
+        finalConfig["quinyxBadge"] = await askQuestion("Enter Quinyx badge", finalConfig["quinyxBadge"] ?? "10133422");
+        finalConfig["quinyxEmail"] = await askQuestion("Enter Quinyx email", finalConfig["quinyxEmail"] ?? "autotest-hubone@goflink.com");
+        finalConfig["quinyxPassword"] = await askQuestion("Enter Quinyx password", finalConfig["quinyxPassword"] ?? "password123&");
+        finalConfig["quinyxShiftType"] = await askQuestion("Enter Quinyx shift type (e.g. OPS_ASSOCIATE)", finalConfig["quinyxShiftType"] ?? "OPS_ASSOCIATE");
+    } else {
+        console.log("ℹ️ Skipped Quinyx configuration");
+    }
+
+    // 6. Save final config to ~/.flinkord/config.json
+    const configDir = path.dirname(jsonConfigPath);
+    if (!fs.existsSync(configDir)) {
+        fs.mkdirSync(configDir, { recursive: true });
+        console.log(`📁 Created directory ${configDir}`);
+    }
+
+    fs.writeFileSync(jsonConfigPath, JSON.stringify(finalConfig, null, 2), "utf-8");
+    console.log(`✅ Updated config at ${jsonConfigPath}`);
+
+    // 7. Create fproxy.yaml as usual
+    writeFproxyConfig();
 }

@@ -10,23 +10,26 @@ import {fileURLToPath} from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-export async function getConfigPath(): Promise<AppConfig> {
+export async function getConfigFilePath(): Promise<string> {
     const currentDir = process.cwd();
     const configPath = path.join(currentDir, "config/config.json");
 
     try {
         await fs.access(configPath, fs.constants.F_OK);
         console.log(`Using local config: ${configPath}`);
-        return await jsonfile.readFile(configPath) as Promise<AppConfig>;
+        return configPath;
     } catch {
+        const resolvedConfigPath = await findUp("config/default.json", {cwd: __dirname});
+        if (!resolvedConfigPath) {
+            throw new Error("No configuration file found");
+        }
+        return resolvedConfigPath;
     }
+}
 
-    const resolvedConfigPath = await findUp("config/default.json", {cwd: __dirname});
-    if (!resolvedConfigPath) {
-        throw new Error("No configuration file found");
-    }
-
-    return await jsonfile.readFile(resolvedConfigPath) as Promise<AppConfig>;
+export async function readAppConfig(): Promise<AppConfig> {
+    const configPath = await getConfigFilePath();
+    return await jsonfile.readFile(configPath) as Promise<AppConfig>;
 }
 
 export const wait = (ms: number) => new Promise(resolve => {

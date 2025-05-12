@@ -16,14 +16,7 @@ describe('Test addShift command', () => {
     });
 
     test('AddShift command', async () => {
-        const shiftDetails = await addShift(
-            TEST_HUB,
-            TEST_SHIFT_ID,
-            QuinyxShiftType.OPS_ASSOCIATE,
-            TEST_EMAIL,
-            TEST_PASSWORD,
-            IS_CLI,
-        );
+        const shiftDetails = await addShift(TEST_HUB, QuinyxShiftType.OPS_ASSOCIATE, TEST_EMAIL, TEST_PASSWORD, IS_CLI);
 
         console.log(shiftDetails);
         expect(shiftDetails?.begin).toContain(today);
