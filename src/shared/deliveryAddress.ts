@@ -62,13 +62,13 @@ export const DeliveryDetails: Record<string, DeliveryDetail> = {
   },
   de_ber_pren: {
     coordinates: {
-      latitude: 52.54680,
-      longitude: 13.41055, 
+      latitude: 52.55240,
+      longitude: 13.40204, 
     },
     address: {
-      street: "Gaudystraße 9",
+      street: "Isländische Straße 3B",
       city: "BER",
-      postalCode: "10437",
+      postalCode: "10439",
       country: "DE",
     },
     contact: {
