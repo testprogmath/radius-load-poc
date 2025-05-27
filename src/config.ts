@@ -14,6 +14,11 @@ export interface AppConfig {
     inventoryServiceUrl: string;
     genericPassword: string;
     firebaseUrl: string;
+    dispatchingApiUrl: string;
+
+    auth0Domain: string;
+    auth0ClientId: string;
+    auth0DispatchingAudience: string;
 
     quinyxHub?: string;
     quinyxBadge?: string;
@@ -28,4 +33,5 @@ export interface AppConfig {
     IDENTITY_KEY?: string;
     FIREBASE_API_KEY?: string;
     INVENTORY_SERVICE_TOKEN?: string;
+    AUTH0_CURB_CLIENT_SECRET?: string;
 }

@@ -1,9 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { stackOrders } from "../src/commands/index.js";
-import * as fproxy from "../src/utils/fproxy.js";
 import * as api from "../src/api/dispatching-api.js";
 import {AxiosHeaders} from "axios";
 import * as ctOrder from "../src/commercetools/index.js";
+import {readAppConfig} from "../src/utils.js";
+import {AppConfig} from "../src/config.js";
 
 const sampleResponse = {
     data: {
@@ -30,17 +31,17 @@ const sampleResponse = {
 };
 
 describe("stackOrders", () => {
-    const stopMock = vi.fn();
+    let config: AppConfig;
 
-    beforeEach(() => {
+    beforeEach(async () => {
         vi.restoreAllMocks();
         vi.spyOn(ctOrder, "getOrderId").mockImplementation(async (id: string) => `uuid-for-${id}`);
+        config = await readAppConfig();
     });
 
-    it("calls portForward and stacks orders correctly", async () => {
+    it("stacks orders correctly", async () => {
         const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
 
-        vi.spyOn(fproxy, "portForward").mockResolvedValue({ port: 8080, stop: stopMock });
         vi.spyOn(api, "sendStackingProposal").mockResolvedValue({
             data: {},
             status: 200,
@@ -65,14 +66,17 @@ describe("stackOrders", () => {
             orderIds: ["1", "2"],
         });
 
-        expect(fproxy.portForward).toHaveBeenCalled();
         expect(api.sendStackingProposal).toHaveBeenCalledWith(
-            "http://dispatching-hub-state-updater-staging.consumer-backend:8080",
+            config.dispatchingApiUrl,
             "de_ber_fran",
-            ["uuid-for-1", "uuid-for-2"]
+            ["uuid-for-1", "uuid-for-2"],
+            expect.objectContaining({
+                headers: expect.objectContaining({
+                    Authorization: expect.stringContaining("Bearer "),
+                }),
+            })
         );
         expect(api.fetchStackState).toHaveBeenCalled();
-        expect(stopMock).toHaveBeenCalled();
         expect(logSpy).toHaveBeenCalledWith(expect.stringContaining("📦 Sending proposal..."));
         expect(logSpy).toHaveBeenCalledWith(expect.stringContaining("🧱 Stack ID: d7c8fbdd"));
     });

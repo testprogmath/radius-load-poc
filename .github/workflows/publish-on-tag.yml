@@ -31,6 +31,7 @@ jobs:
       GENERIC_PASSWORD: ${{ secrets.GENERIC_PASSWORD }}
       INVENTORY_SERVICE_TOKEN: ${{ secrets.INVENTORY_SERVICE_TOKEN }}
       FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
+      AUTH0_CURB_CLIENT_SECRET: ${{ secrets.AUTH0_CURB_CLIENT_SECRET }}
 
     steps:
       - name: Checkout code

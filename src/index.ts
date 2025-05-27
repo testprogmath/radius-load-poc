@@ -206,11 +206,10 @@ const stackOrdersCommand = new Command("stack_orders")
     .description("Stack orders for a given hub")
     .requiredOption("-h, --hub <hub_slug>", "The hub for the order")
     .requiredOption("-o, --orders <orderIds...>", "List of order IDs to stack")
-    .option("--url <url>", "Optional custom service URL")
     .action((commandAndOptions) => {
-        const { hub, orders, url } = commandAndOptions;
+        const { hub, orders } = commandAndOptions;
         loadMergedConfig();
-        stackOrders({ hub, orderIds: orders, url });
+        stackOrders({ hub, orderIds: orders });
     });
 
 // --------------------

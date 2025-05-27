@@ -1,9 +1,0 @@
-version: '1'
-
-fproxyServer:
-  port: 80
-  name: fproxy-server
-  namespace: devops
-
-services:
-  - dispatching-hub-state-updater-staging.consumer-backend

@@ -103,7 +103,7 @@ or follow the steps below:
     ```
 3. Log in on gcloud by running:
    ```shell
-   gcloud auth login --project flink-core-shared
+   gcloud auth login --project flink-core-staging
    ```
 4. Check the file .npmrc in your home directory. If there's no one, create it with the following content:
     ```
@@ -192,7 +192,7 @@ You may also choose to skip this or go forward and use default credentials:
 ```shell
 Do you want to add Quinyx credentials to manage shifts? (yes/no) (default: no): 
 ```
-It will create/update a config file in `~/.flinkord/config.json` and fproxy.yml in your home directory.
+It will create/update a config file in `~/.flinkord/config.json` in your home directory.
 
 Flinkord will automatically merge default and user configuration files at runtime.
 
@@ -342,34 +342,6 @@ curl --location 'https://consumer-api.staging.goflink.com/v1/hubs/slug/<hub_slug
 ### To stack multiple orders into a delivery proposal
 
 You can now stack multiple orders **before delivery**!
-
-#### Prerequisites
-
-There are two ways to reach the internal service:
-
-**a. Use port forwarding**
-
-1. Run:
-```sh
-kubectl -n consumer-backend port-forward "service/dispatching-hub-state-updater-staging" 40082:80
-```
-2. Then call the command with `--url`:
-```sh
-flinkord stack_orders -h de_ber_fran -o cc89585c-e06d-4e6c-9f1c-53e634ac45b4 1f3ac236-8c41-4dda-8851-c9d9d14879c2 4a2bee92-685b-40fd-a1e6-a7466e5c128b --url http://localhost:40082
-```
-
-**b. Use `fproxy`**
-
-1. Install the latest version from [fproxy releases](https://github.com/goflink/fproxy/releases). If you face issues, check the [fproxy setup guide](https://goflink.atlassian.net/wiki/spaces/PLATFORM/pages/1293549606/Getting+Started+With+FProxy#Requirements)
-2. Run:
-```sh
-kubectl config use-context gke_flink-core-staging_europe-west3_k8s-main-staging
-```
-3. Then:
-```sh
-sudo fproxy dns set
-flinkord setup
-```
 
 #### Example:
 

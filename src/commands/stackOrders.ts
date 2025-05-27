@@ -1,9 +1,10 @@
 import axios from "axios";
 import { sendStackingProposal, fetchStackState } from "../api/dispatching-api.js";
-import {portForward} from "../utils/fproxy.js";
 import { table } from "table";
 
 import { getOrderId } from "../commercetools/index.js";
+import {readAppConfig} from "../utils.js";
+import {AppConfig} from "../config.js";
 
 interface Options {
     hub: string;
@@ -11,13 +12,42 @@ interface Options {
     url?: string;
 }
 
-async function sendRequests(baseUrl: string, hub: string, orderIds: string[]) {
+async function getAuth0Token(config: AppConfig) {
+    const auth0ClientSecret = process.env.AUTH0_CURB_CLIENT_SECRET;
+
+    if (!auth0ClientSecret) {
+        throw new Error("Missing AUTH0_CURB_CLIENT_SECRET environment variable");
+    }
+
+    const tokenResponse = await axios.post(`https://${config.auth0Domain}/oauth/token`, {
+        grant_type: "client_credentials",
+        client_id: config.auth0ClientId,
+        client_secret: auth0ClientSecret,
+        audience: config.auth0DispatchingAudience,
+    }, {
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    });
+
+    return tokenResponse.data.access_token;
+}
+
+async function sendRequests(baseUrl: string, hub: string, orderIds: string[], token: string) {
     console.log("📦 Sending proposal...");
-    const putRes = await sendStackingProposal(baseUrl, hub, orderIds);
+    const putRes = await sendStackingProposal(baseUrl, hub, orderIds, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
     console.log("✅ Proposal sent:", putRes.status);
 
     console.log("🔍 Fetching stack state...");
-    const getRes = await fetchStackState(baseUrl, hub);
+    const getRes = await fetchStackState(baseUrl, hub, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
 
     const data = getRes.data;
 
@@ -42,20 +72,16 @@ async function sendRequests(baseUrl: string, hub: string, orderIds: string[]) {
     console.log(table(outputRows));
 }
 
-export async function stackOrders({ hub, orderIds, url }: Options) {
+export async function stackOrders({ hub, orderIds }: Options) {
     if (!Array.isArray(orderIds) || orderIds.length < 2) {
         console.error("❌ You must provide at least two order IDs to stack them.");
         process.exit(1);
     }
-    let forward: { stop: () => void, port: number } | undefined;    try {
-        let baseUrl: string;
-        if (url) {
-            baseUrl = url;
-        } else {
-            console.log("⏳ Starting fproxy to reach internal service...");
-            forward = await portForward();
-            baseUrl = `http://dispatching-hub-state-updater-staging.consumer-backend:${forward.port}`;
-        }
+    try {
+        const config = await readAppConfig();
+        const baseUrl =config.dispatchingApiUrl;
+        const token = await getAuth0Token(config);
+
         const resolvedOrderIds: string[] = [];
 
         for (const rawId of orderIds) {
@@ -67,7 +93,7 @@ export async function stackOrders({ hub, orderIds, url }: Options) {
                 process.exit(1);
             }
         }
-        await sendRequests(baseUrl, hub, resolvedOrderIds);
+        await sendRequests(baseUrl, hub, resolvedOrderIds, token);
 
     } catch (e: any) {
         if (axios.isAxiosError(e)) {
@@ -77,11 +103,6 @@ export async function stackOrders({ hub, orderIds, url }: Options) {
             console.error("📬 Response body:", JSON.stringify(e.response?.data, null, 2));
         } else {
             console.error("❌ Unknown error:", e);
-        }
-    } finally {
-        if (forward) {
-            console.log("🧹 Cleaning up fproxy tunnel...");
-            forward.stop();
         }
     }
 }

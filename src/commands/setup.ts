@@ -1,16 +1,11 @@
 import * as dotenv from "dotenv";
-dotenv.config();
-
 import * as fs from "fs";
 import * as path from "path";
 import * as readline from "readline";
 import * as os from "os";
-import { Storage } from "@google-cloud/storage";
-import { dirname, join } from "path";
-import { fileURLToPath } from "url";
+import {Storage} from "@google-cloud/storage";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+dotenv.config();
 
 async function askQuestion(question: string, defaultValue?: string): Promise<string> {
     const rl = readline.createInterface({
@@ -30,15 +25,6 @@ async function askQuestion(question: string, defaultValue?: string): Promise<str
     });
 }
 
-function writeEnvFile(filePath: string, content: string): void {
-    try {
-        fs.writeFileSync(filePath, content);
-        console.log(".env file successfully written");
-    } catch (err) {
-        console.error("Failed to write to .env file:", err);
-    }
-}
-
 async function downloadConfigFromGCS(bucketName: string, srcFilename: string, destPath: string): Promise<void> {
     const storage = new Storage();
     const bucket = storage.bucket(bucketName);
@@ -56,30 +42,6 @@ async function downloadConfigFromGCS(bucketName: string, srcFilename: string, de
         }    }
 }
 
-export function writeFproxyConfig(): void {
-    const projectRoot = join(__dirname, "..", "..", "..");
-    const templatePath = join(projectRoot, "templates", "fproxy.yaml");
-    const fproxyYamlPath = join(os.homedir(), "fproxy.yaml");
-
-    try {
-        if (!fs.existsSync(templatePath)) {
-            console.error("❌ fproxy.yaml template not found in templates directory.");
-            return;
-        }
-
-        const yamlContent = fs.readFileSync(templatePath, "utf-8");
-
-        if (!fs.existsSync(fproxyYamlPath)) {
-            fs.writeFileSync(fproxyYamlPath, yamlContent);
-            console.log("✅ Created fproxy.yaml in home directory");
-        } else {
-            console.log("ℹ️ fproxy.yaml already exists, skipping creation");
-        }
-    } catch (err) {
-        console.error("❌ Failed to write fproxy.yaml:", err);
-    }
-}
-
 export async function setupEnv(): Promise<void> {
     const jsonConfigPath = path.join(os.homedir(), ".flinkord", "config.json");
     const envFilePath = path.join(process.cwd(), ".env");
@@ -92,7 +54,8 @@ export async function setupEnv(): Promise<void> {
         "IDENTITY_KEY",
         "GENERIC_PASSWORD",
         "INVENTORY_SERVICE_TOKEN",
-        "FIREBASE_API_KEY"
+        "FIREBASE_API_KEY",
+        "AUTH0_CURB_CLIENT_SECRET",
     ];
 
     let finalConfig: Record<string, any> = {};
@@ -121,6 +84,9 @@ export async function setupEnv(): Promise<void> {
     }
 
     // 3. Try to load config from GCS
+    console.log("🔑 To enable access to GCS, make sure you're authenticated in Google Cloud:");
+    console.log("👉 Run: gcloud config set project flink-core-staging");
+    console.log("👉 Then: gcloud auth application-default login");
     await downloadConfigFromGCS("flinkord-cli-configs", "env.json", jsonTempPath);
     if (fs.existsSync(jsonTempPath)) {
         const raw = fs.readFileSync(jsonTempPath, "utf-8");
@@ -140,8 +106,7 @@ export async function setupEnv(): Promise<void> {
     for (const key of managedKeys) {
         if (!finalConfig[key]) {
             const defaultValue = process.env[key] ?? "";
-            const answer = await askQuestion(`Enter ${key}`, defaultValue);
-            finalConfig[key] = answer;
+            finalConfig[key] = await askQuestion(`Enter ${key}`, defaultValue);
         }
     }
 
@@ -167,7 +132,4 @@ export async function setupEnv(): Promise<void> {
 
     fs.writeFileSync(jsonConfigPath, JSON.stringify(finalConfig, null, 2), "utf-8");
     console.log(`✅ Updated config at ${jsonConfigPath}`);
-
-    // 7. Create fproxy.yaml as usual
-    writeFproxyConfig();
 }

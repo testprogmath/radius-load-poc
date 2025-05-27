@@ -13,5 +13,9 @@
   "quinyxUrl": "https://web-rc.quinyx.com/extapi",
   "inventoryServiceUrl": "https://api.staging.goflink.com/hub/inventory-service",
   "genericPassword": "password123&",
-  "firebaseUrl": "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword"
+  "firebaseUrl": "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword",
+  "auth0Domain": "flink-staging.eu.auth0.com",
+  "auth0ClientId": "HvJJiONKt12Dj4UG0JV1QSQbPGbxW2WY",
+  "auth0DispatchingAudience": "https://api.staging.goflink.com/last-mile/dispatching",
+  "dispatchingApiUrl": "https://api.staging.goflink.com/last-mile/dispatching"
 }
