@@ -12,7 +12,6 @@ const QUINYX_KEYS = [
     "quinyxBadge",
     "quinyxEmail",
     "quinyxPassword",
-    "quinyxShiftType",
     "quinyxIsCli",
 ];
 

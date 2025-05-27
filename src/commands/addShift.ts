@@ -50,28 +50,17 @@ function handleAxiosError(error: AxiosError): void {
 export async function addShift(
     hubSlug?: string,
     shiftType?: QuinyxShiftType,
-    username?: string,
-    password?: string,
+    managerUsername?: string,
+    managerPassword?: string,
+    employeeSelector?: string,
     isCLI = true,
     beginDateTime?: string,
-    endDateTime?: string
+    endDateTime?: string,
 ): Promise<ShiftDetails | undefined> {
     // fallback to ENV if any param is missing
     hubSlug ??= process.env.quinyxHub ?? process.env.QUINYX_HUB;
-    username ??= process.env.quinyxEmail ?? process.env.QUINYX_EMAIL;
-    password ??= process.env.quinyxPassword ?? process.env.QUINYX_PASSWORD;
-    const rawShiftType = process.env.quinyxShiftType ?? process.env.QUINYX_SHIFT_TYPE;
-    console.log(shiftType);
-    if (!shiftType && rawShiftType) {
-        const resolved = QuinyxShiftType[rawShiftType as keyof typeof QuinyxShiftType];
-        if (resolved !== undefined) {
-            shiftType = resolved;
-            console.log("Shift TYPE = " + shiftType)
-        } else {
-            console.warn(`⚠️ Unknown shift type: "${rawShiftType}", falling back to HQ_EMPLOYEE`);
-            shiftType = QuinyxShiftType.HQ_EMPLOYEE;
-        }
-    }
+    managerUsername ??= process.env.quinyxEmail ?? process.env.QUINYX_EMAIL;
+    managerPassword ??= process.env.quinyxPassword ?? process.env.QUINYX_PASSWORD;
 
     const rawIsCli = process.env.quinyxIsCli ?? process.env.QUINYX_IS_CLI;
     if (typeof isCLI === "undefined" && rawIsCli !== undefined) {
@@ -89,14 +78,23 @@ export async function addShift(
         return;
     }
 
+    if (!employeeSelector) {
+        console.error("❌ Missing badge number. Please provide -n [badge number]");
+        return;
+    }
+
     try {
-        await quinyxApi.userLogin(username!, password!);
+        await quinyxApi.userLogin(managerUsername!, managerPassword!);
         await quinyxApi.getGroups();
 
         const beginDate = formatDateTime(beginDateTime, 8, 0);
         const endDate = formatDateTime(endDateTime, 23, 59);
 
-        const result = await quinyxApi.createShift(hub.id, beginDate, endDate, shiftType!);
+
+        const employee = await quinyxApi.findEmployee(employeeSelector!, hub.id);
+        const employeeData =  quinyxApi.parseEmployeeInfo(employee);
+
+        const result = await quinyxApi.createShift(hub.id, beginDate, endDate, shiftType!, employeeData.employeeId, employeeData.agreementId);
 
         if (isCLI) spinnerSuccess("🚀 The shift successfully created!");
         const { begin, end } = result;
@@ -105,7 +103,6 @@ export async function addShift(
         console.log(`Begin Time: ${chalk.hex(Colors.THULIAN_PINK).bold(begin)}`);
         console.log(`End Time: ${chalk.hex(Colors.THULIAN_PINK).bold(end)}`);
 
-        const employee = await quinyxApi.findEmployee(username!, hub.id);
         printEmployeeDetails(employee);
 
         return { begin, end };

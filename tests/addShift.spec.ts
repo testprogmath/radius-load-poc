@@ -7,6 +7,7 @@ const TEST_SHIFT_ID = "10133422";
 const TEST_EMAIL = "autotest-hubone@goflink.com";
 const TEST_PASSWORD = "password123&";
 const IS_CLI = false;
+const TEST_BADGE = "10133422"
 
 const today = new Date().toISOString().split("T")[0];
 
@@ -16,7 +17,7 @@ describe('Test addShift command', () => {
     });
 
     test('AddShift command', async () => {
-        const shiftDetails = await addShift(TEST_HUB, QuinyxShiftType.OPS_ASSOCIATE, TEST_EMAIL, TEST_PASSWORD, IS_CLI);
+        const shiftDetails = await addShift(TEST_HUB, QuinyxShiftType.OPS_ASSOCIATE, TEST_EMAIL, TEST_PASSWORD,TEST_BADGE, IS_CLI);
 
         console.log(shiftDetails);
         expect(shiftDetails?.begin).toContain(today);

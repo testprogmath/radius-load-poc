@@ -76,13 +76,11 @@
     "figlet": "^1.8.1",
     "find-up": "^7.0.0",
     "fix-esm": "^1.0.1",
-    "get-port": "^7.1.0",
     "gradient-string": "^3.0.0",
     "graphql": "^16.11.0",
     "graphql-tag": "^2.12.6",
     "inquirer": "^12.6.1",
     "jsonfile": "^6.1.0",
-    "lodash.camelcase": "^4.3.0",
     "lodash.merge": "^4.6.2",
     "node-fetch": "^3.3.2",
     "table": "^6.9.0"

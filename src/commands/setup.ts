@@ -118,7 +118,6 @@ export async function setupEnv(): Promise<void> {
         finalConfig["quinyxBadge"] = await askQuestion("Enter Quinyx badge", finalConfig["quinyxBadge"] ?? "10133422");
         finalConfig["quinyxEmail"] = await askQuestion("Enter Quinyx email", finalConfig["quinyxEmail"] ?? "autotest-hubone@goflink.com");
         finalConfig["quinyxPassword"] = await askQuestion("Enter Quinyx password", finalConfig["quinyxPassword"] ?? "password123&");
-        finalConfig["quinyxShiftType"] = await askQuestion("Enter Quinyx shift type (e.g. OPS_ASSOCIATE)", finalConfig["quinyxShiftType"] ?? "OPS_ASSOCIATE");
     } else {
         console.log("ℹ️ Skipped Quinyx configuration");
     }

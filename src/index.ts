@@ -142,13 +142,12 @@ const deleteAllQuinyxShifts = new Command("delete_shifts")
 
 // "add_shift" command – add a shift for Quinyx with a specific user and time range
 const addQuinyxShift = new Command("add_shift")
-    .description("Add a shift for Quinyx with a specific user and time range")
-    .option("-u, --username <username>", "Username for Quinyx")
-    .option("-p, --password <password>", "Password for Quinyx")
+    .description("Add a shift for a Quinyx user with a specific time range.\n\nYou can use either:\n• your own Quinyx credentials (if you’re creating the shift for yourself), or\n• manager credentials (if you’re creating the shift for another user via badge number or email).\n\nUsername and password can be passed via CLI or config file (you can run flinkord setup to add them to the config file).")    .option("-u, --username <username>", "Manager username for Quinyx")
+    .option("-p, --password <password>", "Manager password for Quinyx")
     .option("-b, --begin <beginDateTime>", "Begin date and time for the shift (format: YYYY-MM-DDTHH:mm:ss)")
     .option("-e, --end <endDateTime>", "End date and time for the shift (format: YYYY-MM-DDTHH:mm:ss)")
     .option("-h, --hub <hubSlug>", "The hub for the shift")
-    .option("-n, --badge <badgeNumber>", "Badge number for another user")
+    .option("-n, --badge <badgeNumber>", "Badge number or email for another user")
     .action(async (options) => {
         const config = loadMergedConfig();
 
@@ -156,7 +155,7 @@ const addQuinyxShift = new Command("add_shift")
         const password = options.password ?? config.quinyxPassword;
         const hub = options.hub ?? config.quinyxHub;
         const badge = options.badge ?? config.quinyxBadge;
-        const shiftType = config.quinyxShiftType || QuinyxShiftType.HQ_EMPLOYEE;
+        const shiftType = QuinyxShiftType.HQ_EMPLOYEE;
         const isCli = config.quinyxIsCli !== false;
         const begin = options.begin;
         const end = options.end;
@@ -174,7 +173,7 @@ const addQuinyxShift = new Command("add_shift")
         }
 
         try {
-            await addShift(hub, shiftType, username, password, isCli, begin, end);
+            await addShift(hub, shiftType, username, password, badge, isCli, begin, end);
         } catch (e) {
             console.error("❌ Shift creation failed:", e);
             process.exit(1);
