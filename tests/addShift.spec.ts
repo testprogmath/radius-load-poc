@@ -13,7 +13,7 @@ const today = new Date().toISOString().split("T")[0];
 
 describe('Test addShift command', () => {
     beforeEach(async () => {
-        await deleteShifts(TEST_HUB, TEST_SHIFT_ID, TEST_EMAIL, TEST_PASSWORD, IS_CLI);
+        await deleteShifts(TEST_HUB, TEST_EMAIL, TEST_PASSWORD, TEST_SHIFT_ID, IS_CLI);
     });
 
     test('AddShift command', async () => {

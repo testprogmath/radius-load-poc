@@ -6,46 +6,33 @@ import chalk from "chalk";
 // @ts-ignore
 import emojic from "emojic";
 import { loadMergedConfig } from "../loadMergedConfig.js";
+import {printEmployeeDetails} from "../utils/output.js";
+import {AxiosError} from "axios";
+import {handleAxiosError} from "../utils/errors.js";
 
 export async function deleteShifts(
     hubSlug?: string,
-    badgeNumber?: string,
-    username?: string,
-    password?: string,
-    isCLI?: boolean
+    managerUsername?: string,
+    managerPassword?: string,
+    employeeSelector?: string,
+    isCLI = true,
+    shiftId?: string,
 ) {
     const config = loadMergedConfig();
 
-    hubSlug ??= process.env.quinyxHub ?? process.env.QUINYX_HUB ?? config.quinyxHub;
-    badgeNumber ??= process.env.quinyxBadge ?? process.env.QUINYX_BADGE ?? config.quinyxBadge;
-    username ??= process.env.quinyxEmail ?? process.env.QUINYX_EMAIL ?? config.quinyxEmail;
-    password ??= process.env.quinyxPassword ?? process.env.QUINYX_PASSWORD ?? config.quinyxPassword;
+    hubSlug ??= process.env.quinyxHub ?? process.env.QUINYX_HUB;
+    managerUsername ??= process.env.quinyxEmail ?? process.env.QUINYX_EMAIL;
+    managerPassword ??= process.env.quinyxPassword ?? process.env.QUINYX_PASSWORD;
 
     const rawIsCli = process.env.quinyxIsCli ?? process.env.QUINYX_IS_CLI;
     if (typeof isCLI === "undefined") {
         isCLI = rawIsCli !== undefined ? rawIsCli === "true" : config.quinyxIsCli !== false;
     }
 
-    const missing: string[] = [];
-    if (!hubSlug) missing.push("quinyxHub");
-    if (!badgeNumber) missing.push("quinyxBadge");
-    if (!username) missing.push("quinyxEmail");
-    if (!password) missing.push("quinyxPassword");
-
-    if (missing.length > 0) {
-        console.error(`❌ Missing required configuration: ${missing.join(", ")}`);
-        console.error("Provide them via arguments, config file, or environment variables.");
-        return;
-    }
-
-    hubSlug = hubSlug!;
-    username = username!;
-    password = password!;
-
     const quinyxApi = new QuinyxApi();
 
     let quinyxGroupValue: number | undefined;
-    if (hubSlug.toUpperCase() in QuinyxGroup) {
+    if (hubSlug && hubSlug.toUpperCase() in QuinyxGroup) {
         quinyxGroupValue = QuinyxGroup[hubSlug.toUpperCase() as keyof typeof QuinyxGroup];
         console.log(`${emojic.calendar} ${chalk.hex(Colors.LAVENDER_PINK).bold("Group number is " + quinyxGroupValue)} ${emojic.calendar}`);
     } else {
@@ -62,17 +49,52 @@ export async function deleteShifts(
         return;
     }
 
-    try {
-        await quinyxApi.userLogin(username, password);
-        console.log("✅ Login successful!");
+    if (!employeeSelector) {
+        console.error("❌ Missing badge number. Please provide -n [badge number]");
+        return;
+    }
 
-        const result = await quinyxApi.getAllShiftsByDateForUser(quinyxGroupValue, new Date());
-        await Promise.all(result.map((shiftId: number) => quinyxApi.deleteShift(shiftId, quinyxGroupValue!)));
+try {
+    console.log(`USERNAME: ${managerUsername}`);
+    console.log(`PASSWORD: ${managerPassword}`);
+        await quinyxApi.userLogin(managerUsername!, managerPassword!);
+        await quinyxApi.getGroups();
 
-        if (isCLI) spinnerSuccess(`✅ All shifts for ${hubSlug} have been removed!`);
-        console.log(`${emojic.calendar} ${chalk.hex(Colors.LAVENDER_PINK).bold("All shifts for " + hubSlug + " have been removed")} ${emojic.calendar}`);
+        const employee = await quinyxApi.findEmployee(employeeSelector, hub.id);
+        const employeeData = quinyxApi.parseEmployeeInfo(employee);
+
+        const shifts = await quinyxApi.getAllShiftsByDateForUser(hub.id, employeeData.employeeId);
+
+        if (!shifts || shifts.length === 0) {
+            console.error("❌ No shifts found for this employee.");
+            return false;
+        }
+
+        const shiftToDelete = shiftId
+            ? shifts.find((s: any) => s.id === shiftId)
+            : shifts[0];
+
+        if (!shiftToDelete) {
+            console.error("❌ Shift not found.");
+            return false;
+        }
+
+        await quinyxApi.deleteShift(shiftToDelete, hub.id);
+
+        if (isCLI) spinnerSuccess("🗑️ The shift was successfully deleted!");
+
+        console.log(`${emojic.calendar} ${chalk.hex(Colors.LAVENDER_PINK).bold("Deleted Shift")} ${emojic.calendar}`);
+        console.log(`Shift ID: ${chalk.hex(Colors.THULIAN_PINK).bold(shiftToDelete.id)}`);
+
+        printEmployeeDetails(employee);
+
+        return true;
     } catch (error) {
-        console.error("❌ Something went wrong:", error);
-        if (isCLI) spinnerError("Your request failed. Please find the stacktrace above");
+        if (error instanceof AxiosError) {
+            handleAxiosError(error);
+        } else {
+            console.error("Oops, something went wrong:", error);
+        }
+        spinnerError("❌ Your request failed. Please find the stacktrace above");
     }
 }

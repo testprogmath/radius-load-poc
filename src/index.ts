@@ -130,19 +130,42 @@ const configCommand = new Command("config")
 // "delete_shifts" command – delete all scheduled shifts from Quinyx
 const deleteAllQuinyxShifts = new Command("delete_shifts")
     .description("Delete all scheduled shifts from Quinyx")
-    .option("-u, --username <username>", "Username for Quinyx")
-    .option("-p, --password <password>", "Password for Quinyx")
+    .option("-u, --username <username>", "Manager username for Quinyx")
+    .option("-p, --password <password>", "Manager password for Quinyx")
     .option("-h, --hub <hubSlug>", "The hub with shifts")
-    .action((commandAndOptions) => {
-        const { username, password, hub } = commandAndOptions;
+    .option("-n, --badge <badgeNumber>", "Badge number or email for another user")
+    .action(async (options) => {
+        const config = loadMergedConfig();
+        const username = options.username ?? config.quinyxEmail;
+        const password = options.password ?? config.quinyxPassword;
+        const hub = options.hub ?? config.quinyxHub;
+        const badge = options.badge ?? config.quinyxBadge;
+        const isCli = config.quinyxIsCli !== false;
 
-        deleteShifts(hub, commandAndOptions.badge, username, password, true)
-            .catch(e => console.error(e));
+        const missing = [];
+        if (!username) missing.push("username");
+        if (!password) missing.push("password");
+        if (!hub) missing.push("hub");
+        if (!badge) missing.push("badge");
+
+        if (missing.length > 0) {
+            console.error(`❌ Missing required options: ${missing.join(", ")}`);
+            console.error("You can provide them via CLI or set them in your config/ENV.");
+            process.exit(1);
+        }
+
+        try {
+            await deleteShifts(hub, username, password, badge, isCli);
+        } catch (e) {
+            console.error("❌ Shift deletion failed:", e);
+            process.exit(1);
+        }
     });
 
 // "add_shift" command – add a shift for Quinyx with a specific user and time range
 const addQuinyxShift = new Command("add_shift")
-    .description("Add a shift for a Quinyx user with a specific time range.\n\nYou can use either:\n• your own Quinyx credentials (if you’re creating the shift for yourself), or\n• manager credentials (if you’re creating the shift for another user via badge number or email).\n\nUsername and password can be passed via CLI or config file (you can run flinkord setup to add them to the config file).")    .option("-u, --username <username>", "Manager username for Quinyx")
+    .description("Add a shift for a Quinyx user with a specific time range.\n\nYou can use either:\n• your own Quinyx credentials (if you’re creating the shift for yourself), or\n• manager credentials (if you’re creating the shift for another user via badge number or email).\n\nUsername and password can be passed via CLI or config file (you can run flinkord setup to add them to the config file).")
+    .option("-u, --username <username>", "Manager username for Quinyx")
     .option("-p, --password <password>", "Manager password for Quinyx")
     .option("-b, --begin <beginDateTime>", "Begin date and time for the shift (format: YYYY-MM-DDTHH:mm:ss)")
     .option("-e, --end <endDateTime>", "End date and time for the shift (format: YYYY-MM-DDTHH:mm:ss)")
@@ -217,6 +240,7 @@ const stackOrdersCommand = new Command("stack_orders")
 program
     .description("A CLI tool for order management")
     .version(getInstalledVersion(), "-v, --version", "Output the current version")
+    .option("--debug", "Enable debug mode for verbose output")
     .showSuggestionAfterError(true)
     .allowUnknownOption();
 

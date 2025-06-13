@@ -1,9 +1,11 @@
-import axios from "axios";
+import axios, {AxiosError} from "axios";
 import {Buffer} from "buffer";
 import { readAppConfig} from "../utils.js";
 import {QuinyxGroup, QuinyxShiftType} from "../shared/enums.js";
 import {formatDate} from "../utils/types.js";
 import * as fs from "fs/promises";
+import {handleAxiosError} from "../utils/errors.js";
+import {debugLog} from "../utils/debug-log.js";
 
 
 const createShiftRequest = JSON.parse(
@@ -105,7 +107,7 @@ export class QuinyxApi {
         }
     }
     public parseEmployeeInfo(employee: any): EmployeeInfo {
-        if (!employee || !employee.id || !employee.agreements) {
+        if (!employee?.id || !employee?.agreements) {
             throw new Error("Invalid employee object");
         }
 
@@ -172,7 +174,7 @@ export class QuinyxApi {
             'showExpiredAgreements': true
         };
 
-        console.log(`Sending request to URL: ${url} with params: ${JSON.stringify(params)}`);
+        debugLog(`Sending request to URL: ${url} with params: ${JSON.stringify(params)}`);
         try {
             const response = await axios.get(url, {
                 headers,
@@ -180,7 +182,7 @@ export class QuinyxApi {
             });
 
             if (response.data?.employees?.length > 0) {
-                console.log(JSON.stringify(response.data));
+                debugLog(JSON.stringify(response.data));
                 return response.data.employees[0];
             }
 
@@ -241,21 +243,25 @@ export class QuinyxApi {
         return null;
     }
 
-    public async getAllShiftsByDateForUser(groupId: number, startDate: Date): Promise<any> {
+    public async getAllShiftsByDateForUser(groupId: number, employeeId: number, startDate?: Date, endDate?: Date): Promise<any> {
         await ensureInitialized();
 
-        // EndDate will be next day
-        const endDate = new Date(startDate);
-        endDate.setDate(startDate.getDate() + 1);
+        // Assign startDate to today if not provided
+        startDate ??= new Date();
 
+        if (!endDate) {
+            // EndDate will be next day
+            endDate = new Date(startDate);
+            endDate.setDate(startDate.getDate() + 1);
+        }
 
         const url = buildUrl(QUINYX_ENDPOINTS.shiftsByDate(groupId, formatDate(startDate), formatDate(endDate)));
         const headers = this.getAuthHeaders();
 
         try {
             const response = await axios.get(url, {headers});
-            const filteredShifts = response.data.filter((shift: any) => shift.employeeId === this.userId);
-            console.log(filteredShifts);
+            const filteredShifts = response.data.filter((shift: any) => shift.employeeId === employeeId);
+            debugLog(filteredShifts);
             return filteredShifts.map((shift: any) => shift.id);
         } catch (error) {
             throw new Error(`Failed to get shifts: ${error}`);
@@ -272,6 +278,11 @@ export class QuinyxApi {
             await axios.delete(url, {headers});
             console.log(`Successfully deleted shift with ID ${shiftId}`);
         } catch (error) {
+            if (error instanceof AxiosError) {
+                handleAxiosError(error)
+            } else {
+                console.error("Unexpected error:", error);
+            }
             throw new Error(`Failed to delete shift: ${error}`);
         }
     }

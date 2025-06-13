@@ -6,17 +6,11 @@ import chalk from "chalk";
 import { AxiosError } from "axios";
 //@ts-ignore
 import emojic from "emojic";
+import {printEmployeeDetails} from "../utils/output.js";
 
 interface ShiftDetails {
     begin: string;
     end: string;
-}
-
-interface EmployeeDetails {
-    firstName: string;
-    lastName: string;
-    email: string;
-    badgeNumber: string;
 }
 
 function formatDateTime(dateTime?: string, defaultHour?: number, defaultMinute?: number): Date {
@@ -26,20 +20,6 @@ function formatDateTime(dateTime?: string, defaultHour?: number, defaultMinute?:
     const date = new Date();
     date.setHours(defaultHour ?? 0, defaultMinute ?? 0, 0);
     return date;
-}
-
-function printEmployeeDetails(employee: EmployeeDetails): void {
-    const details = [
-        { label: "First Name", value: employee.firstName, color: Colors.MEXICAN_PINK },
-        { label: "Last Name", value: employee.lastName, color: Colors.LAVENDER_PINK },
-        { label: "Email", value: employee.email, color: Colors.THULIAN_PINK },
-        { label: "Badge Number", value: employee.badgeNumber, color: Colors.MEXICAN_PINK_DARK }
-    ];
-
-    console.log("-----------------------------------------------------------------------------------------");
-    details.forEach(({ label, value, color }) => {
-        console.log(chalk.hex(color)(`${label}:`).padEnd(15) + chalk.hex(Colors.WHITE)(value || "N/A"));
-    });
 }
 
 function handleAxiosError(error: AxiosError): void {
@@ -91,7 +71,7 @@ export async function addShift(
         const endDate = formatDateTime(endDateTime, 23, 59);
 
 
-        const employee = await quinyxApi.findEmployee(employeeSelector!, hub.id);
+        const employee = await quinyxApi.findEmployee(employeeSelector, hub.id);
         const employeeData =  quinyxApi.parseEmployeeInfo(employee);
 
         const result = await quinyxApi.createShift(hub.id, beginDate, endDate, shiftType!, employeeData.employeeId, employeeData.agreementId);

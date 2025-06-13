@@ -448,27 +448,35 @@ createdAt      2023-12-04T14:45:49.040Z
 
 ---
 
-### To add a new shift in Quinyx and bypass device claiming feature, use "add_shift" command with required options:
+### Add a new shift in Quinyx using the `add_shift` command
 
-This command will let you add a new shift. Note that `username`, `password`, and `hub` are mandatory fields.
+You can use this command in two ways:
+- With your **own Quinyx credentials**, if you're creating a shift for yourself.
+- With **manager credentials**, if you're creating a shift for another user (using their badge number or email).
+
+Credentials and other options can be passed via CLI or preconfigured with:
+```bash
+flinkord setup
+```
+This command will let you add a new shift. The following fields are available:
 
 ```shell
-flinkord add_shift -u <username> -p <password> -h <hubSlug> [-b <beginDateTime>] [-e <endDateTime>] [-n <badgeNumber>]
+flinkord add_shift -u <username> -p <password> -h <hubSlug> [-b <beginDateTime>] [-e <endDateTime>] [-n <badgeNumber or email>]
 ```
 
 #### Options:
 
-- `-u, --username <username>`: **[Mandatory]** Username for Quinyx.
-- `-p, --password <password>`: **[Mandatory]** Password for Quinyx.
-- `-h, --hub <hubSlug>`: **[Mandatory]** The hub for the shift (please make sure that your user has all required permissions).
-- `-b, --begin <beginDateTime>`: **[Optional]** Begin date and time for the shift (format: YYYY-MM-DDTHH:mm:ss). Defaults to today at 08:00.
-- `-e, --end <endDateTime>`: **[Optional]** End date and time for the shift (format: YYYY-MM-DDTHH:mm:ss). Defaults to today at 21:59.
-- `-n, --badge <badgeNumber>`: **[Optional]** Badge number for another user you want to schedule the shift for.
+- `-u, --username <username>`: **[Required]** Username for Quinyx (your own or manager’s).
+- `-p, --password <password>`: **[Required]** Password for Quinyx.
+- `-h, --hub <hubSlug>`: **[Required]** The hub for the shift.
+- `-b, --begin <beginDateTime>`: **[Optional]** Begin time for the shift (format: `YYYY-MM-DDTHH:mm:ss`). Defaults to today at 08:00.
+- `-e, --end <endDateTime>`: **[Optional]** End time for the shift (format: `YYYY-MM-DDTHH:mm:ss`). Defaults to today at 21:59.
+- `-n, --badge <badgeNumber or email>`: **[Optional]** Badge number or email of the user for whom you want to create the shift.
 
 #### Example:
 
 ```shell
-flinkord add_shift -u my_username -p my_password -h de_ber_mit2 -b 2023-09-29T04:00:00 -e 2023-09-29T23:59:00 -n 101961
+flinkord add_shift -u manager@goflink.com -p 'password123' -h de_ber_mit2 -n 00116269 -b 2025-05-31T08:00:00 -e 2025-05-31T21:59:00
 ```
 
 #### Output:
@@ -479,34 +487,26 @@ After running this command, you should see a nicely formatted output:
 📆 Shift Details 📆
 Begin Time: 2023-09-29T04:00:00
 End Time: 2023-09-29T23:59:00
+First Name: Test
+Last Name: User
+Email: email@goflink.com
+Badge Number: 101961
 ```
 
 ### To delete all shifts for the authorized user, please use 'delete_shifts' command:
 ```shell
-flinkord delete_shifts -u <username> -p <password> -h <hubSlug>
+flinkord delete_shifts -u <username> -p <password> -h <hubSlug> -n <badgeNumber or email>
 ```
+
+Options:
+- `-u, --username <username>`  Manager username for Quinyx
+- `-p, --password <password>`  Manager password for Quinyx
+- `-h, --hub <hubSlug>`        The hub with shifts
+- `-n, --badge <badgeNumber>`  Badge number or email for another user
+
 ---
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
-<!-- ROADMAP -->
-
-## Roadmap
-
-- [x] "Create" command with default values
-    - [x] Implement -h (--hub) option ([HO-1044](https://goflink.atlassian.net/browse/HO-1044))
-    - [x] Implement -m (--email) option  ([HO-1070](https://goflink.atlassian.net/browse/HO-1070))
-- [x] Deploy artifact to GCP Artifact Registry
-- [ ] Support custom config file
-- [x] "Cancel" command by order_name
-    - [x] Support order_id in "cancel" command
-
-See the [jira story](https://goflink.atlassian.net/browse/HO-1010) for a full list of proposed features (and known
-issues).
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 
 
 <!-- CONTRIBUTING -->
