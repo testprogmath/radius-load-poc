@@ -9,3 +9,5 @@ export {pick} from "./pick.js"
 export {stackOrders} from "./stackOrders.js"
 export {cancel} from "./cancel.js"
 export {printConfig} from "./config.js";
+export {default as importFlinkord} from "../utils/flinkord-import.js";
+

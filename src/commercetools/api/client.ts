@@ -25,12 +25,12 @@ export async function ensureInitialized() {
 async function createClientWithMiddlewares() {
     await ensureInitialized();
 
-    const middlewareAuth = await import("../utils/commercetools-middleware.cjs");
-
+    // Import CommonJS modules with type assertions
+    const middlewareAuth = await import("../utils/commercetools-middleware.cjs") as any;
+    const middlewareHttp = await import("../utils/commercetools-middleware-http.cjs") as any;
+    
     const { createAuthMiddlewareForClientCredentialsFlow } = middlewareAuth.default;
-
-    const middlewareHttp = await import("../utils/commercetools-middleware-http.cjs");
-    const {createHttpMiddleware } = middlewareHttp.default;
+    const { createHttpMiddleware } = middlewareHttp.default;
 
 
     const authMiddleware = createAuthMiddlewareForClientCredentialsFlow({

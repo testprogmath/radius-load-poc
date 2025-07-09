@@ -4,9 +4,15 @@
   "description": "CLI tool for easy order generation and management",
   "type": "module",
   "main": "dist/src/index.js",
-  "types": "dist/types/src/lib.d.ts",
+  "types": "dist/types/src/index.d.ts",
   "bin": {
     "flinkord": "./dist/src/index.js"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/src/index.js",
+      "types": "./dist/types/src/index.d.ts"
+    }
   },
   "files": [
     "config",

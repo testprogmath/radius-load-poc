@@ -1,23 +1,26 @@
 {
   "compilerOptions": {
+    "target": "ES2020",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "esModuleInterop": true,
+    "outDir": "./dist",
+    "rootDir": ".",
+    "strict": true,
     "skipLibCheck": true,
     "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
     "resolveJsonModule": true,
     "declarationDir": "dist/types",
     "typeRoots": ["./node_modules/@types", "./types"],
-    "outDir": "dist",
-    "strict": true,
-    "target": "es2020",
-    "module": "NodeNext",
-    "sourceMap": true,
-    "esModuleInterop": true,
-    "moduleResolution": "NodeNext",
-    "allowJs": true,
+    "allowJs": true
   },
   "include": [
     "src/**/*.ts",
+    "src/**/*.d.ts",
     "tests/**/*.ts",
-    "src/**/*.json",
-    "index.d.ts"
-  ]
+    "src/**/*.json"
+  ],
+  "exclude": ["node_modules", "dist"]
 }

@@ -17,7 +17,6 @@ import {
 import { QuinyxShiftType } from "./shared/enums.js";
 import { loadMergedConfig } from "./loadMergedConfig.js";
 
-
 // External libraries for styling
 // @ts-ignore
 import figlet from "figlet";
@@ -267,4 +266,4 @@ program.exitOverride((err) => {
     throw err;
 });
 
-export { addShift, create, deleteShifts, deliver, free, getOrderReturns, pick, setupEnv, cancel };
+export { addShift, create, deleteShifts, deliver, free, getOrderReturns, pick, setupEnv, cancel, importFlinkord } from "./commands/index.js";
