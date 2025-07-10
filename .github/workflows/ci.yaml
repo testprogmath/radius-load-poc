@@ -83,14 +83,12 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: html/
-          name: github-pages-${{ github.run_id }}
+          name: github-pages
 
       - name: Deploy to GitHub Pages
         if: always()
         id: deploy
         uses: actions/deploy-pages@v4
-        with:
-          artifact_name: github-pages-${{ github.run_id }}
 
       - name: Publish the test result link on PR
         uses: NejcZdovc/comment-pr@v2
