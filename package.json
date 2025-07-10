@@ -102,7 +102,7 @@
     "@types/jsonfile": "^6.1.4",
     "@types/lodash.camelcase": "^4.3.9",
     "@types/lodash.merge": "^4.6.9",
-    "@types/node": "^22.15.30",
+    "@types/node": "^24.0.1",
     "@vitest/ui": "^3.2.2",
     "eslint": "^9.28.0",
     "standard-version": "^9.5.0",
