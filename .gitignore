@@ -5,3 +5,5 @@ dist
 .npmrc
 .env
 config/user_config.json
+html/
+env.json

@@ -4,6 +4,8 @@ export interface AppConfig {
     hubApiUrl: string;
     CTAuthUrl: string;
     CTApiUrl: string;
+    CTProjectKey: string;
+    
     hubForTests: string;
     testEmail: string;
     hubApiKey: string;

@@ -1,17 +1,16 @@
 {
   "name": "@flink/flinkord-cli",
-  "version": "1.1.67",
+  "version": "1.1.84",
   "description": "CLI tool for easy order generation and management",
   "type": "module",
   "main": "dist/src/index.js",
   "types": "dist/types/src/index.d.ts",
   "bin": {
-    "flinkord": "./dist/src/index.js"
+    "flinkord": "./dist/src/cli.js"
   },
   "exports": {
     ".": {
       "import": "./dist/src/index.js",
-      "require": "./dist/src/index.cjs",
       "types": "./dist/types/src/index.d.ts",
       "default": "./dist/src/index.js"
     },
@@ -24,7 +23,7 @@
     "templates"
   ],
   "scripts": {
-    "build": "npx tsc && chmod +x ./dist/src/index.js",
+    "build": "npx tsc && chmod +x ./dist/src/cli.js",
     "lint": "npx eslint",
     "postbuild": "npm link",
     "test": "vitest run",
@@ -67,10 +66,9 @@
   "homepage": "https://github.com/goflink/flinkord-cli#readme",
   "dependencies": {
     "@apollo/client": "^3.13.8",
-    "@commercetools/platform-sdk": "^8.11.0",
+    "@commercetools/platform-sdk": "^8.12.1",
     "@commercetools/sdk-client-v2": "^3.0.0",
-    "@commercetools/sdk-middleware-auth": "^8.0.1",
-    "@commercetools/sdk-middleware-http": "^8.0.0",
+    "@commercetools/ts-client": "^4.0.1",
     "@flink/hub-manager": "^1.52.2",
     "@google-cloud/storage": "^7.16.0",
     "@typescript-eslint/eslint-plugin": "^8.33.1",

@@ -24,7 +24,7 @@ describe('Test free command', () => {
 
         await free(options.hub);
 
-        expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('"statusCode":200'));
+        expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('All orders are cancelled!'));
         consoleSpy.mockRestore();
     });
 

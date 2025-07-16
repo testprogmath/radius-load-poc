@@ -1,5 +1,4 @@
-import {cancelOrder} from "../commercetools/index.js";
-import {getOrderId} from "../commercetools/index.js";
+import {cancelOrder, getOrderId} from "../commercetools/index.js";
 
 export async function cancel(orderIdentifier: string) {
     const orderId = await getOrderId(orderIdentifier);

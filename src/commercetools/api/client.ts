@@ -1,59 +1,74 @@
-import {Client, createClient} from "@commercetools/sdk-client-v2";
-import {ByProjectKeyRequestBuilder, createApiBuilderFromCtpClient} from "@commercetools/platform-sdk";
-import { readAppConfig} from "../../utils.js";
+import { config } from "dotenv";
 import fetch from "node-fetch";
+import {
+  ClientBuilder,
+  type AuthMiddlewareOptions,
+  type HttpMiddlewareOptions,
+} from "@commercetools/ts-client";
+import {
+  createApiBuilderFromCtpClient,
+  type ByProjectKeyRequestBuilder,
+} from '@commercetools/platform-sdk';
 
-let config: any;
+import { readAppConfig } from "../../utils.js";
+
+config();
+
+let api: ByProjectKeyRequestBuilder | null = null;
+let isInitialized = false;
+
 let CT_AUTH_URL: string;
 let CT_API_URL: string;
 let projectKey: string;
-let isInitialized = false;
-
-let api: ByProjectKeyRequestBuilder | null = null;
-let ctpClient: Client | null = null;
 
 export async function ensureInitialized() {
-    if (!isInitialized) {
-        config = await readAppConfig();
-        CT_AUTH_URL = config.CTAuthUrl;
-        CT_API_URL = config.CTApiUrl;
-        projectKey = process.env.CT_PROJECT_KEY as string;
-        isInitialized = true;
-    }
-}
+  if (!isInitialized) {
+    const cfg = await readAppConfig();
 
-async function createClientWithMiddlewares() {
-    await ensureInitialized();
+    CT_AUTH_URL = cfg.CTAuthUrl;
+    CT_API_URL = cfg.CTApiUrl;
+    projectKey = cfg.CTProjectKey ?? "flink-staging";
 
-    // Import CommonJS modules with type assertions
-    const middlewareAuth = await import("../utils/commercetools-middleware.cjs") as any;
-    const middlewareHttp = await import("../utils/commercetools-middleware-http.cjs") as any;
-    
-    const { createAuthMiddlewareForClientCredentialsFlow } = middlewareAuth.default;
-    const { createHttpMiddleware } = middlewareHttp.default;
-
-
-    const authMiddleware = createAuthMiddlewareForClientCredentialsFlow({
-        host: CT_AUTH_URL,
-        projectKey,
-        credentials: {
-            clientId: process.env.CT_CLIENT_ID!,
-            clientSecret: process.env.CT_CLIENT_SECRET!,
-        },
-        scopes: [`manage_orders:${projectKey}`, `view_states:${projectKey}`],
-        fetch,
-    });
-
-    const httpMiddleware = createHttpMiddleware({host: CT_API_URL, fetch});
-
-    return createClient({middlewares: [authMiddleware, httpMiddleware]});
+    isInitialized = true;
+  }
 }
 
 export async function ensureClientAndApi() {
-    if (!ctpClient || !api) {
-        ctpClient = await createClientWithMiddlewares();
-        api = createApiBuilderFromCtpClient(ctpClient).withProjectKey({projectKey});
-    }
+  await ensureInitialized();
+
+  if (!api) {
+    console.debug("[CT Client] Initializing new SDK client...");
+
+    const authMiddlewareOptions: AuthMiddlewareOptions = {
+      host: CT_AUTH_URL,
+      projectKey: projectKey,
+      credentials: {
+        clientId: process.env.CT_CLIENT_ID!,
+        clientSecret: process.env.CT_CLIENT_SECRET!,
+      },
+      scopes: [
+        `manage_orders:${projectKey}`,
+        `view_states:${projectKey}`,
+      ],
+      httpClient: fetch,
+    };
+
+    const httpMiddlewareOptions: HttpMiddlewareOptions = {
+      host: CT_API_URL,
+      httpClient: fetch,
+      timeout: 15_000,
+    };
+
+    const ctpClient = new ClientBuilder()
+      .withProjectKey(projectKey)
+      .withClientCredentialsFlow(authMiddlewareOptions)
+      .withHttpMiddleware(httpMiddlewareOptions)
+      .build();
+
+    api = createApiBuilderFromCtpClient(ctpClient).withProjectKey({projectKey});
+
+    console.debug("[CT Client] API instance created!");
+  }
 }
 
-export {api, ctpClient};
+export { api, projectKey };
