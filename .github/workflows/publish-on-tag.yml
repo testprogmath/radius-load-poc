@@ -73,7 +73,7 @@ jobs:
         run: |
           VERSION=${{ github.ref_type == 'tag' && github.ref_name || inputs.tag }}
           echo "Using version $VERSION"
-          npm version ${VERSION#v} --no-git-tag-version
+          npm version ${VERSION#v} --no-git-tag-version || echo "Version unchanged or already set, continuing..."
 
       - name: Publish module
         run: |

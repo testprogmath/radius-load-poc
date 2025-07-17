@@ -70,6 +70,7 @@ jobs:
       - name: Automatic Versioning
         id: versioning
         uses: goflink/github-actions/automatic-versioning@v2
+        continue-on-error: true
         with:
           bump: ${{ github.event.inputs.bump || 'patch' }}
           dry_run: "false"
@@ -90,8 +91,10 @@ jobs:
         run: |
           if [[ "${{ github.event.inputs.tag }}" != "" ]]; then
             echo "VERSION=${{ github.event.inputs.tag }}" >> $GITHUB_ENV
-          else
+          elif [[ "${{ steps.versioning.outputs.version }}" != "" ]]; then
             echo "VERSION=${{ steps.versioning.outputs.version }}" >> $GITHUB_ENV
+          else
+            echo "No new version generated; skipping tag creation."
           fi
 
       - name: Log computed version
