@@ -28,8 +28,8 @@ env:
   GENERIC_PASSWORD: ${{ secrets.GENERIC_PASSWORD }}
 
 jobs:
-  release:
-    if: github.event_name != 'push' || startsWith(github.ref, 'refs/heads/main')
+  release_and_publish:
+    if: github.event_name == 'push' && (startsWith(github.ref, 'refs/heads/main') || startsWith(github.ref, 'refs/tags/v'))
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -74,44 +74,6 @@ jobs:
           name: ${{ steps.versioning.outputs.version }}
           generate_release_notes: true
 
-  publish:
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
-    runs-on: ubuntu-latest
-    env:
-      CT_CLIENT_ID: ${{ secrets.CT_CLIENT_ID }}
-      CT_CLIENT_SECRET: ${{ secrets.CT_CLIENT_SECRET }}
-      IDENTITY_KEY: ${{ secrets.IDENTITY_KEY }}
-      GENERIC_PASSWORD: ${{ secrets.GENERIC_PASSWORD }}
-      INVENTORY_SERVICE_TOKEN: ${{ secrets.INVENTORY_SERVICE_TOKEN }}
-      FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
-      AUTH0_CURB_CLIENT_SECRET: ${{ secrets.AUTH0_CURB_CLIENT_SECRET }}
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Authenticate to GCP
-        uses: google-github-actions/auth@v2
-        with:
-          token_format: access_token
-          workload_identity_provider: ${{ env.GCP_AUTH_WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: ${{ env.GCP_AUTH_SERVICE_ACCOUNT }}
-
-      - name: Install dependencies
-        run: |
-          npx google-artifactregistry-auth
-          npm ci --cache .npm
-
-      - name: Build application
-        run: npm run build --if-present
-
       - name: Create .env file
         run: |
           echo 'CT_PROJECT_KEY="flink-staging"' > .env
@@ -124,7 +86,7 @@ jobs:
 
       - name: Update package.json version
         run: |
-          VERSION=${GITHUB_REF##*/}
+          VERSION=${{ steps.versioning.outputs.version }}
           echo "Using version $VERSION"
           npm version ${VERSION#v} --no-git-tag-version
 
