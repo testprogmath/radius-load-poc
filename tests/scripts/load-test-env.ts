@@ -32,9 +32,7 @@ export async function loadEnvFromJson() {
     const parsed = JSON.parse(raw);
 
     for (const [key, value] of Object.entries(parsed)) {
-        if (!process.env[key]) {
-            process.env[key] = String(value);
-        }
+        process.env[key] ??= String(value);
     }
 
     console.log("✅ Environment variables loaded from env.json");

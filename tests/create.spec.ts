@@ -156,7 +156,7 @@ describe('Test create command', () => {
     });
 
     afterAll(() => {
-        execSync(`flinkord free -h ${options.hub}`);
-        execSync(`flinkord free -h nl_ame_cent`);
+        execSync(`node ./dist/src/cli.js free -h ${options.hub}`);
+        execSync(`node ./dist/src/cli.js free -h nl_ame_cent`);
     });
 });

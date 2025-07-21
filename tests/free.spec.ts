@@ -30,7 +30,7 @@ describe('Test free command', () => {
 
     test('CLI: Hub should be specified for free command', async () => {
         await expect(async () => {
-            const output = execSync(`flinkord free`).toString();
+            const output = execSync(`node ./dist/src/cli.js free`).toString();
             console.log(output);
             expect(output).toContain(`error: required option '-h, --hub <hub_slug>' not specified`);
         }).rejects.toThrow();

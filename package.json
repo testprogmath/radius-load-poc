@@ -23,9 +23,8 @@
     "templates"
   ],
   "scripts": {
-    "build": "npx tsc && chmod +x ./dist/src/cli.js",
+    "build": "npx tsc && [ -f ./dist/src/cli.js ] && chmod +x ./dist/src/cli.js",
     "lint": "npx eslint",
-    "postbuild": "npm link",
     "test": "vitest run",
     "preinstall": "npx google-artifactregistry-auth",
     "release": "standard-version",

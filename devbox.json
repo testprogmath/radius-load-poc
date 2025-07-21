@@ -1,0 +1,158 @@
+{
+  "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/0.15.0/.schema/devbox.schema.json",
+  "packages": {
+    "nodejs":            "latest",
+    "yarn":              "latest",
+    "typescript":        "latest",
+    "eslint":            "latest",
+    "playwright":        "latest",
+    "playwright-driver": "latest",
+    "prettier":          "latest",
+    "jq":                "latest",
+    "yq-go":             "latest",
+    "google-cloud-sdk":  "latest",
+    "alsa-lib": {
+      "platforms": ["x86_64-linux"]
+    },
+    "at-spi2-atk": {
+      "platforms": ["x86_64-linux"]
+    },
+    "at-spi2-core": {
+      "platforms": ["x86_64-linux"]
+    },
+    "atk": {
+      "platforms": ["x86_64-linux"]
+    },
+    "cairo": {
+      "platforms": ["x86_64-linux"]
+    },
+    "cups": {
+      "platforms": ["x86_64-linux"]
+    },
+    "dbus": {
+      "platforms": ["x86_64-linux"]
+    },
+    "expat": {
+      "platforms": ["x86_64-linux"]
+    },
+    "fontconfig": {
+      "platforms": ["x86_64-linux"]
+    },
+    "freetype": {
+      "platforms": ["x86_64-linux"]
+    },
+    "glib": {
+      "version":   "2.78.4",
+      "platforms": ["x86_64-linux"]
+    },
+    "harfbuzz": {
+      "platforms": ["x86_64-linux"]
+    },
+    "libdatrie": {
+      "platforms": ["x86_64-linux"]
+    },
+    "libepoxy": {
+      "platforms": ["x86_64-linux"]
+    },
+    "libgcrypt": {
+      "platforms": ["x86_64-linux"]
+    },
+    "libgpg-error": {
+      "platforms": ["x86_64-linux"]
+    },
+    "libthai": {
+      "platforms": ["x86_64-linux"]
+    },
+    "libtiff": {
+      "platforms": ["x86_64-linux"]
+    },
+    "libxkbcommon": {
+      "platforms": ["x86_64-linux"]
+    },
+    "nspr": {
+      "platforms": ["x86_64-linux"]
+    },
+    "pango": {
+      "platforms": ["x86_64-linux"]
+    },
+    "pixman": {
+      "platforms": ["x86_64-linux"]
+    },
+    "xorg.libX11": {
+      "platforms": ["x86_64-linux"]
+    },
+    "xorg.libXScrnSaver": {
+      "platforms": ["x86_64-linux"]
+    },
+    "xorg.libXau": {
+      "platforms": ["x86_64-linux"]
+    },
+    "xorg.libXcomposite": {
+      "platforms": ["x86_64-linux"]
+    },
+    "xorg.libXcursor": {
+      "platforms": ["x86_64-linux"]
+    },
+    "xorg.libXdamage": {
+      "platforms": ["x86_64-linux"]
+    },
+    "xorg.libXdmcp": {
+      "platforms": ["x86_64-linux"]
+    },
+    "xorg.libXext": {
+      "platforms": ["x86_64-linux"]
+    },
+    "xorg.libXfixes": {
+      "platforms": ["x86_64-linux"]
+    },
+    "xorg.libXi": {
+      "platforms": ["x86_64-linux"]
+    },
+    "xorg.libXinerama": {
+      "platforms": ["x86_64-linux"]
+    },
+    "xorg.libXrandr": {
+      "platforms": ["x86_64-linux"]
+    },
+    "xorg.libXrender": {
+      "platforms": ["x86_64-linux"]
+    },
+    "xorg.libXtst": {
+      "platforms": ["x86_64-linux"]
+    },
+    "xorg.libxcb": {
+      "platforms": ["x86_64-linux"]
+    },
+    "xorg.libxkbfile": {
+      "platforms": ["x86_64-linux"]
+    },
+    "xorg.xkbcomp": {
+      "platforms": ["x86_64-linux"]
+    },
+    "zlib": "latest",
+    "nss": {
+      "version":   "latest",
+      "platforms": ["x86_64-linux"]
+    },
+    "liberation_ttf": {
+      "version":   "latest",
+      "platforms": ["x86_64-linux"]
+    },
+    "xorg.libxshmfence": {
+      "version":   "latest",
+      "platforms": ["x86_64-linux"]
+    }
+  },
+  "shell": {
+    "init_hook": [
+      "npx google-artifactregistry-auth",
+      "npm install",
+      "# Playwright browsers are installed automatically by the playwright-driver package"
+    ],
+    "scripts": {
+      "test": [
+        "npm run test"
+      ]
+    }
+  }
+}
