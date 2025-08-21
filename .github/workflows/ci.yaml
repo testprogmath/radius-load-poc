@@ -13,7 +13,7 @@ env:
 
 permissions:
   id-token: write
-  contents: write # This is required for actions/checkout@v4
+  contents: write # This is required for actions/checkout@v5
   pages: write
   pull-requests: write
 
@@ -30,7 +30,7 @@ jobs:
       AUTH0_CURB_CLIENT_SECRET: ${{ secrets.AUTH0_CURB_CLIENT_SECRET }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       
       # Authenticate to GCP first
       - id: auth
