@@ -103,11 +103,6 @@ gh api repos/goflink/flinkord-cli/contents/scripts/install-docker-shim.sh?ref=ma
   -H "Accept: application/vnd.github.raw" | bash
 ```
 
-- Using curl (works for public access):
-```sh
-curl -fsSL https://raw.githubusercontent.com/goflink/flinkord-cli/main/scripts/install-docker-shim.sh | bash
-```
-
 This installs `/usr/local/bin/flinkord` (requires sudo inside the script). The wrapper auto-detects Docker vs Podman and, on Apple Silicon, uses `--platform=linux/amd64` (Docker) or `--arch=amd64` (Podman) until multi-arch images are published. If the initial pull fails and `gcloud` is available, it attempts Artifact Registry login automatically.
 
 #### Use
@@ -129,8 +124,7 @@ sudo rm /usr/local/bin/flinkord
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-This is an example of how you may give instructions on setting up your project locally.
-To get a local copy up and running follow these simple example steps.
+If you prefer a local Node.js install instead of the container, see the sections below.
 
 ### Prerequisites
 
