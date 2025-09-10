@@ -1,8 +1,7 @@
 import {readAppConfig} from "../utils.js";
 import axios from "axios";
 import * as dotenv from "dotenv";
-
-dotenv.config();
+dotenv.config({ override: true, quiet: true });
 
 let config: any;
 let identityUrl: string;

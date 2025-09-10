@@ -52,4 +52,5 @@ jobs:
         build_args: |
           LAST_TAG=${{ steps.previoustag.outputs.tag }}
         app_name: ${{ env.service_name }}
+        platforms: linux/amd64,linux/arm64
         security_check_enabled: 'true'

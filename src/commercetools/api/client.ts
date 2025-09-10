@@ -12,7 +12,7 @@ import {
 
 import { readAppConfig } from "../../utils.js";
 
-config();
+config({ override: true, quiet: true });
 
 let api: ByProjectKeyRequestBuilder | null = null;
 let isInitialized = false;

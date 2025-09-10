@@ -11,6 +11,8 @@ REPO="flink-core-shared/flinkord-cli/flinkord-cli"
 # Default to :latest; allow override via FLINKORD_IMAGE env var at install time
 DEFAULT_IMAGE="$REGISTRY/$REPO:latest"
 TARGET="/usr/local/bin/flinkord"
+ALT_TARGET="/usr/local/bin/flinkord-docker"
+EXISTING_BIN="$(command -v flinkord || true)"
 
 tmp="$(mktemp)"
 cat >"$tmp" <<'WRAP'
@@ -58,10 +60,26 @@ maybe_login() {
   fi
 }
 
-# Try a quiet pull once; if it fails, try to login, then continue to run (which will pull if needed)
-"$ENGINE" pull -q "${PLATFORM_ARGS[@]}" "$IMAGE" >/dev/null 2>&1 || maybe_login
+# Pull policy: only pull if missing, unless FLINKORD_ALWAYS_PULL=1
+has_local_image() {
+  "$ENGINE" image inspect "$IMAGE" >/dev/null 2>&1
+}
+
+if [ "${FLINKORD_ALWAYS_PULL:-0}" = "1" ]; then
+  maybe_login
+  "$ENGINE" pull -q "${PLATFORM_ARGS[@]}" "$IMAGE" >/dev/null 2>&1 || true
+else
+  if ! has_local_image; then
+    maybe_login
+    "$ENGINE" pull -q "${PLATFORM_ARGS[@]}" "$IMAGE" >/dev/null 2>&1 || true
+  fi
+fi
 
 exec "$ENGINE" run --rm -it "${PLATFORM_ARGS[@]}" \
+  -e DOTENV_CONFIG_QUIET=true \
+  -e DOTENV_CONFIG_OVERRIDE=true \
+  -e NPM_CONFIG_UPDATE_NOTIFIER=false \
+  -e NO_UPDATE_NOTIFIER=1 \
   -v "$HOME/.flinkord:/home/nodejs/.flinkord" \
   "$IMAGE" "$@"
 WRAP
@@ -70,7 +88,22 @@ WRAP
 sudo install -m 0755 "$tmp" "$TARGET"
 rm -f "$tmp"
 
+# Also provide an alternative launcher name that users can call explicitly
+sudo ln -sf "$TARGET" "$ALT_TARGET"
+
 echo "Installed $TARGET"
+echo "Also available as: $ALT_TARGET"
 echo "Usage: flinkord --help"
 echo "Set FLINKORD_IMAGE to pin a specific tag, e.g.:"
 echo "  FLINKORD_IMAGE=$DEFAULT_IMAGE flinkord --version"
+
+# If another flinkord exists earlier in PATH, warn the user
+if [ -n "$EXISTING_BIN" ] && [ "$EXISTING_BIN" != "$TARGET" ]; then
+  echo "" >&2
+  echo "Warning: another 'flinkord' found at: $EXISTING_BIN" >&2
+  echo "It may shadow the new Docker/Podman wrapper at $TARGET." >&2
+  echo "Fix options:" >&2
+  echo "  1) Ensure /usr/local/bin precedes that path in \$PATH" >&2
+  echo "  2) Run the wrapper explicitly: $TARGET (or use $ALT_TARGET)" >&2
+  echo "  3) Remove the global npm CLI: npm uninstall -g @flink/flinkord-cli" >&2
+fi

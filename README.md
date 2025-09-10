@@ -124,6 +124,18 @@ sudo rm /usr/local/bin/flinkord
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+#### Troubleshooting (Quick Install)
+- Running global npm CLI instead of wrapper
+  - Symptom: warnings referencing your local nvm/npm path (e.g., `~/.nvm/versions/node/...`), deprecation notices like `punycode`.
+  - Cause: a globally installed `@flink/flinkord-cli` is earlier in your PATH than `/usr/local/bin`.
+  - Fix:
+    - Check which binary runs: `which flinkord`
+    - Prefer the wrapper: `/usr/local/bin/flinkord` (or `flinkord-docker`)
+    - Or adjust PATH so `/usr/local/bin` comes first
+    - Or remove the global CLI: `npm uninstall -g @flink/flinkord-cli`
+- Apple Silicon (M1/M2/M3)
+  - The wrapper auto-uses amd64 emulation until multi-arch images are published.
+
 If you prefer a local Node.js install instead of the container, see the sections below.
 
 ### Prerequisites

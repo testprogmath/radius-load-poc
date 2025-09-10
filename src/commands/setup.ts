@@ -5,7 +5,7 @@ import * as readline from "readline";
 import * as os from "os";
 import {Storage} from "@google-cloud/storage";
 
-dotenv.config();
+dotenv.config({ override: true, quiet: true });
 
 async function askQuestion(question: string, defaultValue?: string): Promise<string> {
     const rl = readline.createInterface({

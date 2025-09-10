@@ -1,7 +1,8 @@
 import fs from "fs";
 import path from "path";
 import os from "os";
-import "dotenv/config";
+import dotenv from "dotenv";
+dotenv.config({ override: true, quiet: true });
 import merge from "lodash.merge";
 
 const defaultConfigPath = process.env.DEFAULT_CONFIG_PATH ?? path.resolve("config", "default.json");
