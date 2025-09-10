@@ -26,7 +26,6 @@
     "build": "npx tsc && [ -f ./dist/src/cli.js ] && chmod +x ./dist/src/cli.js",
     "lint": "npx eslint",
     "test": "vitest run",
-    "preinstall": "npx google-artifactregistry-auth",
     "release": "standard-version",
     "postrelease": "git push --follow-tags && npm publish"
   },

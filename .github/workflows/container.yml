@@ -1,0 +1,55 @@
+name: Build and Publish Container
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  REGISTRY: europe-west3-docker.pkg.dev
+  GCP_PROJECT: flink-core-shared
+  IMAGE_NAME: flinkord-cli
+  service_name: flinkord-cli
+  GCP_AUTH_WORKLOAD_IDENTITY_PROVIDER: projects/592763168884/locations/global/workloadIdentityPools/goflink-github-actions/providers/github-actions
+  GCP_AUTH_SERVICE_ACCOUNT: flinkord-cli@flink-core-shared.iam.gserviceaccount.com
+
+permissions:
+  id-token: write
+  contents: read
+  pages: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - id: auth
+      name: Authenticate to GCP
+      uses: google-github-actions/auth@v2
+      with:
+        token_format: access_token
+        workload_identity_provider: "${{ env.GCP_AUTH_WORKLOAD_IDENTITY_PROVIDER }}"
+        service_account: "${{ env.GCP_AUTH_SERVICE_ACCOUNT }}"
+
+    - name: Login to Google artifact registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: oauth2accesstoken
+        password: "${{ steps.auth.outputs.access_token }}"
+
+    - name: Auth Flink NPM registry
+      run: |
+        npx google-artifactregistry-auth --repo-config=./.npmrc --credential-config=./.npmrc
+
+    - uses: goflink/github-actions/build-push-image@v2
+      with:
+        build_args: |
+          LAST_TAG=${{ steps.previoustag.outputs.tag }}
+        app_name: ${{ env.service_name }}
+        security_check_enabled: 'true'

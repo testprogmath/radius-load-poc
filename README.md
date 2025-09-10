@@ -47,6 +47,8 @@
     <li>
       <a href="#getting-started">Getting Started</a>
       <ul>
+        <li><a href="#container-quick-install">Container Quick Install</a></li>
+        <li><a href="#container-installation-alternative">Container Installation (Alternative)</a></li>
         <li><a href="#prerequisites">Prerequisites</a></li>
         <li><a href="#installation">Installation</a></li>
       </ul>
@@ -81,6 +83,44 @@
 <!-- GETTING STARTED -->
 
 ## Getting Started
+
+Below are three ways to use flinkord-cli. The quickest is the container quick install, which requires only Docker or Podman.
+
+### Container Quick Install
+
+One-line install that adds a `flinkord` command to your PATH which runs the container image (Docker or Podman) under the hood.
+
+#### Prerequisites
+- Docker or Podman running
+- Access to Artifact Registry (one-time):
+  - Docker: `gcloud auth configure-docker europe-west3-docker.pkg.dev` or `gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin europe-west3-docker.pkg.dev`
+  - Podman: `gcloud auth print-access-token | podman login -u oauth2accesstoken --password-stdin europe-west3-docker.pkg.dev`
+
+#### Install
+```sh
+curl -fsSL https://raw.githubusercontent.com/goflink/flinkord-cli/main/scripts/install-docker-shim.sh | bash
+```
+
+This installs `/usr/local/bin/flinkord` (requires sudo inside the script). The wrapper auto-detects Docker vs Podman and, on Apple Silicon, uses `--platform=linux/amd64` (Docker) or `--arch=amd64` (Podman) until multi-arch images are published. If the initial pull fails and `gcloud` is available, it attempts Artifact Registry login automatically.
+
+#### Use
+```sh
+flinkord --help
+flinkord setup
+flinkord create -h de_ham_winw
+```
+
+To pin a specific image/tag at runtime:
+```sh
+FLINKORD_IMAGE=europe-west3-docker.pkg.dev/flink-core-shared/flinkord-cli/flinkord-cli:<tag> flinkord --version
+```
+
+Uninstall:
+```sh
+sudo rm /usr/local/bin/flinkord
+```
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 This is an example of how you may give instructions on setting up your project locally.
 To get a local copy up and running follow these simple example steps.
@@ -170,6 +210,39 @@ Commands:
   pick [options]           Pick an order from a specific hub by order number
   help [command]           display help for command
 ```
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+### Container Installation (Alternative)
+
+If you prefer to avoid Node.js setup and npm registry configuration, you can use the containerized version:
+
+#### Prerequisites
+- Docker or [Podman](https://podman.io/getting-started/installation) installed
+
+#### Container Usage
+To use the containerized version, you'll need to authenticate with Google Artifact Registry first:
+
+```sh
+# Pull the image (Docker example)
+docker pull europe-west3-docker.pkg.dev/flink-core-shared/flinkord-cli/flinkord-cli:latest
+
+# Run with volume mounts for config
+docker run --rm \
+  -v ~/.flinkord:/home/nodejs/.flinkord \
+  -v $(pwd):/workspace -w /workspace \
+  europe-west3-docker.pkg.dev/flink-core-shared/flinkord-cli/flinkord-cli:latest --help
+
+# Create an alias for easier usage
+alias flinkord='docker run --rm -v ~/.flinkord:/home/nodejs/.flinkord -v $(pwd):/workspace -w /workspace europe-west3-docker.pkg.dev/flink-core-shared/flinkord-cli/flinkord-cli:latest'
+```
+
+#### Container Benefits
+- ✅ No Node.js installation required
+- ✅ No npm registry configuration needed
+- ✅ Isolated environment
+- ✅ Works on any system with Podman/Docker
+- ✅ Always uses the correct dependencies
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -553,7 +626,3 @@ Project Link: [https://github.com/goflink/flinkord-cli](https://github.com/gofli
 [commander]: https://img.shields.io/badge/-Commander-brightgreen?style=for-the-badge
 
 [commander-url]: https://github.com/tj/commander.js
-
-
-
-
