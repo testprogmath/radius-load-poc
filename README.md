@@ -97,6 +97,13 @@ One-line install that adds a `flinkord` command to your PATH which runs the cont
   - Podman: `gcloud auth print-access-token | podman login -u oauth2accesstoken --password-stdin europe-west3-docker.pkg.dev`
 
 #### Install
+- Using GitHub CLI (recommended for private repos):
+```sh
+gh api repos/goflink/flinkord-cli/contents/scripts/install-docker-shim.sh?ref=main \
+  -H "Accept: application/vnd.github.raw" | bash
+```
+
+- Using curl (works for public access):
 ```sh
 curl -fsSL https://raw.githubusercontent.com/goflink/flinkord-cli/main/scripts/install-docker-shim.sh | bash
 ```
