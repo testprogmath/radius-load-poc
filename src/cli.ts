@@ -18,27 +18,33 @@ import {
 import { QuinyxShiftType } from "./shared/enums.js";
 import { loadMergedConfig } from "./loadMergedConfig.js";
 
-// External libraries for styling
+// External libraries for styling (banner optional)
 // @ts-ignore
 import figlet from "figlet";
 import gradient from "gradient-string";
-import { execSync } from "child_process";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 
-// Print a fancy banner
-console.log(gradient.rainbow(figlet.textSync("Flinkord")));
+// Print banner only when not requesting help/version
+const argv = process.argv.slice(2);
+const showBanner = argv.length > 0 && !argv.includes("-h") && !argv.includes("--help") && !argv.includes("-v") && !argv.includes("--version");
+if (showBanner) {
+    console.log(gradient.rainbow(figlet.textSync("Flinkord")));
+}
 
 const program = new Command();
 
 function getInstalledVersion(): string {
     try {
-        const result = execSync('npm list -g @flink/flinkord-cli --depth=0', { encoding: 'utf-8' });
-        const match = /@flink\/flinkord-cli@([\d.]+)/.exec(result);
-        return match ? match[1] : 'Version not found';
-    } catch (error) {
-        if (error instanceof Error) {
-            return `Error fetching version: ${error.message}`;
-        }
-        return 'An unknown error occurred while fetching version';
+        const __filename = fileURLToPath(import.meta.url);
+        const __dirname = path.dirname(__filename);
+        const pkgPath = path.resolve(__dirname, "..", "..", "package.json");
+        const raw = fs.readFileSync(pkgPath, "utf-8");
+        const pkg = JSON.parse(raw);
+        return pkg.version ?? "unknown";
+    } catch {
+        return "unknown";
     }
 }
 

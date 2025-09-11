@@ -1,5 +1,5 @@
 import * as dotenv from "dotenv";
-dotenv.config({ override: true, quiet: true });
+dotenv.config({ override: true });
 
 import { readAppConfig} from "../utils.js";
 import {DEFAULT_PRODUCTS_NUMBER} from "../utils/constants.js";

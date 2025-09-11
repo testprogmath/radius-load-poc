@@ -33,20 +33,21 @@ else
   exit 1
 fi
 
-# On Apple Silicon, force amd64 until multi-arch images are published
-# Docker uses --platform, Podman uses --arch
+# Platform args for fallback only (prefer native first)
 PLATFORM_ARGS=()
 ARCH="$(uname -m)"
-if [ "$ARCH" = "arm64" ] || [ "$ARCH" = "aarch64" ]; then
-  if [ "$ENGINE" = "docker" ]; then
-    PLATFORM_ARGS=("--platform=linux/amd64")
-  else
-    PLATFORM_ARGS=("--arch=amd64")
-  fi
-fi
 
 # Ensure config dir exists and is mounted inside the container
 mkdir -p "$HOME/.flinkord"
+
+# If local Google ADC creds exist, prepare env + mount for GCS access
+EXTRA_ENV_ARGS=()
+EXTRA_MOUNT_ARGS=()
+ADC_FILE="$HOME/.config/gcloud/application_default_credentials.json"
+if [ -f "$ADC_FILE" ]; then
+  EXTRA_ENV_ARGS+=("-e" "GOOGLE_APPLICATION_CREDENTIALS=/home/nodejs/.config/gcloud/application_default_credentials.json")
+  EXTRA_MOUNT_ARGS+=("-v" "$HOME/.config/gcloud:/home/nodejs/.config/gcloud:ro")
+fi
 
 # Optional: if gcloud is available and we're not logged in, try Artifact Registry login
 maybe_login() {
@@ -65,13 +66,38 @@ has_local_image() {
   "$ENGINE" image inspect "$IMAGE" >/dev/null 2>&1
 }
 
+pull_native_or_fallback() {
+  # Try native pull first
+  if ! "$ENGINE" pull -q "$IMAGE" >/dev/null 2>&1; then
+    # On arm64 hosts, fallback to amd64 emulation
+    if [ "$ARCH" = "arm64" ] || [ "$ARCH" = "aarch64" ]; then
+      if [ "$ENGINE" = "docker" ]; then
+        "$ENGINE" pull -q --platform=linux/amd64 "$IMAGE" >/dev/null 2>&1 || true
+      else
+        "$ENGINE" pull -q --arch=amd64 "$IMAGE" >/dev/null 2>&1 || true
+      fi
+    fi
+  fi
+}
+
 if [ "${FLINKORD_ALWAYS_PULL:-0}" = "1" ]; then
   maybe_login
-  "$ENGINE" pull -q "${PLATFORM_ARGS[@]}" "$IMAGE" >/dev/null 2>&1 || true
+  pull_native_or_fallback
 else
   if ! has_local_image; then
     maybe_login
-    "$ENGINE" pull -q "${PLATFORM_ARGS[@]}" "$IMAGE" >/dev/null 2>&1 || true
+    pull_native_or_fallback
+  fi
+fi
+
+# If the locally available image is amd64 on an arm64 host, set fallback run args
+if [ "$ARCH" = "arm64" ] || [ "$ARCH" = "aarch64" ]; then
+  if "$ENGINE" image inspect "$IMAGE" 2>/dev/null | grep -q '"Architecture": "amd64"'; then
+    if [ "$ENGINE" = "docker" ]; then
+      PLATFORM_ARGS=("--platform=linux/amd64")
+    else
+      PLATFORM_ARGS=("--arch=amd64")
+    fi
   fi
 fi
 
@@ -80,7 +106,9 @@ exec "$ENGINE" run --rm -it "${PLATFORM_ARGS[@]}" \
   -e DOTENV_CONFIG_OVERRIDE=true \
   -e NPM_CONFIG_UPDATE_NOTIFIER=false \
   -e NO_UPDATE_NOTIFIER=1 \
+  "${EXTRA_ENV_ARGS[@]}" \
   -v "$HOME/.flinkord:/home/nodejs/.flinkord" \
+  "${EXTRA_MOUNT_ARGS[@]}" \
   "$IMAGE" "$@"
 WRAP
 

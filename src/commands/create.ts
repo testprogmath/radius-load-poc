@@ -12,7 +12,7 @@ import * as dotenv from "dotenv";
 import {resolveLocale} from "../utils/locale.js";
 import {readAppConfig} from "../utils.js";
 
-dotenv.config({ override: true, quiet: true });
+dotenv.config({ override: true });
 
 export interface CreateOptions {
     locale?: string;

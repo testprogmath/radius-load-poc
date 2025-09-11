@@ -103,6 +103,12 @@ gh api repos/goflink/flinkord-cli/contents/scripts/install-docker-shim.sh?ref=ma
   -H "Accept: application/vnd.github.raw" | bash
 ```
 
+If you plan to run `flinkord setup` and load config from GCS, authenticate once with Google Cloud so the wrapper can mount your credentials:
+```sh
+gcloud config set project flink-core-staging
+gcloud auth application-default login
+```
+
 This installs `/usr/local/bin/flinkord` (requires sudo inside the script). The wrapper auto-detects Docker vs Podman and, on Apple Silicon, uses `--platform=linux/amd64` (Docker) or `--arch=amd64` (Podman) until multi-arch images are published. If the initial pull fails and `gcloud` is available, it attempts Artifact Registry login automatically.
 
 #### Use

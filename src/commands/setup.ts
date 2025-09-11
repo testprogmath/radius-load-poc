@@ -5,7 +5,7 @@ import * as readline from "readline";
 import * as os from "os";
 import {Storage} from "@google-cloud/storage";
 
-dotenv.config({ override: true, quiet: true });
+dotenv.config({ override: true });
 
 async function askQuestion(question: string, defaultValue?: string): Promise<string> {
     const rl = readline.createInterface({
@@ -46,6 +46,7 @@ export async function setupEnv(): Promise<void> {
     const jsonConfigPath = path.join(os.homedir(), ".flinkord", "config.json");
     const envFilePath = path.join(process.cwd(), ".env");
     const jsonTempPath = path.join(process.cwd(), "env.json");
+    const embeddedEnvPath = process.env.FLINKORD_EMBEDDED_ENV_PATH || path.join(process.cwd(), "resources", "env.default.json");
 
     const managedKeys = [
         "CT_PROJECT_KEY",
@@ -83,26 +84,45 @@ export async function setupEnv(): Promise<void> {
         console.log("✅ Loaded config from .env");
     }
 
-    // 3. Try to load config from GCS
-    console.log("🔑 To enable access to GCS, make sure you're authenticated in Google Cloud:");
-    console.log("👉 Run: gcloud config set project flink-core-staging");
-    console.log("👉 Then: gcloud auth application-default login");
-    await downloadConfigFromGCS("flinkord-cli-configs", "env.json", jsonTempPath);
-    if (fs.existsSync(jsonTempPath)) {
-        const raw = fs.readFileSync(jsonTempPath, "utf-8");
-        const remote = JSON.parse(raw);
-        fs.unlinkSync(jsonTempPath);
-
-        for (const key of managedKeys) {
-            if (remote[key]) {
-                finalConfig[key] = remote[key];
+    // 3. Load embedded defaults from the image if present
+    if (fs.existsSync(embeddedEnvPath)) {
+        try {
+            const raw = fs.readFileSync(embeddedEnvPath, "utf-8");
+            const embedded = JSON.parse(raw);
+            for (const key of managedKeys) {
+                if (embedded[key] && !finalConfig[key]) {
+                    finalConfig[key] = embedded[key];
+                }
             }
+            console.log(`📦 Loaded embedded defaults from ${embeddedEnvPath}`);
+        } catch (e) {
+            console.warn("⚠️ Could not parse embedded defaults.");
         }
-
-        console.log("✅ Loaded config from GCS");
     }
 
-    // 4. Prompt for any missing values
+    // 4. Optionally load config from GCS if ADC is available
+    const hasADC = !!process.env.GOOGLE_APPLICATION_CREDENTIALS;
+    if (hasADC) {
+        console.log("🔑 Attempting to load managed config from GCS (ADC detected)...");
+        await downloadConfigFromGCS("flinkord-cli-configs", "env.json", jsonTempPath);
+        if (fs.existsSync(jsonTempPath)) {
+            const raw = fs.readFileSync(jsonTempPath, "utf-8");
+            const remote = JSON.parse(raw);
+            fs.unlinkSync(jsonTempPath);
+
+            for (const key of managedKeys) {
+                if (remote[key]) {
+                    finalConfig[key] = remote[key];
+                }
+            }
+
+            console.log("✅ Loaded config from GCS");
+        }
+    } else {
+        console.log("ℹ️ Skipping GCS download (no ADC detected). Run 'gcloud auth application-default login' to enable.");
+    }
+
+    // 5. Prompt for any missing values
     for (const key of managedKeys) {
         if (!finalConfig[key]) {
             const defaultValue = process.env[key] ?? "";
@@ -110,7 +130,7 @@ export async function setupEnv(): Promise<void> {
         }
     }
 
-    // 5. Ask user if they want to add Quinyx credentials
+    // 6. Ask user if they want to add Quinyx credentials
     const wantsQuinyx = await askQuestion("Do you want to add Quinyx credentials to manage shifts? (yes/no)", "no");
 
     if (wantsQuinyx.toLowerCase().startsWith("y")) {
@@ -122,7 +142,7 @@ export async function setupEnv(): Promise<void> {
         console.log("ℹ️ Skipped Quinyx configuration");
     }
 
-    // 6. Save final config to ~/.flinkord/config.json
+    // 7. Save final config to ~/.flinkord/config.json
     const configDir = path.dirname(jsonConfigPath);
     if (!fs.existsSync(configDir)) {
         fs.mkdirSync(configDir, { recursive: true });

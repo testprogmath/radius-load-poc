@@ -15,7 +15,7 @@ import {DEFAULT_QUANTITY_OF_PRODUCTS} from "./utils/constants.js";
 import {parseProductsArray} from "./utils/cli-arguments.js";
 import {DeliveryDetails} from "./shared/deliveryAddress.js";
 
-dotenv.config({ override: true, quiet: true });
+dotenv.config({ override: true });
 
 let config: any;
 let inStoreLogin: string;
