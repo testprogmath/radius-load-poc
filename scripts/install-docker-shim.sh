@@ -101,14 +101,14 @@ if [ "$ARCH" = "arm64" ] || [ "$ARCH" = "aarch64" ]; then
   fi
 fi
 
-exec "$ENGINE" run --rm -it "${PLATFORM_ARGS[@]}" \
+exec "$ENGINE" run --rm -it ${PLATFORM_ARGS[@]+"${PLATFORM_ARGS[@]}"} \
   -e DOTENV_CONFIG_QUIET=true \
   -e DOTENV_CONFIG_OVERRIDE=true \
   -e NPM_CONFIG_UPDATE_NOTIFIER=false \
   -e NO_UPDATE_NOTIFIER=1 \
-  "${EXTRA_ENV_ARGS[@]}" \
+  ${EXTRA_ENV_ARGS[@]+"${EXTRA_ENV_ARGS[@]}"} \
   -v "$HOME/.flinkord:/home/nodejs/.flinkord" \
-  "${EXTRA_MOUNT_ARGS[@]}" \
+  ${EXTRA_MOUNT_ARGS[@]+"${EXTRA_MOUNT_ARGS[@]}"} \
   "$IMAGE" "$@"
 WRAP
 
