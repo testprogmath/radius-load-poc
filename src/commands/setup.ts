@@ -45,7 +45,8 @@ async function downloadConfigFromGCS(bucketName: string, srcFilename: string, de
 export async function setupEnv(): Promise<void> {
     const jsonConfigPath = path.join(os.homedir(), ".flinkord", "config.json");
     const envFilePath = path.join(process.cwd(), ".env");
-    const jsonTempPath = path.join(process.cwd(), "env.json");
+    // Write temp file to OS tmp dir to avoid EACCES in /app for non-root user
+    const jsonTempPath = path.join(os.tmpdir(), "flinkord-env.json");
     const embeddedEnvPath = process.env.FLINKORD_EMBEDDED_ENV_PATH || path.join(process.cwd(), "resources", "env.default.json");
 
     const managedKeys = [
