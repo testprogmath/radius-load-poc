@@ -3,7 +3,7 @@ set -euo pipefail
 
 # Installer for the flinkord Docker wrapper
 # - Installs a small launcher at /usr/local/bin/flinkord
-# - The launcher runs the published Docker image and mounts ~/.flinkord
+# - The launcher runs the published Docker image with SOPS + Age secret management and mounts ~/.flinkord
 # - On Apple Silicon, it uses --platform=linux/amd64 until multi-arch images are published
 
 REGISTRY="europe-west3-docker.pkg.dev"
@@ -124,6 +124,8 @@ echo "Also available as: $ALT_TARGET"
 echo "Usage: flinkord --help"
 echo "Set FLINKORD_IMAGE to pin a specific tag, e.g.:"
 echo "  FLINKORD_IMAGE=$DEFAULT_IMAGE flinkord --version"
+echo ""
+echo "🔐 The image includes SOPS + Age secret management for secure credential storage"
 
 # If another flinkord exists earlier in PATH, warn the user
 if [ -n "$EXISTING_BIN" ] && [ "$EXISTING_BIN" != "$TARGET" ]; then

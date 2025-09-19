@@ -6,7 +6,8 @@
   "main": "dist/src/index.js",
   "types": "dist/types/src/index.d.ts",
   "bin": {
-    "flinkord": "./dist/src/cli.js"
+    "flinkord": "./dist/src/cli.js",
+    "flinkord-setup": "./dist/bin/setup.js"
   },
   "exports": {
     ".": {
@@ -20,12 +21,20 @@
     "config",
     "dist",
     "resources",
-    "templates"
+    "templates",
+    "lib",
+    "bin",
+    "keys",
+    "embedded-secrets.enc"
   ],
   "scripts": {
-    "build": "npx tsc && [ -f ./dist/src/cli.js ] && chmod +x ./dist/src/cli.js",
+    "build": "npx tsc && [ -f ./dist/src/cli.js ] && chmod +x ./dist/src/cli.js && [ -f ./dist/src/commands/setup.js ] && mkdir -p ./dist/bin && cp ./dist/src/commands/setup.js ./dist/bin/setup.js && chmod +x ./dist/bin/setup.js",
     "lint": "npx eslint",
     "test": "vitest run",
+    "setup": "node dist/bin/setup.js",
+    "setup:secrets": "node dist/bin/setup.js",
+    "encrypt-secrets": "sops --encrypt --age age10z6zj3ceggkz6mlu654cseadsx25kl3alxs0t62j9u67ww0pf3sq3fmmlp embedded-secrets.json > embedded-secrets.enc",
+    "decrypt-secrets": "sops --decrypt --age age10z6zj3ceggkz6mlu654cseadsx25kl3alxs0t62j9u67ww0pf3sq3fmmlp embedded-secrets.enc > embedded-secrets.json",
     "release": "standard-version",
     "postrelease": "git push --follow-tags && npm publish"
   },
@@ -67,8 +76,8 @@
     "@commercetools/platform-sdk": "^8.12.1",
     "@commercetools/sdk-client-v2": "^3.0.0",
     "@commercetools/ts-client": "^4.1.0",
-    "@flink/hub-manager": "^1.52.2",
-    "@google-cloud/storage": "^7.16.0",
+        "@google-cloud/storage": "^7.16.0",
+    "@types/keytar": "^4.4.0",
     "@typescript-eslint/eslint-plugin": "^8.37.0",
     "@typescript-eslint/parser": "^8.32.1",
     "axios": "^1.12.0",
@@ -86,6 +95,7 @@
     "graphql-tag": "^2.12.6",
     "inquirer": "^12.7.0",
     "jsonfile": "^6.1.0",
+    "keytar": "^7.9.0",
     "lodash.merge": "^4.6.2",
     "node-fetch": "^3.3.2",
     "table": "^6.9.0"

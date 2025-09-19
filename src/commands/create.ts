@@ -5,7 +5,7 @@ import {
     prepareProductsForCreateRequest
 } from "../cart.js";
 import {spinnerError, spinnerSuccess, startSpinner, updateSpinnerText} from "../spinner.js";
-import {OpenAPI as HubManagerConfig} from "@flink/hub-manager";
+import { OpenAPI as HubManagerConfig } from '../lib/openapi/OpenAPI.js';
 import {initializeCartApi} from "../utils/api.js";
 import {getValidatedHubSlug} from "../utils/hub.js";
 import * as dotenv from "dotenv";

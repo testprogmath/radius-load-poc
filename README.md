@@ -53,7 +53,15 @@
         <li><a href="#installation">Installation</a></li>
       </ul>
     </li>
-    <li><a href="#usage">Usage</a></li>
+    <li><a href="#usage">Usage</a>
+      <ul>
+        <li><a href="#-secure-secret-management">🔐 Secure Secret Management</a></li>
+        <li><a href="#-how-it-works">🛡️ How It Works</a></li>
+        <li><a href="#-what-developers-need">📋 What Developers Need</a></li>
+        <li><a href="#-traditional-setup-optional">🔧 Traditional Setup (Optional)</a></li>
+        <li><a href="#configuration-files">Configuration Files</a></li>
+      </ul>
+    </li>
     <li><a href="#roadmap">Roadmap</a></li>
     <li><a href="#contributing">Contributing</a></li>
     <li><a href="#contact">Contact</a></li>
@@ -234,34 +242,129 @@ Commands:
 
 ### Container Installation (Alternative)
 
-If you prefer to avoid Node.js setup and npm registry configuration, you can use the containerized version:
+If you prefer to avoid Node.js setup and npm registry configuration, you can use the containerized version with built-in secret management:
 
 #### Prerequisites
 - Docker or [Podman](https://podman.io/getting-started/installation) installed
 
-#### Container Usage
-To use the containerized version, you'll need to authenticate with Google Artifact Registry first:
+#### Quick Container Usage
+
+**Recommended: GH Installer Script**
 
 ```sh
-# Pull the image (Docker example)
-docker pull europe-west3-docker.pkg.dev/flink-core-shared/flinkord-cli/flinkord-cli:latest
+# Run our installation script (installs to /usr/local/bin/flinkord)
+curl -fsSL https://raw.githubusercontent.com/goflink/flinkord-cli/main/scripts/install-docker-shim.sh | bash
 
-# Run with volume mounts for config
+# Then use like native CLI
+flinkord --help
+flinkord create -h de_ber_mit2
+flinkord list
+```
+
+**Manual Docker Usage**
+
+```sh
+# First-time setup (one-time)
 docker run --rm \
   -v ~/.flinkord:/home/nodejs/.flinkord \
-  -v $(pwd):/workspace -w /workspace \
-  europe-west3-docker.pkg.dev/flink-core-shared/flinkord-cli/flinkord-cli:latest --help
+  flinkord-cli setup --secrets
 
-# Create an alias for easier usage
-alias flinkord='docker run --rm -v ~/.flinkord:/home/nodejs/.flinkord -v $(pwd):/workspace -w /workspace europe-west3-docker.pkg.dev/flink-core-shared/flinkord-cli/flinkord-cli:latest'
+# Regular usage
+docker run --rm \
+  -v ~/.flinkord:/home/nodejs/.flinkord \
+  flinkord-cli create -h de_ber_mit2
+
+# Create an alias for easier usage (optional)
+alias flinkord='docker run --rm -v ~/.flinkord:/home/nodejs/.flinkord flinkord-cli'
+
+# Auto-Setup Mode (first time only)
+docker run --rm \
+  -e FLINKORD_AUTO_SETUP=true \
+  -v ~/.flinkord:/home/nodejs/.flinkord \
+  flinkord-cli
+```
+
+**Interactive Shell**
+
+```sh
+# Start an interactive shell
+docker run --rm -it \
+  -v ~/.flinkord:/home/nodejs/.flinkord \
+  --entrypoint /bin/bash \
+  flinkord-cli
 ```
 
 #### Container Benefits
-- ✅ No Node.js installation required
-- ✅ No npm registry configuration needed
-- ✅ Isolated environment
-- ✅ Works on any system with Podman/Docker
-- ✅ Always uses the correct dependencies
+- ✅ **Zero Dependencies**: No Node.js installation required
+- ✅ **Built-in Secret Management**: SOPS + Age encryption included
+- ✅ **Isolated Environment**: Clean, reproducible runtime
+- ✅ **Universal Compatibility**: Works on any system with Docker/Podman
+- ✅ **Persistent Configuration**: Config stored in ~/.flinkord volume mount
+- ✅ **Security-First**: Non-root user, secure secret storage
+
+#### Building Locally
+
+```sh
+# Build the image
+docker build -t flinkord-cli .
+
+# Test the build
+docker run --rm flinkord-cli --version
+
+# Run setup
+docker run --rm -v ~/.flinkord:/home/nodejs/.flinkord flinkord-cli setup --secrets
+```
+
+#### Docker Compose (Optional)
+
+Create a `docker-compose.yml` for easier development:
+
+```yaml
+version: '3.8'
+services:
+  flinkord:
+    build: .
+    volumes:
+      - ~/.flinkord:/home/nodejs/.flinkord
+      - .:/workspace
+    working_dir: /workspace
+    environment:
+      - FLINKORD_AUTO_SETUP=false
+```
+
+Usage:
+```sh
+docker-compose run --rm flinkord setup --secrets
+docker-compose run --rm flinkord create -h de_ber_mit2
+```
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+## Key Rotation Strategy
+
+The CLI uses SOPS + Age for embedded secret management with **annual key rotation** for enhanced security.
+
+### Features
+- ✅ **GitHub Actions monitoring** - Creates issues when rotation is due
+- ✅ **30-day advance notices** - Automatic reminders for planning
+- ✅ **Semi-automated rotation** - `scripts/rotate-keys-annual.sh` with dry-run mode
+- ✅ **Comprehensive validation** - CLI testing before and after rotation
+- ✅ **Backup and rollback** - Safe rotation with recovery options
+
+### Process
+1. **Monitoring**: GitHub Actions checks key age daily
+2. **Notification**: Creates issue when keys are 365+ days old
+3. **Rotation**: Manual execution with validation and backups
+4. **Testing**: CLI functionality verification
+5. **Cleanup**: Old key removal after confirmation
+
+```bash
+# Test rotation process (dry run)
+./scripts/rotate-keys-annual.sh --dry-run
+
+# Execute actual rotation when needed
+./scripts/rotate-keys-annual.sh
+```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -273,22 +376,104 @@ Usage: flinkord [options]
 
 ### Setup
 
-Before using Flinkord for the first time, you need to set up your credentials and configuration. Run:
+Before using Flinkord for the first time, you need to set up your credentials and configuration. The CLI now includes **automated secret management** using SOPS + Age encryption.
+
+#### 🔐 Secure Secret Management
+
+The flinkord CLI now includes enterprise-grade secret management that automatically handles all staging environment credentials and API keys.
+
+**One-time setup:**
+```shell
+flinkord setup --secrets
+```
+
+This command will:
+1. **Automatically install** required tools (SOPS and Age) if not present
+2. **Decrypt embedded secrets** using the built-in Age encryption key
+3. **Save configuration** securely to `~/.flinkord/config.json` with proper permissions (600)
+4. **Make the CLI ready** for immediate use
+
+**After setup, you can use any command immediately:**
+```shell
+flinkord create -h de_ber_mit2
+flinkord config
+flinkord pick -o de-ber-fjpq-q9su -h de_ber_fran
+# Any other flinkord command...
+```
+
+#### 🛡️ How It Works
+
+**The Magic Behind the Scenes:**
+- **Embedded Age Key**: An obfuscated decryption key is built into the CLI
+- **Encrypted Secrets**: All staging environment secrets are encrypted in the package
+- **Automatic Decryption**: The setup command automatically decrypts secrets to your local machine
+- **Secure Storage**: Secrets are stored in `~/.flinkord/config.json` with strict file permissions
+- **Runtime Access**: All CLI commands automatically access secrets from the secure configuration
+
+**Security Architecture:**
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    DEVELOPER WORKFLOW                       │
+├─────────────────────────────────────────────────────────────┤
+│  1. npm install @flink/flinkord-cli                       │
+│  2. flinkord setup --secrets                                │
+│  3. flinkord <any command>                                  │
+└─────────────────────────────────────────────────────────────┘
+                            │
+                            ▼
+┌─────────────────────────────────────────────────────────────┐
+│                  SECRET MANAGEMENT                           │
+├─────────────────────────────────────────────────────────────┤
+│  • Embedded Age Key (obfuscated)                           │
+│  • SOPS + Age Encryption                                     │
+│  • Automatic Tool Installation                             │
+│  • Secure Local Storage (600 permissions)                   │
+│  • Runtime Secret Retrieval                                 │
+└─────────────────────────────────────────────────────────────┘
+```
+
+#### 📋 What Developers Need
+
+**✅ Requirements:**
+- **Internet**: For automatic SOPS + Age installation (if not present)
+- **File Permissions**: Write access to home directory for `~/.flinkord/`
+- **Node.js**: v18+ (standard for npm packages)
+
+**✅ What They DON'T Need:**
+- ❌ No manual environment variable setup
+- ❌ No secret management knowledge
+- ❌ No decryption keys or passwords
+- ❌ No additional configuration files
+
+#### 🔧 Traditional Setup (Optional)
+
+If you prefer to configure Quinyx credentials manually for shift management:
+
 ```shell
 flinkord setup
 ```
-During setup, you can optionally provide your Quinyx credentials to enable shift creation and deletion.
 
-You may also choose to skip this or go forward and use default credentials:
+During setup, you can optionally provide your Quinyx credentials to enable shift creation and deletion:
 
 ```shell
 Do you want to add Quinyx credentials to manage shifts? (yes/no) (default: no): 
 ```
-It will create/update a config file in `~/.flinkord/config.json` in your home directory.
 
-Flinkord will automatically merge default and user configuration files at runtime.
+#### Configuration Files
 
-Feel free to manually update `~/.flinkord/config.json` if needed.
+The CLI creates and manages configuration files in your home directory:
+
+- **`~/.flinkord/config.json`**: Main configuration with decrypted secrets
+- **File Permissions**: Automatically set to 600 (read/write for owner only)
+- **Auto-merge**: Default and user configurations are merged at runtime
+
+You can manually view or edit `~/.flinkord/config.json` if needed:
+
+```shell
+flinkord config
+```
+
+This will show you the current configuration being used by the CLI.
 
 To create the order in the chosen hub, please use -h (--hub option):
 

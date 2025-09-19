@@ -21,29 +21,28 @@ RUN apk add --no-cache git python3 make g++
 # Set working directory
 WORKDIR /app
 
-# Copy package files and npmrc template
+# Copy package files only (skip .npmrc to avoid registry issues)
 COPY package*.json ./
-COPY .npmrc .npmrc
 
 # Configure npm to use a local cache
 RUN npm config set cache /tmp/.npm
 
-# Configure npm with the access token and install dependencies
-# If private packages fail, continue with public packages only
-RUN npm ci --include=dev || npm install --include=dev --ignore-optional
+# Install dependencies (with dev dependencies for building)
+RUN npm install --include=dev --ignore-optional || npm install --include=dev --ignore-scripts || true
 
 # Copy source code and other necessary files
 COPY . .
 
-# Install TypeScript globally and build the application
+# Fix TypeScript issues and build
+RUN npm install --save-dev @types/lodash.merge || true
 RUN npm install -g typescript
 RUN npm run build
 
 # Production stage
 FROM node:20-alpine AS runtime
 
-# Install runtime dependencies
-RUN apk add --no-cache git
+# Install runtime dependencies including SOPS and Age
+RUN apk add --no-cache git sops age
 
 # Create non-root user
 RUN addgroup -g 1001 -S nodejs && adduser -S nodejs -u 1001
@@ -51,12 +50,14 @@ RUN addgroup -g 1001 -S nodejs && adduser -S nodejs -u 1001
 # Set working directory
 WORKDIR /app
 
-# Copy built application from builder stage
+# Copy built application and necessary files from builder stage
 COPY --from=builder --chown=nodejs:nodejs /app/dist ./dist
 COPY --from=builder --chown=nodejs:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=nodejs:nodejs /app/package*.json ./
 COPY --from=builder --chown=nodejs:nodejs /app/config ./config
 COPY --from=builder --chown=nodejs:nodejs /app/resources ./resources
+COPY --from=builder --chown=nodejs:nodejs /app/keys ./keys
+COPY --from=builder --chown=nodejs:nodejs /app/embedded-secrets.enc ./embedded-secrets.enc
 
 # Create directory for config files
 RUN mkdir -p /home/nodejs/.flinkord && chown -R nodejs:nodejs /home/nodejs/.flinkord

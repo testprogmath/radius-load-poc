@@ -121,9 +121,19 @@ const cancelOrder = new Command("cancel")
 // "setup" command – setup environment variables and configurations
 const setup = new Command("setup")
     .description("Setup environment variables and configurations")
-    .action(() => {
+    .option("-s, --secrets", "Setup secure secrets management with SOPS + Age encryption")
+    .action(async (options) => {
         console.log("Setup command invoked");
-        setupEnv().catch(e => console.error(e));
+        if (options.secrets) {
+            try {
+                await setupEnv();
+            } catch (error) {
+                console.error("❌ Secret setup failed:", error instanceof Error ? error.message : String(error));
+                process.exit(1);
+            }
+        } else {
+            setupEnv().catch(e => console.error(e));
+        }
     });
 
 const configCommand = new Command("config")

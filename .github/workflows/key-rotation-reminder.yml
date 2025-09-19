@@ -1,0 +1,124 @@
+name: Annual Key Rotation Reminder
+
+on:
+  schedule:
+    # Run annually on January 1st at 09:00 UTC
+    - cron: '0 9 1 1 *'
+  workflow_dispatch:
+    # Allow manual triggering
+
+jobs:
+  rotation-reminder:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          
+      - name: Check key age
+        id: check-age
+        run: |
+          # Get current date in epoch
+          CURRENT_DATE=$(date +%s)
+          
+          # Check when keys were last rotated (look for embedded-key.js modification date)
+          if [ -f "keys/embedded-key.js" ]; then
+            KEY_DATE=$(git log -1 --pretty=format:%ct keys/embedded-key.js 2>/dev/null || echo "0")
+            DAYS_SINCE_ROTATION=$(( (CURRENT_DATE - KEY_DATE) / 86400 ))
+            
+            echo "Days since last rotation: $DAYS_SINCE_ROTATION"
+            echo "key_age_days=$DAYS_SINCE_ROTATION" >> $GITHUB_OUTPUT
+            
+            # Check if rotation is due (365 days)
+            if [ $DAYS_SINCE_ROTATION -ge 365 ]; then
+              echo "rotation_due=true" >> $GITHUB_OUTPUT
+              echo "⚠️ Key rotation is DUE!"
+            else
+              echo "rotation_due=false" >> $GITHUB_OUTPUT
+              DAYS_UNTIL_ROTATION=$(( 365 - DAYS_SINCE_ROTATION ))
+              echo "✅ Keys are fresh. Rotation due in $DAYS_UNTIL_ROTATION days"
+            fi
+          else
+            echo "rotation_due=false" >> $GITHUB_OUTPUT
+            echo "key_age_days=0" >> $GITHUB_OUTPUT
+            echo "📝 No key file found, assuming initial setup"
+          fi
+          
+      - name: Create rotation issue if due
+        if: steps.check-age.outputs.rotation_due == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: '🔐 Annual Key Rotation Required',
+              body: `## Annual SOPS + Age Key Rotation Due ⚠️
+              
+              This is an automated reminder that the embedded Age keys need to be rotated.
+              
+              ### Rotation Checklist:
+              - [ ] Run \`./scripts/rotate-keys-annual.sh\` locally
+              - [ ] Test CLI functionality after rotation
+              - [ ] Build and test Docker image with new keys
+              - [ ] Update and redeploy Docker image
+              - [ ] Monitor for 30 days for any issues
+              
+              ### Key Age: ${{ steps.check-age.outputs.key_age_days }} days
+              ### Due Date: ${new Date().toISOString().split('T')[0]}
+              
+              ---
+              *This issue was automatically created by the annual key rotation workflow.*
+              `,
+              labels: ['security', 'automation', 'key-rotation']
+            })
+            
+      - name: Create advance notice (30 days before due)
+        if: steps.check-age.outputs.rotation_due == 'false' && steps.check-age.outputs.key_age_days >= 335
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const daysUntilRotation = 365 - ${{ steps.check-age.outputs.key_age_days }};
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: '🔐 Key Rotation Coming Soon (30 days)',
+              body: `## Key Rotation Notice - 30 Days Advance Warning 📅
+              
+              The annual Age key rotation will be due in approximately **${daysUntilRotation} days**.
+              
+              ### Preparation Steps:
+              - [ ] Review the [Key Rotation Strategy](docs/KEY_ROTATION_STRATEGY.md)
+              - [ ] Ensure you have local access to run rotation scripts
+              - [ ] Plan maintenance window for Docker image rebuild
+              - [ ] Test rotation process in development environment
+              
+              ### Current Key Age: ${{ steps.check-age.outputs.key_age_days }} days
+              ### Rotation Due: ${daysUntilRotation} days
+              
+              ---
+              *This is a courtesy notice to allow ample preparation time.*
+              `,
+              labels: ['security', 'automation', 'key-rotation']
+            })
+            
+
+      - name: Summary
+        run: |
+          echo "## Key Rotation Status Summary"
+          echo "Key Age: ${{ steps.check-age.outputs.key_age_days }} days"
+          echo "Rotation Due: ${{ steps.check-age.outputs.rotation_due }}"
+          if [ "${{ steps.check-age.outputs.rotation_due }}" == "true" ]; then
+            echo "🚨 Action Required: Key rotation is overdue!"
+            echo "📋 GitHub issue created for tracking"
+          elif [ "${{ steps.check-age.outputs.key_age_days }}" -ge 335 ]; then
+            echo "📅 Coming Soon: Rotation due in $(( 365 - ${{ steps.check-age.outputs.key_age_days }} )) days"
+            echo "📋 Advance notice issue created"
+          else
+            echo "✅ All Good: No action needed at this time"
+          fi

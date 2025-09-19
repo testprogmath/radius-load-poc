@@ -8,18 +8,16 @@ import {Colors} from "./shared/enums.js";
 import {authorizeInStore} from "./api/website-api.js";
 import axios, {AxiosResponse} from "axios";
 import {CartLine, CartRequest} from "./api/objects/cart-request.js";
-
-import * as dotenv from "dotenv";
 import {getInventoryChangesForTheHub, updateStockInTheHub} from "./api/inventory-service-api.js";
 import {DEFAULT_QUANTITY_OF_PRODUCTS} from "./utils/constants.js";
 import {parseProductsArray} from "./utils/cli-arguments.js";
 import {DeliveryDetails} from "./shared/deliveryAddress.js";
-
-dotenv.config({ override: true });
+import { SecretsManager } from "../lib/secrets-manager.js";
 
 let config: any;
 let inStoreLogin: string;
 let inStorePassword: string;
+let secretsManager: SecretsManager;
 let isInitialized = false;
 
 const cartToken = {
@@ -52,6 +50,7 @@ async function ensureInitialized() {
         config = await readAppConfig();
         inStoreLogin = config.instoreLogin;
         inStorePassword = config.instorePassword;
+        secretsManager = new SecretsManager();
         isInitialized = true;
     }
 }
@@ -104,9 +103,9 @@ export async function getCart(customerDomainApi: CartApi<any>, cartId: string) {
 async function getToken() {
     await ensureInitialized();
     const url = config.firebaseUrl;
-    const apiKey = process.env.FIREBASE_API_KEY;
+    const apiKey = await secretsManager.getSecret("FIREBASE_API_KEY");
     if (!apiKey) {
-        throw new Error("Missing FIREBASE_API_KEY in environment variables");
+        throw new Error("Missing FIREBASE_API_KEY in configuration");
     }
     try {
         const response = await axios.post(

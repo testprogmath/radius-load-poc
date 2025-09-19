@@ -2,8 +2,23 @@ node_modules
 dist
 .idea
 **/*.js
+!keys/embedded-key.example.js
+keys/embedded-key.js
 .npmrc
 .env
 config/user_config.json
 html/
 env.json
+embedded-secrets.json
+age-key.txt
+*.key
+temp-secrets*# Temporary files and backups
+backups/
+*.key
+temp-secrets*
+embedded-secrets.json
+age-key.txt
+
+# Test files
+test-*.txt
+test-*.enc
