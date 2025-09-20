@@ -64,6 +64,35 @@ jobs:
           npx google-artifactregistry-auth
           npm ci --cache .npm
 
+      - name: Create embedded key file
+        run: |
+          mkdir -p keys
+          cat > keys/embedded-key.js << 'EOF'
+          // Embedded Age key for flinkord-cli
+          // This contains both public and private keys for decryption
+          
+          const privateKeyParts = [
+            '${{ secrets.AGE_PRIVATE_KEY_PART1 }}',
+            '${{ secrets.AGE_PRIVATE_KEY_PART2 }}'
+          ];
+          
+          const publicKeyParts = [
+            '${{ secrets.AGE_PUBLIC_KEY_PART1 }}',
+            '${{ secrets.AGE_PUBLIC_KEY_PART2 }}'
+          ];
+          
+          // Simple obfuscation function
+          const getEmbeddedAgeKey = () => {
+            return privateKeyParts.join('');
+          };
+          
+          const getEmbeddedAgePublicKey = () => {
+            return publicKeyParts.join('');
+          };
+          
+          export { getEmbeddedAgeKey, getEmbeddedAgePublicKey };
+          EOF
+
       - name: Build the project
         run: npm run build --if-present
 

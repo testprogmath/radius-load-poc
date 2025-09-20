@@ -102,7 +102,8 @@ export async function setupEnv(): Promise<void> {
     }
 
     // 4. Optionally load config from GCS if ADC is available
-    const hasADC = !!process.env.GOOGLE_APPLICATION_CREDENTIALS;
+    const adcPath = path.join(os.homedir(), ".config", "gcloud", "application_default_credentials.json");
+    const hasADC = !!process.env.GOOGLE_APPLICATION_CREDENTIALS || fs.existsSync(adcPath);
     if (hasADC) {
         console.log("🔑 Attempting to load managed config from GCS (ADC detected)...");
         await downloadConfigFromGCS("flinkord-cli-configs", "env.json", jsonTempPath);

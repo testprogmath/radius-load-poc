@@ -4,6 +4,7 @@
 import { execSync } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as os from 'os';
 
 // Default environment variable fallbacks
 const DEFAULT_ENV_FALLBACKS = {
@@ -26,15 +27,17 @@ export class SecretsManager {
     if (this.initialized) return;
 
     try {
-      const secretsPath = path.join(process.cwd(), 'embedded-secrets.enc');
-      const embeddedKeyPath = path.join(process.cwd(), 'keys', 'embedded-key.js');
+      // Get the package directory (where this file is located)
+      const packageDir = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
+      const secretsPath = path.join(packageDir, 'embedded-secrets.enc');
+      const embeddedKeyPath = path.join(packageDir, 'keys', 'embedded-key.js');
       
       if (fs.existsSync(secretsPath) && fs.existsSync(embeddedKeyPath)) {
         try {
           // Dynamically import the embedded key only if file exists
           const { getEmbeddedAgeKey } = await import('../keys/embedded-key.js');
           const privateKey = getEmbeddedAgeKey();
-          const tempKeyFile = path.join(process.cwd(), 'temp-age-key.txt');
+          const tempKeyFile = path.join(os.tmpdir(), 'flinkord-temp-age-key.txt');
         
           // Write temporary key file
           fs.writeFileSync(tempKeyFile, privateKey);

@@ -47,6 +47,35 @@ jobs:
       run: |
         npx google-artifactregistry-auth --repo-config=./.npmrc --credential-config=./.npmrc
 
+    - name: Create embedded key file for Docker build
+      run: |
+        mkdir -p keys
+        cat > keys/embedded-key.js << 'EOF'
+        // Embedded Age key for flinkord-cli
+        // This contains both public and private keys for decryption
+        
+        const privateKeyParts = [
+          '${{ secrets.AGE_PRIVATE_KEY_PART1 }}',
+          '${{ secrets.AGE_PRIVATE_KEY_PART2 }}'
+        ];
+        
+        const publicKeyParts = [
+          '${{ secrets.AGE_PUBLIC_KEY_PART1 }}',
+          '${{ secrets.AGE_PUBLIC_KEY_PART2 }}'
+        ];
+        
+        // Simple obfuscation function
+        const getEmbeddedAgeKey = () => {
+          return privateKeyParts.join('');
+        };
+        
+        const getEmbeddedAgePublicKey = () => {
+          return publicKeyParts.join('');
+        };
+        
+        export { getEmbeddedAgeKey, getEmbeddedAgePublicKey };
+        EOF
+
     - uses: goflink/github-actions/build-push-image@v2
       with:
         build_args: |
