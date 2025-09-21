@@ -67,7 +67,7 @@ export async function setupEnv(): Promise<void> {
         try {
             const raw = fs.readFileSync(jsonConfigPath, "utf-8");
             finalConfig = JSON.parse(raw);
-            console.log(`🛠 Loaded existing config from ${jsonConfigPath}`);
+            console.log(`🛠 Loaded existing config from ~/.flinkord/config.json`);
         } catch (e) {
             console.warn("⚠️ Could not parse existing config. Starting fresh.");
         }
@@ -148,9 +148,9 @@ export async function setupEnv(): Promise<void> {
     const configDir = path.dirname(jsonConfigPath);
     if (!fs.existsSync(configDir)) {
         fs.mkdirSync(configDir, { recursive: true });
-        console.log(`📁 Created directory ${configDir}`);
+        console.log(`📁 Created directory ~/.flinkord/`);
     }
 
     fs.writeFileSync(jsonConfigPath, JSON.stringify(finalConfig, null, 2), "utf-8");
-    console.log(`✅ Updated config at ${jsonConfigPath}`);
+    console.log(`✅ Updated config at ~/.flinkord/config.json`);
 }
