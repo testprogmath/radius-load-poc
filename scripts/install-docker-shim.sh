@@ -31,30 +31,48 @@ get_release_commit() {
   fi
 }
 
-# Get commit hash for latest release
+# Function to get available tags from Docker registry
+get_available_tags() {
+  if command -v gh >/dev/null 2>&1; then
+    # Get list of available image tags from GitHub packages
+    gh api "repos/$1/packages/container/flinkord-cli/versions" --jq '.[].metadata.container.tags[]' 2>/dev/null | grep -v 'latest' | head -5 || echo "4027972"
+  else
+    echo "4027972"
+  fi
+}
+
+# Try to get commit hash for latest release, but fall back to known good images
 COMMIT_HASH=$(get_release_commit "$GITHUB_REPO")
 if [ -z "$COMMIT_HASH" ]; then
   echo "Failed to fetch commit hash from GitHub. Using fallback 4027972" >&2
   COMMIT_HASH="4027972"
 fi
 
-# Default to image with commit hash; allow override via FLINKORD_IMAGE env var at install time
+# Check if the commit hash image exists, if not use a known good fallback
 DEFAULT_IMAGE="$REGISTRY/$REPO:$COMMIT_HASH"
+if command -v docker >/dev/null 2>&1; then
+  if ! docker manifest inspect "$DEFAULT_IMAGE" >/dev/null 2>&1; then
+    echo "Warning: Docker image for commit $COMMIT_HASH not found yet." >&2
+    echo "Using fallback image from recent build." >&2
+    DEFAULT_IMAGE="$REGISTRY/$REPO:4027972"
+  fi
+fi
 TARGET="/usr/local/bin/flinkord"
 ALT_TARGET="/usr/local/bin/flinkord-docker"
 EXISTING_BIN="$(command -v flinkord || true)"
 
+# Create launcher script
 tmp="$(mktemp)"
-cat >"$tmp" <<WRAP
+cat >"$tmp" << 'EOF'
 #!/usr/bin/env bash
 set -euo pipefail
 
 # Ensure HOME is set
-HOME="\${HOME:-\$(cd ~ && pwd)}"
+HOME="${HOME:-$(cd ~ && pwd)}"
 
 # You can override the image at runtime with FLINKORD_IMAGE env var
-IMAGE_DEFAULT="$DEFAULT_IMAGE"
-IMAGE="\${FLINKORD_IMAGE:-\$IMAGE_DEFAULT}"
+IMAGE_DEFAULT="IMAGE_TO_REPLACE"
+IMAGE="${FLINKORD_IMAGE:-$IMAGE_DEFAULT}"
 
 # Choose container engine: prefer docker, fallback to podman
 if command -v docker >/dev/null 2>&1; then
@@ -147,6 +165,10 @@ exec "$ENGINE" run --rm -it ${PLATFORM_ARGS[@]+"${PLATFORM_ARGS[@]}"} \
   ${EXTRA_MOUNT_ARGS[@]+"${EXTRA_MOUNT_ARGS[@]}"} \
   "$IMAGE" "$@"
 WRAP
+
+# Replace the placeholder with the actual image
+sed -i.bak "s|IMAGE_TO_REPLACE|$DEFAULT_IMAGE|" "$tmp"
+rm -f "$tmp.bak"
 
 # Install the wrapper into PATH
 sudo install -m 0755 "$tmp" "$TARGET"
