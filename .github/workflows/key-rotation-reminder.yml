@@ -51,7 +51,7 @@ jobs:
           
       - name: Create rotation issue if due
         if: steps.check-age.outputs.rotation_due == 'true'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             github.rest.issues.create({
@@ -80,7 +80,7 @@ jobs:
             
       - name: Create advance notice (30 days before due)
         if: steps.check-age.outputs.rotation_due == 'false' && steps.check-age.outputs.key_age_days >= 335
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const daysUntilRotation = 365 - ${{ steps.check-age.outputs.key_age_days }};
