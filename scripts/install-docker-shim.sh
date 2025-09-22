@@ -171,13 +171,14 @@ sed -i.bak "s|IMAGE_TO_REPLACE|$DEFAULT_IMAGE|" "$tmp"
 rm -f "$tmp.bak"
 
 # Install the wrapper into PATH
+echo "Installing flinkord to $TARGET..." >&2
 sudo install -m 0755 "$tmp" "$TARGET"
 rm -f "$tmp"
 
 # Also provide an alternative launcher name that users can call explicitly
 sudo ln -sf "$TARGET" "$ALT_TARGET"
 
-echo "Installed $TARGET"
+echo "✅ Installed $TARGET"
 echo "Also available as: $ALT_TARGET"
 echo "Usage: flinkord --help"
 echo "Set FLINKORD_IMAGE to pin a specific tag, e.g.:"
