@@ -10,27 +10,36 @@ REGISTRY="europe-west3-docker.pkg.dev"
 REPO="flink-core-shared/flinkord-cli/flinkord-cli"
 GITHUB_REPO="goflink/flinkord-cli"
 
-# Function to get latest release using GitHub CLI
-get_latest_release() {
+# Function to get commit hash for latest release using GitHub CLI
+get_release_commit() {
   if command -v gh >/dev/null 2>&1; then
-    gh release view --repo "$1" --json tagName --jq '.tagName' 2>/dev/null
+    # Get the target commitish for the latest release
+    COMMIT_HASH=$(gh release view --repo "$1" --json targetCommitish --jq '.targetCommitish' 2>/dev/null)
+    if [ "$COMMIT_HASH" = "main" ] || [ -z "$COMMIT_HASH" ]; then
+      # If release points to main, get the latest commit hash
+      gh api "repos/$1/git/refs/heads/main" --jq '.object.sha' 2>/dev/null | head -c 7
+    else
+      # Use the specific commit hash, truncated to 7 characters
+      echo "$COMMIT_HASH" | head -c 7
+    fi
   else
-    # Fallback to public API for non-authenticated access
-    curl --silent --fail "https://api.github.com/repos/$1/releases/latest" 2>/dev/null | \
-    grep '"tag_name":' | \
-    sed -E 's/.*"([^"]+)".*/\1/' || true
+    # Fallback: get latest commit hash directly
+    curl --silent "https://api.github.com/repos/$1/commits/main" 2>/dev/null | \
+    grep '"sha":' | \
+    head -1 | \
+    sed -E 's/.*"([^"]+)".*/\1/' | head -c 7 || true
   fi
 }
 
-# Get latest version from GitHub releases
-LATEST_VERSION=$(get_latest_release "$GITHUB_REPO")
-if [ -z "$LATEST_VERSION" ]; then
-  echo "Failed to fetch latest version from GitHub. Using fallback version v2.6.0" >&2
-  LATEST_VERSION="v2.6.0"
+# Get commit hash for latest release
+COMMIT_HASH=$(get_release_commit "$GITHUB_REPO")
+if [ -z "$COMMIT_HASH" ]; then
+  echo "Failed to fetch commit hash from GitHub. Using fallback 4027972" >&2
+  COMMIT_HASH="4027972"
 fi
 
-# Default to latest release; allow override via FLINKORD_IMAGE env var at install time
-DEFAULT_IMAGE="$REGISTRY/$REPO:$LATEST_VERSION"
+# Default to image with commit hash; allow override via FLINKORD_IMAGE env var at install time
+DEFAULT_IMAGE="$REGISTRY/$REPO:$COMMIT_HASH"
 TARGET="/usr/local/bin/flinkord"
 ALT_TARGET="/usr/local/bin/flinkord-docker"
 EXISTING_BIN="$(command -v flinkord || true)"
@@ -39,6 +48,9 @@ tmp="$(mktemp)"
 cat >"$tmp" <<WRAP
 #!/usr/bin/env bash
 set -euo pipefail
+
+# Ensure HOME is set
+HOME="\${HOME:-\$(cd ~ && pwd)}"
 
 # You can override the image at runtime with FLINKORD_IMAGE env var
 IMAGE_DEFAULT="$DEFAULT_IMAGE"
