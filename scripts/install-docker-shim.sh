@@ -8,20 +8,41 @@ set -euo pipefail
 
 REGISTRY="europe-west3-docker.pkg.dev"
 REPO="flink-core-shared/flinkord-cli/flinkord-cli"
-# Default to specific version; allow override via FLINKORD_IMAGE env var at install time
-DEFAULT_IMAGE="$REGISTRY/$REPO:__VERSION__"
+GITHUB_REPO="goflink/flinkord-cli"
+
+# Function to get latest release using GitHub CLI
+get_latest_release() {
+  if command -v gh >/dev/null 2>&1; then
+    gh release view --repo "$1" --json tagName --jq '.tagName' 2>/dev/null
+  else
+    # Fallback to public API for non-authenticated access
+    curl --silent --fail "https://api.github.com/repos/$1/releases/latest" 2>/dev/null | \
+    grep '"tag_name":' | \
+    sed -E 's/.*"([^"]+)".*/\1/' || true
+  fi
+}
+
+# Get latest version from GitHub releases
+LATEST_VERSION=$(get_latest_release "$GITHUB_REPO")
+if [ -z "$LATEST_VERSION" ]; then
+  echo "Failed to fetch latest version from GitHub. Using fallback version v2.6.0" >&2
+  LATEST_VERSION="v2.6.0"
+fi
+
+# Default to latest release; allow override via FLINKORD_IMAGE env var at install time
+DEFAULT_IMAGE="$REGISTRY/$REPO:$LATEST_VERSION"
 TARGET="/usr/local/bin/flinkord"
 ALT_TARGET="/usr/local/bin/flinkord-docker"
 EXISTING_BIN="$(command -v flinkord || true)"
 
 tmp="$(mktemp)"
-cat >"$tmp" <<'WRAP'
+cat >"$tmp" <<WRAP
 #!/usr/bin/env bash
 set -euo pipefail
 
 # You can override the image at runtime with FLINKORD_IMAGE env var
-IMAGE_DEFAULT="europe-west3-docker.pkg.dev/flink-core-shared/flinkord-cli/flinkord-cli:__VERSION__"
-IMAGE="${FLINKORD_IMAGE:-$IMAGE_DEFAULT}"
+IMAGE_DEFAULT="$DEFAULT_IMAGE"
+IMAGE="\${FLINKORD_IMAGE:-\$IMAGE_DEFAULT}"
 
 # Choose container engine: prefer docker, fallback to podman
 if command -v docker >/dev/null 2>&1; then
@@ -36,6 +57,9 @@ fi
 # Platform args for fallback only (prefer native first)
 PLATFORM_ARGS=()
 ARCH="$(uname -m)"
+
+# Ensure HOME is set
+HOME="${HOME:-$(cd ~ && pwd)}"
 
 # Ensure config dir exists and is mounted inside the container
 mkdir -p "$HOME/.flinkord"
