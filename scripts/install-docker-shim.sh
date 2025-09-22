@@ -63,7 +63,9 @@ EXISTING_BIN="$(command -v flinkord || true)"
 
 # Create launcher script
 tmp="$(mktemp)"
-cat >"$tmp" << 'EOF'
+
+# Create launcher script using a temporary file to avoid heredoc issues when piped
+cat > "$tmp" << 'EOF'
 #!/usr/bin/env bash
 set -euo pipefail
 
@@ -103,7 +105,7 @@ if [ -f "$ADC_FILE" ]; then
   EXTRA_MOUNT_ARGS+=("-v" "$HOME/.config/gcloud:/home/nodejs/.config/gcloud:ro")
 fi
 
-# Optional: if gcloud is available and we're not logged in, try Artifact Registry login
+# Optional: if gcloud is available and we are not logged in, try Artifact Registry login
 maybe_login() {
   if command -v gcloud >/dev/null 2>&1; then
     echo "Attempting Artifact Registry login via gcloud..." >&2
@@ -164,7 +166,7 @@ exec "$ENGINE" run --rm -it ${PLATFORM_ARGS[@]+"${PLATFORM_ARGS[@]}"} \
   -v "$HOME/.flinkord:/home/nodejs/.flinkord" \
   ${EXTRA_MOUNT_ARGS[@]+"${EXTRA_MOUNT_ARGS[@]}"} \
   "$IMAGE" "$@"
-WRAP
+EOF
 
 # Replace the placeholder with the actual image
 sed -i.bak "s|IMAGE_TO_REPLACE|$DEFAULT_IMAGE|" "$tmp"
