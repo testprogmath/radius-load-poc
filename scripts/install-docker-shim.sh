@@ -8,8 +8,8 @@ set -euo pipefail
 
 REGISTRY="europe-west3-docker.pkg.dev"
 REPO="flink-core-shared/flinkord-cli/flinkord-cli"
-# Default to :latest; allow override via FLINKORD_IMAGE env var at install time
-DEFAULT_IMAGE="$REGISTRY/$REPO:latest"
+# Default to specific version; allow override via FLINKORD_IMAGE env var at install time
+DEFAULT_IMAGE="$REGISTRY/$REPO:__VERSION__"
 TARGET="/usr/local/bin/flinkord"
 ALT_TARGET="/usr/local/bin/flinkord-docker"
 EXISTING_BIN="$(command -v flinkord || true)"
@@ -20,7 +20,7 @@ cat >"$tmp" <<'WRAP'
 set -euo pipefail
 
 # You can override the image at runtime with FLINKORD_IMAGE env var
-IMAGE_DEFAULT="europe-west3-docker.pkg.dev/flink-core-shared/flinkord-cli/flinkord-cli:latest"
+IMAGE_DEFAULT="europe-west3-docker.pkg.dev/flink-core-shared/flinkord-cli/flinkord-cli:__VERSION__"
 IMAGE="${FLINKORD_IMAGE:-$IMAGE_DEFAULT}"
 
 # Choose container engine: prefer docker, fallback to podman
