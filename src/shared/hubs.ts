@@ -1,5 +1,10 @@
 import dotenv from 'dotenv';
+import { loadMergedConfig } from '../loadMergedConfig.js';
+
 dotenv.config({ override: true });
+
+// Load merged configuration to ensure GENERIC_PASSWORD is available from ~/.flinkord/config.json
+loadMergedConfig();
 
 const genericPassword = process.env.GENERIC_PASSWORD as string;
 
@@ -33,8 +38,8 @@ export const Hubs: HubsType = {
         password: genericPassword
     },
     "de_ber_wedd": {
-        latitude: 52.540392,
-        longitude: 13.349166,
+        latitude: 52.5533,
+        longitude: 13.360499,
         email: "de_ber_wedd@goflink.de",
         password: genericPassword
     },
@@ -46,7 +51,7 @@ export const Hubs: HubsType = {
     },
     "de_ber_mit2": {
         latitude: 52.532985,
-        longitude: 13.380318,
+        longitude: 13.387786,
         email: "de_ber_mit2@goflink.de",
         password: genericPassword
     },

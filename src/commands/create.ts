@@ -8,6 +8,7 @@ import {spinnerError, spinnerSuccess, startSpinner, updateSpinnerText} from "../
 import { OpenAPI as HubManagerConfig } from '../lib/openapi/OpenAPI.js';
 import {initializeCartApi} from "../utils/api.js";
 import {getValidatedHubSlug} from "../utils/hub.js";
+import {DeliveryDetails} from "../shared/deliveryAddress.js";
 import * as dotenv from "dotenv";
 import {resolveLocale} from "../utils/locale.js";
 import {readAppConfig} from "../utils.js";
@@ -69,10 +70,12 @@ export async function create(options: CreateOptions) {
         return result;
 
     } catch (error) {
-        console.error("Error creating order:", error);
         spinnerError("Failed to create the order.");
-        if (error instanceof Error && error.message.includes("Invalid hub slug")) {
-            return "This hub does not exist!";
+        if (error instanceof Error && (error.message.includes("Invalid hub slug") || error.message.includes("This hub does not exist"))) {
+            console.error(`Hub '${options.hubSlug}' not found in src/shared/hubs.ts.`);
+            console.error("If this hub should be supported, please contribute by adding it to:");
+            console.error("https://github.com/goflink/flinkord-cli/blob/main/src/shared/hubs.ts");
+            return "This hub does not exist! Please check the hub name and try again.";
         }
         return "An error occurred while processing the order.";
     }

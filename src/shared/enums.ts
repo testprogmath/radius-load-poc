@@ -15,6 +15,7 @@ export enum QuinyxGroup {
     DE_BER_MIT1 = 223932,
     DE_BER_MIT2 = 223927,
     DE_BER_TEMP = 223883,
+    DE_BER_WEDD = 223884,
     SETTINGS_UNIT = 223369,
     DE_HAM_WATE = 239172
 }

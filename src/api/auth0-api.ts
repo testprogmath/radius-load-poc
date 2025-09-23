@@ -8,6 +8,7 @@ export class Auth0Api {
         if (!hubInfo) {
             throw new Error(`Hub information for '${hubSlug}' not found. Please check the hubSlug. If it's correct, contact the author of this tool: https://goflink.slack.com/team/U04RCKMB6JK`);
         }
+
         try {
             const response = await axios.post('https://auth.staging.goflink.com/oauth/token', {
                 grant_type: "password",
