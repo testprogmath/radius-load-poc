@@ -1,0 +1,21 @@
+version: "3.8"
+
+services:
+  radius:
+    image: freeradius/freeradius-server:3.2.3
+    container_name: radius-poc
+    platform: linux/amd64
+    command: ["-X"]
+    ports:
+      - "1812:1812/udp"
+      - "1813:1813/udp"
+    volumes:
+      - ./raddb/clients.conf:/etc/raddb/clients.conf:ro
+      - ./raddb/mods-config/files/authorize:/etc/raddb/mods-config/files/authorize:ro
+      # Use image's default radiusd.conf to avoid config mismatch
+    healthcheck:
+      test: ["CMD-SHELL", "echo 'User-Name = testuser, User-Password = pass123, NAS-IP-Address = 127.0.0.1' | radclient -sx 127.0.0.1:1812 auth testing123 | grep -q 'Access-Accept'"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 5s

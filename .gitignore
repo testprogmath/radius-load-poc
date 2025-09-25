@@ -1,0 +1,34 @@
+# Go
+/bin/
+/build/
+/dist/
+/vendor/
+/coverage.out
+*.test
+*.exe
+*.dll
+*.so
+*.dylib
+
+# IDE/editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*.un~
+*.DS_Store
+
+# Logs and artifacts
+logs/
+*.ndjson
+*.log
+
+# Docker
+.docker/
+docker-compose.override.yml
+*.pid
+
+# Env
+.env
+*.env.local
+
