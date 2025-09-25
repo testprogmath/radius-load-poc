@@ -9,6 +9,7 @@ import (
     "os"
     "sort"
     "strings"
+    "text/tabwriter"
 )
 
 type rec struct {
@@ -75,8 +76,9 @@ func main() {
         }
     }
 
-    // Print summary table
-    fmt.Printf("Phase\tCount\tOK\tErrors\tErrorRate%%\tP50(ms)\tP95(ms)\tP99(ms)\tMin(ms)\tMax(ms)\n")
+    // Print summary table (aligned)
+    tw := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+    fmt.Fprintf(tw, "Phase\tCount\tOK\tErrors\tErrorRate%%\tP50(ms)\tP95(ms)\tP99(ms)\tMin(ms)\tMax(ms)\n")
     ordered := make([]string, 0, len(phaseStats))
     for ph := range phaseStats {
         ordered = append(ordered, ph)
@@ -94,9 +96,10 @@ func main() {
         if len(s.latency) == 0 {
             min, max = 0, 0
         }
-        fmt.Printf("%s\t%d\t%d\t%d\t%.2f\t%.1f\t%.1f\t%.1f\t%.1f\t%.1f\n",
+        fmt.Fprintf(tw, "%s\t%d\t%d\t%d\t%.2f\t%.1f\t%.1f\t%.1f\t%.1f\t%.1f\n",
             ph, s.count, s.ok, s.errors, errRate, p50, p95, p99, min, max)
     }
+    _ = tw.Flush()
 }
 
 func percentile(samples []float64, p int) float64 {
@@ -121,4 +124,3 @@ func percentile(samples []float64, p int) float64 {
     frac := pos - float64(l)
     return cp[l]*(1.0-frac) + cp[u]*frac
 }
-

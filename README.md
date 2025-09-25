@@ -24,15 +24,21 @@ Topics: radius, freeradius, load-testing, benchmarking, golang, ndjson, docker, 
   - `make load`
 - Parse NDJSON logs into a summary:
   - `make parse`
+  - Optional: `TEST_ID=my-run-001 make parse` (parses only matching records)
 
 Tip: to tag requests, set a test identifier (goes into RADIUS Calling-Station-Id):
 - `export TEST_ID=my-run-001` or use flag `-test-id=my-run-001` for `cmd/load`.
 
 Testing flow for TEST_ID:
-- `export TEST_ID=my-run-001`
-- `make smoke` (sends one request with Calling-Station-Id)
+- Prefer per-run override so Makefile env defaults don’t mask it:
+- `TEST_ID=my-run-001 make smoke` (sends one request with Calling-Station-Id)
 - `TEST_ID=my-run-001 make load` (NDJSON now includes `"test_id":"my-run-001"`)
+- Or export once in your shell: `export TEST_ID=my-run-001` and then run `make smoke`, `make load`.
 - Filter in FreeRADIUS logs by Calling-Station-Id, or filter NDJSON: e.g., `jq 'select(.test_id=="my-run-001")' logs/steady.ndjson`
+
+Makefile helpers for filtering by TEST_ID:
+- `TEST_ID=my-run-001 make parse` — parses only records with that `test_id`
+- `TEST_ID=my-run-001 make filter` — writes `logs/filtered-my-run-001.ndjson`
 
 ## What it does
 - FreeRADIUS runs with a permissive client config and a simple users file:

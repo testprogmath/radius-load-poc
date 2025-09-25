@@ -24,15 +24,21 @@
   - `make load`
 - Парсинг NDJSON в сводку:
   - `make parse`
+  - Опционально: `TEST_ID=my-run-001 make parse` (парсит только соответствующие записи)
 
 Подсказка: чтобы пометить запросы идентификатором теста (кладётся в RADIUS Calling-Station-Id):
 - `export TEST_ID=my-run-001` или используйте флаг `-test-id=my-run-001` для `cmd/load`.
 
 Как проверить TEST_ID:
-- `export TEST_ID=my-run-001`
-- `make smoke` (отправит один запрос с Calling-Station-Id)
+- Предпочитайте разовое переопределение для запуска, чтобы значения из Makefile не перекрыли переменную:
+- `TEST_ID=my-run-001 make smoke` (отправит один запрос с Calling-Station-Id)
 - `TEST_ID=my-run-001 make load` (в NDJSON появится поле `"test_id":"my-run-001"`)
+- Или экспортируйте один раз: `export TEST_ID=my-run-001`, затем `make smoke`, `make load`.
 - Фильтруйте по Calling-Station-Id в логах FreeRADIUS или по `test_id` в NDJSON: `jq 'select(.test_id=="my-run-001")' logs/steady.ndjson`
+
+Makefile для фильтрации по TEST_ID:
+- `TEST_ID=my-run-001 make parse` — парсит только записи с этим `test_id`
+- `TEST_ID=my-run-001 make filter` — сохранит в `logs/filtered-my-run-001.ndjson`
 
 ## Что внутри
 - FreeRADIUS с минимальной конфигурацией и файлами пользователей:

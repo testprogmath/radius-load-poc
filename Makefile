@@ -7,7 +7,7 @@ include configs/example.env
 export $(shell sed -n 's/^\([A-Za-z_][A-Za-z0-9_]*\)=.*/\1/p' configs/example.env)
 endif
 
-.PHONY: up down logs smoke load spike parse fmt lint radclient ensure-logs init
+.PHONY: up down logs smoke load spike parse filter fmt lint radclient ensure-logs init
 
 ensure-logs:
 	mkdir -p logs
@@ -31,7 +31,19 @@ spike: ensure-logs
 	go run ./cmd/load -phase=spike | tee logs/spike.ndjson
 
 parse:
-	cat logs/*.ndjson | go run ./cmd/parse
+	@if [ -n "$$TEST_ID" ]; then \
+	  echo "Parsing only records with TEST_ID='$$TEST_ID'"; \
+	  cat logs/*.ndjson | jq -c "select(.test_id==\"$$TEST_ID\")" | go run ./cmd/parse; \
+	else \
+	  cat logs/*.ndjson | go run ./cmd/parse; \
+	fi
+
+filter: ensure-logs
+	@if [ -z "$$TEST_ID" ]; then \
+	  echo "Usage: TEST_ID=<value> make filter"; exit 1; \
+	fi
+	@cat logs/*.ndjson | jq -c "select(.test_id==\"$$TEST_ID\")" | tee "logs/filtered-$$TEST_ID.ndjson" >/dev/null
+	@echo "Wrote logs/filtered-$$TEST_ID.ndjson"
 
 fmt:
 	go fmt ./...
