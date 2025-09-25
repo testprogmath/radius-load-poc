@@ -11,6 +11,8 @@ Topics: radius, freeradius, load-testing, benchmarking, golang, ndjson, docker, 
 - Go 1.22+
 
 ## Quickstart
+- One-time init (creates local secrets file from example):
+  - `make init`
 - Start FreeRADIUS:
   - `make up`
   - Follow logs in another terminal: `make logs`
@@ -104,3 +106,6 @@ Topics: radius, freeradius, load-testing, benchmarking, golang, ndjson, docker, 
 - Format and vet:
   - `make fmt`
   - `make lint`
+
+Security note: the repo stores only `raddb/mods-config/files/authorize.example`.
+The actual `authorize` with plaintext demo creds is generated locally by `make init` and is gitignored.

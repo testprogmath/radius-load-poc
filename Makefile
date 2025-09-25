@@ -7,12 +7,12 @@ include configs/example.env
 export $(shell sed -n 's/^\([A-Za-z_][A-Za-z0-9_]*\)=.*/\1/p' configs/example.env)
 endif
 
-.PHONY: up down logs smoke load spike parse fmt lint radclient ensure-logs
+.PHONY: up down logs smoke load spike parse fmt lint radclient ensure-logs init
 
 ensure-logs:
 	mkdir -p logs
 
-up:
+up: init
 	docker compose up -d --wait
 
 logs:
@@ -45,4 +45,13 @@ radclient:
 	else \
 	  echo "radclient not found on host; using container..."; \
 	  docker compose exec -T radius sh -lc "echo 'User-Name = testuser, User-Password = pass123, NAS-IP-Address = 127.0.0.1' | radclient -sx 127.0.0.1:1812 auth testing123"; \
+	fi
+
+init:
+	mkdir -p raddb/mods-config/files
+	@if [ ! -f raddb/mods-config/files/authorize ]; then \
+	  cp raddb/mods-config/files/authorize.example raddb/mods-config/files/authorize; \
+	  echo "created raddb/mods-config/files/authorize"; \
+	else \
+	  echo "raddb/mods-config/files/authorize already exists"; \
 	fi

@@ -3,4 +3,3 @@
 
 # Regex-style: accept user0000..user0999 with same password
 DEFAULT User-Name =~ "^user0[0-9]{3}$", Cleartext-Password := "pass123"
-
