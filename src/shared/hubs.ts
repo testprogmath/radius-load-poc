@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 import { loadMergedConfig } from '../loadMergedConfig.js';
 
-dotenv.config({ override: true });
+dotenv.config({ override: true, quiet: true });
 
 // Load merged configuration to ensure GENERIC_PASSWORD is available from ~/.flinkord/config.json
 loadMergedConfig();
