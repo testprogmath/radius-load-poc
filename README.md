@@ -1,5 +1,7 @@
 # radius-load-poc
 
+Для русской версии перейдите по ссылке: [README.ru.md](README.ru.md)
+
 Local FreeRADIUS load testing PoC using Docker and a Go client (layeh.com/radius). Includes smoke test, RPS-controlled load (steady/spike), NDJSON metrics, and a parser.
 
 Topics: radius, freeradius, load-testing, benchmarking, golang, ndjson, docker, docker-compose, radclient, udp, performance, spike-testing
