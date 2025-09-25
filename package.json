@@ -76,11 +76,12 @@
     "@commercetools/platform-sdk": "^8.16.0",
     "@commercetools/sdk-client-v2": "^3.0.0",
     "@commercetools/ts-client": "^4.1.0",
-        "@google-cloud/storage": "^7.17.1",
+    "@google-cloud/storage": "^7.17.1",
     "@types/keytar": "^4.4.2",
     "@typescript-eslint/eslint-plugin": "^8.44.0",
     "@typescript-eslint/parser": "^8.32.1",
     "axios": "^1.12.2",
+    "axios-cookiejar-support": "^6.0.4",
     "chalk": "^5.6.2",
     "cli-spinners": "^3.2.1",
     "commander": "^14.0.1",
@@ -98,7 +99,8 @@
     "keytar": "^7.9.0",
     "lodash.merge": "^4.6.2",
     "node-fetch": "^3.3.2",
-    "table": "^6.9.0"
+    "table": "^6.9.0",
+    "tough-cookie": "^5.1.2"
   },
   "devDependencies": {
     "@types/figlet": "^1.7.0",
