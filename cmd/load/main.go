@@ -78,6 +78,7 @@ func main() {
     spike := flag.Duration("spike", envDuration("SPIKE", 10*time.Second), "Spike duration")
     spikeMult := flag.Float64("spike-mult", envFloat("SPIKE_MULT", 3.0), "Spike RPS multiplier")
     phase := flag.String("phase", getenv("PHASE", "all"), "Phase to run: warmup|steady|spike|all")
+    testID := flag.String("test-id", getenv("TEST_ID", ""), "Optional test identifier (sent as Calling-Station-Id)")
     flag.Parse()
 
     // Output writer goroutine
@@ -135,7 +136,7 @@ func main() {
                 go func(phaseName string) {
                     defer func() { <-sem }()
                     u := usernames[rand.Intn(len(usernames))]
-                    sendRequest(*addr, *secret, u, "pass123", *timeout, phaseName, metricsCh)
+                    sendRequest(*addr, *secret, u, "pass123", *timeout, phaseName, *testID, metricsCh)
                 }(name)
             default:
                 time.Sleep(50 * time.Microsecond)
@@ -164,7 +165,7 @@ func main() {
     wgWrite.Wait()
 }
 
-func sendRequest(addr, secret, user, pass string, timeout time.Duration, phase string, out chan<- metric) {
+func sendRequest(addr, secret, user, pass string, timeout time.Duration, phase string, testID string, out chan<- metric) {
     ctx, cancel := context.WithTimeout(context.Background(), timeout)
     defer cancel()
 
@@ -172,6 +173,9 @@ func sendRequest(addr, secret, user, pass string, timeout time.Duration, phase s
     _ = rfc2865.UserName_SetString(p, user)
     _ = rfc2865.UserPassword_SetString(p, pass)
     _ = rfc2865.NASIPAddress_Set(p, net.ParseIP("127.0.0.1"))
+    if testID != "" {
+        _ = rfc2865.CallingStationID_SetString(p, testID)
+    }
 
     reqBytes, _ := p.Encode()
 

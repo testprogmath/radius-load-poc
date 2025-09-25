@@ -37,6 +37,7 @@ func main() {
     secret := getenv("RADIUS_SECRET", "testing123")
     user := getenv("RADIUS_USER", "testuser")
     pass := getenv("RADIUS_PASS", "pass123")
+    testID := getenv("TEST_ID", "")
     timeout := parseDurationEnv("RADIUS_TIMEOUT", "2s")
 
     if _, _, err := net.SplitHostPort(addr); err != nil {
@@ -59,6 +60,9 @@ func main() {
     _ = rfc2865.UserName_SetString(p, user)
     _ = rfc2865.UserPassword_SetString(p, pass)
     _ = rfc2865.NASIPAddress_Set(p, net.ParseIP("127.0.0.1"))
+    if testID != "" {
+        _ = rfc2865.CallingStationID_SetString(p, testID)
+    }
 
     resp, err := radius.Exchange(ctx, p, addr)
     if err != nil {

@@ -25,6 +25,9 @@ Topics: radius, freeradius, load-testing, benchmarking, golang, ndjson, docker, 
 - Parse NDJSON logs into a summary:
   - `make parse`
 
+Tip: to tag requests, set a test identifier (goes into RADIUS Calling-Station-Id):
+- `export TEST_ID=my-run-001` or use flag `-test-id=my-run-001` for `cmd/load`.
+
 ## What it does
 - FreeRADIUS runs with a permissive client config and a simple users file:
   - Client `localdev` accepts all IPs with secret `testing123`
