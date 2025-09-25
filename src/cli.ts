@@ -12,6 +12,7 @@ import {
     getOrderReturns,
     pick,
     printConfig,
+    punchIn,
     setupEnv,
     stackOrders
 } from "./commands/index.js";
@@ -250,6 +251,20 @@ const stackOrdersCommand = new Command("stack_orders")
         stackOrders({ hub, orderIds: orders });
     });
 
+// "punch_in" command – punch in an employee by badge number
+const punchInCommand = new Command("punch_in")
+    .description("Punch in an employee by badge number")
+    .requiredOption("-h, --hub <hub_slug>", "The hub for the employee")
+    .requiredOption("-b, --badge <badge_number>", "Employee badge number")
+    .option("-e, --email <email>", "Email for webpunch authentication")
+    .option("-p, --password <password>", "Password for webpunch authentication")
+    .option("-r, --reason <reason>", "Reason for late punch (required if punching late)")
+    .action((commandAndOptions) => {
+        console.log("Punch-in command invoked with:", commandAndOptions);
+        loadMergedConfig();
+        punchIn(commandAndOptions.hub, commandAndOptions.badge, commandAndOptions.email, commandAndOptions.password, commandAndOptions.reason).catch(e => console.error(e));
+    });
+
 // --------------------
 // Main CLI configuration
 // --------------------
@@ -271,6 +286,7 @@ program.addCommand(deleteAllQuinyxShifts);
 program.addCommand(getReturns);
 program.addCommand(pickOrder);
 program.addCommand(stackOrdersCommand);
+program.addCommand(punchInCommand);
 program.addCommand(configCommand);
 
 // Parse arguments if not running tests
