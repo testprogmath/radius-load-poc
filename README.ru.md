@@ -28,6 +28,12 @@
 Подсказка: чтобы пометить запросы идентификатором теста (кладётся в RADIUS Calling-Station-Id):
 - `export TEST_ID=my-run-001` или используйте флаг `-test-id=my-run-001` для `cmd/load`.
 
+Как проверить TEST_ID:
+- `export TEST_ID=my-run-001`
+- `make smoke` (отправит один запрос с Calling-Station-Id)
+- `TEST_ID=my-run-001 make load` (в NDJSON появится поле `"test_id":"my-run-001"`)
+- Фильтруйте по Calling-Station-Id в логах FreeRADIUS или по `test_id` в NDJSON: `jq 'select(.test_id=="my-run-001")' logs/steady.ndjson`
+
 ## Что внутри
 - FreeRADIUS с минимальной конфигурацией и файлами пользователей:
   - Клиент `localdev` принимает все IP, общий секрет `testing123`

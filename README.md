@@ -28,6 +28,12 @@ Topics: radius, freeradius, load-testing, benchmarking, golang, ndjson, docker, 
 Tip: to tag requests, set a test identifier (goes into RADIUS Calling-Station-Id):
 - `export TEST_ID=my-run-001` or use flag `-test-id=my-run-001` for `cmd/load`.
 
+Testing flow for TEST_ID:
+- `export TEST_ID=my-run-001`
+- `make smoke` (sends one request with Calling-Station-Id)
+- `TEST_ID=my-run-001 make load` (NDJSON now includes `"test_id":"my-run-001"`)
+- Filter in FreeRADIUS logs by Calling-Station-Id, or filter NDJSON: e.g., `jq 'select(.test_id=="my-run-001")' logs/steady.ndjson`
+
 ## What it does
 - FreeRADIUS runs with a permissive client config and a simple users file:
   - Client `localdev` accepts all IPs with secret `testing123`

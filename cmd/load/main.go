@@ -27,6 +27,7 @@ type metric struct {
     Err       string  `json:"err"`
     BytesIn   int     `json:"bytes_in"`
     BytesOut  int     `json:"bytes_out"`
+    TestID    string  `json:"test_id,omitempty"`
 }
 
 func getenv(key, def string) string {
@@ -188,6 +189,7 @@ func sendRequest(addr, secret, user, pass string, timeout time.Duration, phase s
         Phase:     phase,
         LatencyMS: toMS(elapsed),
         BytesOut:  len(reqBytes),
+        TestID:    testID,
     }
     if err != nil {
         m.Code = "timeout"
