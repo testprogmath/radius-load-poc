@@ -26,7 +26,7 @@ const HUB_PUNCH_CONFIG = {
     }
 } as Record<string, HubPunchConfig>;
 
-export async function punchIn(hubSlug?: string, badgeNumber?: string, email?: string, password?: string, reason?: string): Promise<void> {
+export async function punchIn(hubSlug?: string, badgeNumber?: string, username?: string, password?: string, reason?: string): Promise<void> {
     try {
         updateSpinnerText("Initializing punch system...", true);
 
@@ -47,19 +47,19 @@ export async function punchIn(hubSlug?: string, badgeNumber?: string, email?: st
 
         updateSpinnerText("Logging into punch system...", true);
 
-        let webpunchEmail = email;
+        let webpunchUsername = username;
         let webpunchPassword = password;
         
-        if (!webpunchEmail || !webpunchPassword) {
-            webpunchEmail = config.quinyxEmail;
+        if (!webpunchUsername || !webpunchPassword) {
+            webpunchUsername = config.quinyxEmail;
             webpunchPassword = config.quinyxPassword;
         }
         
-        if (!webpunchEmail || !webpunchPassword) {
-            throw new Error("Webpunch email and password are required. Use --email and --password options or configure Quinyx credentials.");
+        if (!webpunchUsername || !webpunchPassword) {
+            throw new Error("Webpunch username and password are required. Use --username and --password options or configure Quinyx credentials.");
         }
         
-        const loginResponse = await punchApi.login(webpunchEmail, webpunchPassword);
+        const loginResponse = await punchApi.login(webpunchUsername, webpunchPassword);
         const userInfo = loginResponse.manager;
         
         if (badgeNumber && userInfo.e_badge_no !== badgeNumber) {
@@ -88,7 +88,7 @@ export async function punchIn(hubSlug?: string, badgeNumber?: string, email?: st
                     process.stdout.write('\n');
                     console.log(`⚠️  ${chalk.yellow('Punch is too late and requires a reason.')}`);
                     console.log(`To force the punch, run the command again with the --reason option:`);
-                    console.log(`${chalk.cyan(`flinkord punch_in --hub ${validatedHubSlug} --badge ${badgeNumber} --email "${webpunchEmail}" --password "${webpunchPassword}" --reason "Your reason here"`)}`);
+                    console.log(`${chalk.cyan(`flinkord punch_in --hub ${validatedHubSlug} --badge ${badgeNumber} --username "${webpunchUsername}" --password "${webpunchPassword}" --reason "Your reason here"`)}`);
                     throw new Error('Punch cancelled: Late punch requires a reason. Use --reason option to force.');
                 }
             }

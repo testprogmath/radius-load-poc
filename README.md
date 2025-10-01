@@ -787,21 +787,21 @@ Options:
 You can punch in employees for time tracking using their badge number and hub information.
 
 ```shell
-flinkord punch_in -h <hubSlug> -b <badgeNumber> -e <email> -p <password> [-r <reason>]
+flinkord punch_in -h <hubSlug> -n <badgeNumber> -u <username> -p <password> [-r <reason>]
 ```
 
 #### Options:
 
 - `-h, --hub <hubSlug>`: **[Required]** The hub for the employee.
-- `-b, --badge <badgeNumber>`: **[Required]** Employee badge number.
-- `-e, --email <email>`: **[Optional]** Email for webpunch authentication. Falls back to Quinyx email from config.
+- `-n, --badge <badgeNumber>`: **[Required]** Employee badge number.
+- `-u, --username <username>`: **[Optional]** Username for webpunch authentication. Falls back to Quinyx email from config.
 - `-p, --password <password>`: **[Optional]** Password for webpunch authentication. Falls back to Quinyx password from config.
 - `-r, --reason <reason>`: **[Optional]** Reason for late punch (required if punching in late).
 
 #### Example:
 
 ```shell
-flinkord punch_in -h de_ber_mit2 -b 00130345 -e "manager@goflink.com" -p "password123"
+flinkord punch_in -h de_ber_mit2 -n 00130345 -u "manager@goflink.com" -p "password123"
 ```
 
 #### Output:
@@ -829,7 +829,7 @@ e_badge_no: 00130345
   ```shell
   ⚠️ Punch is too late and requires a reason.
   To force the punch, run the command again with the --reason option:
-  flinkord punch_in --hub de_ber_mit2 --badge 00130345 --email "manager@goflink.com" --password "password123" --reason "Traffic delay"
+  flinkord punch_in --hub de_ber_mit2 --badge 00130345 --username "manager@goflink.com" --password "password123" --reason "Traffic delay"
   ```
 
 - **Duplicate Punch**: If the employee has already punched in:

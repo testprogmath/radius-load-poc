@@ -255,14 +255,14 @@ const stackOrdersCommand = new Command("stack_orders")
 const punchInCommand = new Command("punch_in")
     .description("Punch in an employee by badge number")
     .requiredOption("-h, --hub <hub_slug>", "The hub for the employee")
-    .requiredOption("-b, --badge <badge_number>", "Employee badge number")
-    .option("-e, --email <email>", "Email for webpunch authentication")
+    .requiredOption("-n, --badge <badge_number>", "Employee badge number")
+    .option("-u, --username <username>", "Username for webpunch authentication")
     .option("-p, --password <password>", "Password for webpunch authentication")
     .option("-r, --reason <reason>", "Reason for late punch (required if punching late)")
     .action((commandAndOptions) => {
         console.log("Punch-in command invoked with:", commandAndOptions);
         loadMergedConfig();
-        punchIn(commandAndOptions.hub, commandAndOptions.badge, commandAndOptions.email, commandAndOptions.password, commandAndOptions.reason).catch(e => console.error(e));
+        punchIn(commandAndOptions.hub, commandAndOptions.badge, commandAndOptions.username, commandAndOptions.password, commandAndOptions.reason).catch(e => console.error(e));
     });
 
 // --------------------
