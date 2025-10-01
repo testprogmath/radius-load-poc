@@ -103,6 +103,10 @@ export class PunchApi {
             params.append('badge_number', badgeNumber);
             params.append('action', action);
             
+            // Add current timestamp for the punch
+            const now = new Date();
+            params.append('punch_time', now.toISOString());
+            
             if (webcamImage) {
                 params.append('webcam_image', webcamImage);
             }
@@ -132,7 +136,11 @@ export class PunchApi {
                     }
                 } else if (error.response.status === 400) {
                     console.log('400 Error details:', JSON.stringify(errorData, null, 2));
-                    throw new Error('Invalid request. Please check your hub name and input data.');
+                    if (errorData.error === 'Invalid time interval') {
+                        throw new Error('Invalid time interval: The punch time may be outside allowed hours or there may be no active shift scheduled. Please check if you have a scheduled shift for the current time.');
+                    } else {
+                        throw new Error('Invalid request. Please check your hub name and input data.');
+                    }
                 }
             }
             throw error;
