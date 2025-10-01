@@ -235,6 +235,7 @@ Commands:
   delete_shifts [options]  Delete all scheduled shifts from Quinyx
   get_returns <orderId>    Retrieve order returns by specifying order ID
   pick [options]           Pick an order from a specific hub by order number
+  punch_in [options]       Punch in an employee by badge number
   help [command]           display help for command
 ```
 
@@ -780,6 +781,61 @@ Options:
 - `-p, --password <password>`  Manager password for Quinyx
 - `-h, --hub <hubSlug>`        The hub with shifts
 - `-n, --badge <badgeNumber>`  Badge number or email for another user
+
+### Punch in an employee using the `punch_in` command
+
+You can punch in employees for time tracking using their badge number and hub information.
+
+```shell
+flinkord punch_in -h <hubSlug> -b <badgeNumber> -e <email> -p <password> [-r <reason>]
+```
+
+#### Options:
+
+- `-h, --hub <hubSlug>`: **[Required]** The hub for the employee.
+- `-b, --badge <badgeNumber>`: **[Required]** Employee badge number.
+- `-e, --email <email>`: **[Optional]** Email for webpunch authentication. Falls back to Quinyx email from config.
+- `-p, --password <password>`: **[Optional]** Password for webpunch authentication. Falls back to Quinyx password from config.
+- `-r, --reason <reason>`: **[Optional]** Reason for late punch (required if punching in late).
+
+#### Example:
+
+```shell
+flinkord punch_in -h de_ber_mit2 -b 00130345 -e "manager@goflink.com" -p "password123"
+```
+
+#### Output:
+
+After successful punch-in, you'll see employee details:
+
+```shell
+✅ 🕐 Successfully punched in!
+
+👤 Employee Details 👤
+Badge Number: 00130345
+Hub: de_ber_mit2
+Customer ID: 5799
+Unit ID: 60581
+
+ℹ️ Additional Info
+e_id: 12345
+e_name: John Doe
+e_badge_no: 00130345
+```
+
+#### Error Handling:
+
+- **Late Punch**: If punching in late, you'll be prompted to provide a reason:
+  ```shell
+  ⚠️ Punch is too late and requires a reason.
+  To force the punch, run the command again with the --reason option:
+  flinkord punch_in --hub de_ber_mit2 --badge 00130345 --email "manager@goflink.com" --password "password123" --reason "Traffic delay"
+  ```
+
+- **Duplicate Punch**: If the employee has already punched in:
+  ```shell
+  ❌ Punch has already been completed for this time period. No duplicate punch allowed.
+  ```
 
 ---
 
