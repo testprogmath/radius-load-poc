@@ -88,7 +88,7 @@
     "emojic": "^1.1.18",
     "eslint-plugin-promise": "^7.2.1",
     "figlet": "^1.9.3",
-    "find-up": "^7.0.0",
+    "find-up": "^8.0.0",
     "fix-esm": "^1.0.1",
     "gradient-string": "^3.0.0",
     "graphql": "^16.12.0",
