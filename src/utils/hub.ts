@@ -1,5 +1,6 @@
-import {promptForHub} from "./prompt.js";
-import {QuinyxGroup} from "../shared/enums.js";
+import { promptForHub } from "./prompt.js";
+import { QuinyxGroup } from "../shared/enums.js";
+import { Hubs } from "../shared/hubs.js";
 
 const hubSlugRegex = /\b[a-z]{2}_[a-z]+_[a-z1-9]+\b/;
 
@@ -12,7 +13,8 @@ export async function getValidatedHubSlug(hubSlug?: string) {
         throw new Error("Invalid hub slug format");
     }
 
-    if (!hubMap[hubSlug]) {
+    // Validate against configured hubs used across the CLI
+    if (!Hubs[hubSlug]) {
         throw new Error("This hub does not exist!");
     }
 

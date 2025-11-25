@@ -1,5 +1,6 @@
 import axios from "axios";
-import {Hubs} from "../shared/hubs.js";
+import { Hubs } from "../shared/hubs.js";
+import { readAppConfig } from "../utils.js";
 
 export class Auth0Api {
     public async getToken(hubSlug: string) {
@@ -10,7 +11,10 @@ export class Auth0Api {
         }
 
         try {
-            const response = await axios.post('https://auth.staging.goflink.com/oauth/token', {
+            const cfg = await readAppConfig();
+            const tokenEndpoint = `https://${cfg.auth0Domain}/oauth/token`;
+
+            const response = await axios.post(tokenEndpoint, {
                 grant_type: "password",
                 username: hubInfo.email,
                 password: hubInfo.password,
@@ -19,8 +23,7 @@ export class Auth0Api {
                 audience: "https://api.staging.goflink.com"
             }, {
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Cookie': 'did=s%3Av0%3A1bdcb670-dbbf-11ee-8616-4d45586ae3fa.RdSlhJuo6h1kn0KqL4lkAZ6mUNk74gcfxGgeiwFnbJw; did_compat=s%3Av0%3A1bdcb670-dbbf-11ee-8616-4d45586ae3fa.RdSlhJuo6h1kn0KqL4lkAZ6mUNk74gcfxGgeiwFnbJw'
+                    'Content-Type': 'application/json'
                 }
             });
             if (response.data.access_token) {
