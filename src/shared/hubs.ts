@@ -52,7 +52,7 @@ export const Hubs: HubsType = {
     "de_ber_mit2": {
         latitude: 52.532985,
         longitude: 13.387786,
-        email: "de_ber_mit2@goflink.de",
+        email: "de_ber_mit2@goflink.com",
         password: genericPassword
     },
     "nl_ame_cent": {
