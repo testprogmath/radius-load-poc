@@ -2,9 +2,26 @@
 
 Для русской версии перейдите по ссылке: [README.ru.md](README.ru.md)
 
-Local FreeRADIUS load testing PoC using Docker and a Go client (layeh.com/radius). Includes smoke test, RPS-controlled load (steady/spike), NDJSON metrics, and a parser.
+A self-contained harness for load testing RADIUS authentication on a laptop or VM. One `make up` starts FreeRADIUS in Docker with synthetic users; a Go client (layeh.com/radius) then sends PAP Access-Requests at a target rate through warmup, steady and spike phases, writes one NDJSON record per request, and a parser turns those records into a per-phase latency and error summary.
 
-Topics: radius, freeradius, load-testing, benchmarking, golang, ndjson, docker, docker-compose, radclient, udp, performance, spike-testing
+The question it answers is "does this setup hold N authentications per second, and what happens in a burst?" before a real network access control deployment is involved. Every run can carry a test ID, sent as `Calling-Station-Id`, so its requests can be found in FreeRADIUS logs and picked out of the NDJSON.
+
+## Output
+
+Format only; the values below are placeholders, not a measurement.
+
+`make load` writes one line per request to `logs/steady.ndjson`:
+
+```json
+{"ts":"<RFC3339 UTC>","phase":"steady","latency_ms":<float>,"code":"Access-Accept","err":"","bytes_in":<int>,"bytes_out":<int>,"test_id":"my-run-001"}
+```
+
+`make parse` prints one row per phase:
+
+```text
+Phase   Count  OK  Errors  ErrorRate%  P50(ms)  P95(ms)  P99(ms)  Min(ms)  Max(ms)
+steady  ...
+```
 
 ## Prereqs
 - Docker and Docker Compose
@@ -63,7 +80,7 @@ Makefile helpers for filtering by TEST_ID:
   - `RADIUS_TIMEOUT` (default 2s)
   - Phase durations: `WARMUP`, `STEADY`, `SPIKE`
   - Spike multiplier: `SPIKE_MULT`
-- Use `make load` for steady-only or `make spike` for spike-only. Full sequence runs with `-phase=all` (default).
+- Use `make load` for steady-only or `make spike` for spike-only. The full warmup, steady and spike sequence is the client's default (`-phase=all`) and has no Makefile target: run `mkdir -p logs && go run ./cmd/load | tee logs/all.ndjson`.
 
 ## Troubleshooting
 - UDP drops / MTU:
@@ -114,6 +131,15 @@ Makefile helpers for filtering by TEST_ID:
   - Allocate sufficient vCPU/RAM.
   - Prefer bridged networking; NAT often adds jitter/drops for high UDP rates.
   - Tune `RPS`, `WORKERS`, and `RADIUS_TIMEOUT` in `configs/example.env` to match VM capacity.
+
+## Limits
+Read the numbers with these in mind:
+- The client paces requests with a ticker but never exceeds `WORKERS` requests in flight. When all workers are busy it waits, so the achieved rate can fall below `RPS`, and that waiting time is not part of any recorded latency.
+- Latency percentiles include failed requests. A timed-out request is recorded at roughly `RADIUS_TIMEOUT`.
+- Any error from the client is recorded with `"code":"timeout"`; the `err` field carries the actual error.
+- Only PAP against the `files` module is exercised, from one client machine, with one shared password for all synthetic users.
+- On Apple Silicon the FreeRADIUS image runs under x86_64 emulation, so absolute latencies there say little about a real server.
+- There are no automated tests or CI; `make lint` runs `go vet`.
 
 ## Notes
 - EAP/TTLS, TLS setup, and advanced policies are intentionally omitted for this PoC.
